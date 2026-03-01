@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.localhelp.app.data.remote.NetworkModule
+import com.localhelp.app.model.response.UserResponse
 import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
@@ -19,7 +20,7 @@ class LoginViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
     var loginError by mutableStateOf<String?>(null)
 
-    fun onLoginClick(onSuccess: () -> Unit) {
+    fun onLoginClick(onSuccess: (UserResponse) -> Unit) {
         if (email.isEmpty() || password.isEmpty()){
             loginError = "Vui lòng nhập đầy đủ thông tin đăng nhập."
             return
@@ -45,7 +46,7 @@ class LoginViewModel : ViewModel() {
             }
     }
 
-    private fun syncWithBackend(idToken: String, onSuccess: () -> Unit) {
+    private fun syncWithBackend(idToken: String, onSuccess: (UserResponse) -> Unit) {
         viewModelScope.launch {
             try {
                 val response = NetworkModule.authService.loginSync("Bearer $idToken")
@@ -54,11 +55,10 @@ class LoginViewModel : ViewModel() {
                     val userResponse = response.body()
                     if (userResponse != null) {
                         isLoading = false
-                        onSuccess()
+                        onSuccess(userResponse)
                     }
                 } else {
                     isLoading = false
-                    // LẤY CHI TIẾT LỖI TỪ SERVER
                     val errorBody = response.errorBody()?.string()
                     println("DEBUG_AUTH: Server Error Code: ${response.code()}")
                     println("DEBUG_AUTH: Server Error Body: $errorBody")

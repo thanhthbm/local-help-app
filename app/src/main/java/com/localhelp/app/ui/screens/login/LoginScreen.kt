@@ -22,10 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,17 +32,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.localhelp.app.R
-import com.localhelp.app.ui.theme.LocalHelpTheme
+import com.localhelp.app.model.response.UserResponse
+
 
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: (UserResponse) -> Unit,
+    onRegisterNavigate: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -118,7 +115,11 @@ fun LoginScreen(
             }
 
             Button (
-                onClick = { viewModel.onLoginClick { onLoginSuccess() } },
+                onClick = {
+                    viewModel.onLoginClick { user ->
+                        onLoginSuccess(user)
+                    }
+                },
                 enabled = !viewModel.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -151,7 +152,9 @@ fun LoginScreen(
                     text = stringResource(R.string.create_new_account),
                     color = Color(0xFFED7D68),
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { /* Navigate to Register */ }
+                    modifier = Modifier.clickable {
+                        onRegisterNavigate()
+                    }
                 )
             }
 
@@ -183,18 +186,4 @@ fun CustomLoginTextField(
         singleLine = true,
         visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
     )
-}
-
-@SuppressLint("ViewModelConstructorInComposable")
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoginScreenPreview() {
-    LocalHelpTheme {
-        // Khởi tạo một ViewModel trắng để Preview không bị crash
-        val previewViewModel = LoginViewModel()
-        LoginScreen(
-            viewModel = previewViewModel,
-            onLoginSuccess = {}
-        )
-    }
 }
