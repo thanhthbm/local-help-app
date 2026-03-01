@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "503651659314",
+    "project_id": "local-help-backend",
+    "storage_bucket": "local-help-backend.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503651659314:android:c44e0579925bc83167962b",
+        "android_client_info": {
+          "package_name": "com.localhelp.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "503651659314-8uq7gpqlmvvpgc5q6n3jld7eqj01nsm9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDxDAe7rUpB5KcdyR4tlGkVAl26BRBTm0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "503651659314-8uq7gpqlmvvpgc5q6n3jld7eqj01nsm9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
