@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Local Help</string>
+    <string name="welcome_text">Chào mừng bạn đến với Giúp nhau quanh đây</string>
+    <string name="email_or_phone">Số điện thoại hoặc Email</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="not_having_account">Chưa có tài khoản?</string>
+    <string name="create_new_account">Đăng ký tài khoản mới</string>
+    <string name="login">Đăng nhập</string>
+    <string name="or_login_with">Hoặc là đăng nhập với</string>
+    <string name="password">Mật khẩu</string>
+</resources>
