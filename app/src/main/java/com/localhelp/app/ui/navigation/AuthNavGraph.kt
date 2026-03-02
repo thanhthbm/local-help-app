@@ -28,6 +28,9 @@ fun NavGraphBuilder.authNavGraph(
             },
             onRegisterNavigate = {
                 navController.navigate(Screen.Register)
+            },
+            onForgotPasswordClick = {
+                navController.navigate("forgot_password_root")
             }
         )
     }
@@ -49,4 +52,6 @@ fun NavGraphBuilder.authNavGraph(
         HomeScreen()
 
     }
+
+    forgotPasswordGraph(navController)
 }

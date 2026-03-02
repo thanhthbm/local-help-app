@@ -43,7 +43,8 @@ import com.localhelp.app.model.response.UserResponse
 fun LoginScreen(
     viewModel: LoginViewModel,
     onLoginSuccess: (UserResponse) -> Unit,
-    onRegisterNavigate: () -> Unit
+    onRegisterNavigate: () -> Unit,
+    onForgotPasswordClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -100,7 +101,7 @@ fun LoginScreen(
                 modifier = Modifier
                     .align(Alignment.Start)
                     .padding(vertical = 16.dp)
-                    .clickable { /* Handle forget password */ },
+                    .clickable { onForgotPasswordClick() },
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
             )
 
