@@ -9,4 +9,9 @@ object Screen {
     const val ResetPassword = "reset_password"
     const val OtpVerification = "otp_verification"
     const val NewPassword = "new_password"
+
+    const val MyJobs = "my_jobs"
+    const val PostJob = "post_job"
+    const val Messages = "messages"
+    const val Profile = "profile"
 }

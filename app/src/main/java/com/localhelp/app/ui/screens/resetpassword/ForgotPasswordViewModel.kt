@@ -18,12 +18,10 @@ class ForgotPasswordViewModel: ViewModel() {
     var otpCode by mutableStateOf("")
     var newPassword by mutableStateOf("")
     var confirmPassword by mutableStateOf("")
-
     var isLoading by mutableStateOf(false)
     var errorMsg by mutableStateOf<String?>(null)
 
     private val auth = FirebaseAuth.getInstance()
-
 
     fun sendOtp(activity: Activity, onSuccess: () -> Unit) {
         isLoading = true
