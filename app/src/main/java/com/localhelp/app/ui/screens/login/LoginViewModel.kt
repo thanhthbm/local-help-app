@@ -60,8 +60,6 @@ class LoginViewModel : ViewModel() {
                 } else {
                     isLoading = false
                     val errorBody = response.errorBody()?.string()
-                    println("DEBUG_AUTH: Server Error Code: ${response.code()}")
-                    println("DEBUG_AUTH: Server Error Body: $errorBody")
 
                     loginError = "Backend lỗi (${response.code()}): $errorBody"
                 }
