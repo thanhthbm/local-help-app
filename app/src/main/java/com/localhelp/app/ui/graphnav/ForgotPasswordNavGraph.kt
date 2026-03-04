@@ -1,4 +1,4 @@
-package com.localhelp.app.ui.navigation
+package com.localhelp.app.ui.graphnav
 
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel

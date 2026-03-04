@@ -5,18 +5,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.localhelp.app.data.remote.NetworkModule
+import com.localhelp.app.data.repository.AuthRepository
 import com.localhelp.app.model.response.UserResponse
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel : ViewModel() {
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     var email by mutableStateOf("")
     var password by mutableStateOf("")
-
     var isLoading by mutableStateOf(false)
     var loginError by mutableStateOf<String?>(null)
 
@@ -29,46 +30,26 @@ class LoginViewModel : ViewModel() {
         isLoading = true
         loginError = null
 
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful){
-                    val user = auth.currentUser
-                    user?.getIdToken(true)?.addOnCompleteListener { result ->
-                        val idToken = result.result?.token
-                        if (idToken != null) {
-                            syncWithBackend(idToken, onSuccess)
-                        }
-                    }
-                } else {
+        // Bước 1: Gọi Firebase thông qua callback truyền thống
+        authRepository.loginFirebase(email, password) { firebaseResult ->
+            firebaseResult.onSuccess { token ->
+
+                // Bước 2: Khi đã có token, dùng viewModelScope để gọi API (suspend function)
+                viewModelScope.launch {
+                    val backendResult = authRepository.syncWithBackend(token)
                     isLoading = false
-                    loginError = task.exception?.message?: "Đăng nhập Firebase thất bại"
-                }
-            }
-    }
 
-    private fun syncWithBackend(idToken: String, onSuccess: (UserResponse) -> Unit) {
-        viewModelScope.launch {
-            try {
-                val response = NetworkModule.authService.loginSync("Bearer $idToken")
-
-                if (response.isSuccessful) {
-                    val userResponse = response.body()
-                    if (userResponse != null) {
-                        isLoading = false
+                    backendResult.onSuccess { userResponse ->
                         onSuccess(userResponse)
+                    }.onFailure { error ->
+                        loginError = error.message
                     }
-                } else {
-                    isLoading = false
-                    val errorBody = response.errorBody()?.string()
-
-                    loginError = "Backend lỗi (${response.code()}): $errorBody"
                 }
-            } catch (e: Exception) {
+
+            }.onFailure { error ->
                 isLoading = false
-                println("DEBUG_AUTH: Network Exception: ${e.message}")
-                loginError = "Lỗi kết nối: ${e.localizedMessage}"
+                loginError = error.message
             }
         }
     }
-
 }

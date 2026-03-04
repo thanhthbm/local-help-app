@@ -7,7 +7,9 @@ import androidx.activity.viewModels
 import com.localhelp.app.data.local.MainViewModel
 import com.localhelp.app.ui.LocalHelpApp
 import com.localhelp.app.ui.theme.LocalHelpTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

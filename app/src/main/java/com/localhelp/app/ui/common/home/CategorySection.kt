@@ -36,7 +36,7 @@ fun CategorySection() {
     ) {
         CategoryItem(
             title = "Tất cả",
-            icon = Icons.Default.GridView,
+            icon = Icons.Default.GridView ,
             containerColor = Color(0xFFED7D68),
             contentColor = Color.White
         )
