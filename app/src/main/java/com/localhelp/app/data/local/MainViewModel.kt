@@ -1,16 +1,26 @@
 package com.localhelp.app.data.local
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.localhelp.app.data.repository.UserRepository
 import com.localhelp.app.model.response.UserResponse
 import com.localhelp.app.ui.screens.Graph
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel: ViewModel() {
-    private val _userState = MutableStateFlow(UserState())
-    val userState: StateFlow<UserState> = _userState.asStateFlow()
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val userManager: UserManager,
+    private val userRepository: UserRepository
+) : ViewModel() {
+
+    val currentUser = userManager.currentUser
+
     private val _startDestination = MutableStateFlow(Graph.Auth)
     val startDestination: StateFlow<String> = _startDestination.asStateFlow()
 
@@ -22,30 +32,33 @@ class MainViewModel: ViewModel() {
     }
 
     private fun checkAutoLogin() {
-        val currentUser = FirebaseAuth.getInstance().currentUser
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
 
+        if (firebaseUser != null) {
+            viewModelScope.launch {
+                val result = userRepository.getProfile()
 
-        if (currentUser != null) {
-            // Nếu Firebase đã lưu phiên đăng nhập -> Vào thẳng Home
-            _startDestination.value = Graph.Home
+                result.onSuccess { userResponse ->
+                    userManager.updateProfile(userResponse)
+                    _startDestination.value = Graph.Home
+                }.onFailure {
+                    userManager.logout()
+                    _startDestination.value = Graph.Auth
+                }
 
-            // TODO: (Tùy chọn) Gọi API lấy thông tin UserResponse từ backend để gán vào _userState
+                _isLoading.value = false
+            }
         } else {
-            // Chưa đăng nhập -> Vào luồng Auth (Login)
             _startDestination.value = Graph.Auth
+            _isLoading.value = false
         }
-
-        // Đã kiểm tra xong, báo cho UI biết để render
-        _isLoading.value = false
     }
 
-    fun updateUser(user: UserResponse){
-        _userState.value = _userState.value.copy(user = user)
+    fun updateUser(user: UserResponse) {
+        userManager.updateProfile(user)
     }
 
     fun logout() {
-        FirebaseAuth.getInstance().signOut() // Đăng xuất khỏi Firebase
-        _userState.value = UserState(user = null, token = null)
-        _startDestination.value = Graph.Auth // Đặt lại đích đến
+        userManager.logout()
     }
 }

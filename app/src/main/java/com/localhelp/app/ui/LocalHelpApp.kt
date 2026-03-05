@@ -7,6 +7,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect // Import thêm cái này
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,7 +26,8 @@ import com.localhelp.app.ui.screens.Screen
 @Composable
 fun LocalHelpApp(mainViewModel: MainViewModel) {
     val navController = rememberNavController()
-    val state by mainViewModel.userState.collectAsState()
+
+    val currentUser by mainViewModel.currentUser.collectAsState()
 
     val startDestination by mainViewModel.startDestination.collectAsState()
     val isLoading by mainViewModel.isLoading.collectAsState()
@@ -37,6 +39,7 @@ fun LocalHelpApp(mainViewModel: MainViewModel) {
         Screen.Home, Screen.MyJobs, Screen.Messages, Screen.Profile
     )
 
+
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -44,8 +47,17 @@ fun LocalHelpApp(mainViewModel: MainViewModel) {
         return
     }
 
+    LaunchedEffect(currentUser) {
+        if (currentUser == null && currentDestination?.parent?.route != Graph.Auth) {
+            navController.navigate(Graph.Auth) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
     CompositionLocalProvider(
-        LocalUser provides state.user){
+        LocalUser provides currentUser
+    ) {
         Scaffold(
             bottomBar = {
                 if (showBottomBar){
@@ -69,6 +81,4 @@ fun LocalHelpApp(mainViewModel: MainViewModel) {
             }
         }
     }
-
 }
-
