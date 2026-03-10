@@ -13,9 +13,15 @@ data class UserResponse(
     val phone: String?,
     val avatarUrl: String?,
     val gender: GenderEnum?,
+    val bio: String?,
 
     val reputationScore: Double,
     val role: UserRole,
     val status: UserStatus,
-    val createdAt: String
+    val createdAt: String,
+
+    val completedJobs: Int = 0,
+    val totalReviews: Int = 0,
+    val averageRating: Double = 0.0,
+    val responseRate: Double = 0.0
 )

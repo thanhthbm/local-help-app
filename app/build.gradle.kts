@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
+    implementation("com.cloudinary:cloudinary-android:2.5.0")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.0")

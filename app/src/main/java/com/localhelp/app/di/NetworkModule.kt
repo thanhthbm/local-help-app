@@ -2,6 +2,8 @@ package com.localhelp.app.di
 
 import com.localhelp.app.data.remote.AuthInterceptor
 import com.localhelp.app.data.remote.AuthService
+import com.localhelp.app.data.remote.CategoryService
+import com.localhelp.app.data.remote.JobService
 import com.localhelp.app.data.remote.TokenAuthenticator
 import com.localhelp.app.data.remote.UserService
 import dagger.Module
@@ -47,5 +49,17 @@ object NetworkModule {
     @Singleton
     fun provideUserService(retrofit: Retrofit): UserService{
         return retrofit.create(UserService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideJobService(retrofit: Retrofit): JobService {
+        return retrofit.create(JobService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCategoryService(retrofit: Retrofit): CategoryService{
+        return retrofit.create(CategoryService::class.java)
     }
 }

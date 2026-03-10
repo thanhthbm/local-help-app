@@ -20,6 +20,7 @@ import com.localhelp.app.data.local.MainViewModel
 import com.localhelp.app.ui.common.navigation.BottomNavigationBar
 import com.localhelp.app.ui.graphnav.authNavGraph
 import com.localhelp.app.ui.graphnav.homeNavGraph
+import com.localhelp.app.ui.graphnav.profileNavGraph
 import com.localhelp.app.ui.screens.Graph
 import com.localhelp.app.ui.screens.Screen
 
@@ -59,6 +60,7 @@ fun LocalHelpApp(mainViewModel: MainViewModel) {
         LocalUser provides currentUser
     ) {
         Scaffold(
+            modifier = Modifier.fillMaxSize(),
             bottomBar = {
                 if (showBottomBar){
                     BottomNavigationBar(navController)
@@ -68,7 +70,7 @@ fun LocalHelpApp(mainViewModel: MainViewModel) {
             NavHost(
                 navController = navController,
                 startDestination = startDestination,
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.padding(innerPadding).fillMaxSize()
             ){
                 authNavGraph(
                     navController = navController,
@@ -78,6 +80,7 @@ fun LocalHelpApp(mainViewModel: MainViewModel) {
                 )
 
                 homeNavGraph(navController = navController)
+                profileNavGraph(navController = navController)
             }
         }
     }

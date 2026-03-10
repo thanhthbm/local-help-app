@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.localhelp.app.ui.screens.Graph
 import com.localhelp.app.ui.screens.Screen
+import com.localhelp.app.ui.screens.createjob.CreateJobScreen
 import com.localhelp.app.ui.screens.home.HomeScreen
 
 fun NavGraphBuilder.homeNavGraph(navController: NavController){
@@ -17,5 +18,11 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
             HomeScreen()
         }
 
+        composable  (Screen.PostJob ){
+            CreateJobScreen(
+                onBackClick = {navController.popBackStack()},
+                onJobCreated = {navController.popBackStack()}
+            )
+        }
     }
 }

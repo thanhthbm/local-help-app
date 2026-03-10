@@ -36,7 +36,13 @@ class AuthRepository @Inject constructor(
         return try {
             val response = authService.loginSync("Bearer $token")
             if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+                val apiResponse = response.body()!!
+
+                if (apiResponse.data != null) {
+                    Result.success(apiResponse.data)
+                } else {
+                    Result.failure(Exception(apiResponse.message?.toString() ?: "Dữ liệu user rỗng"))
+                }
             } else {
                 val errorBody = response.errorBody()?.string()
                 Result.failure(Exception("Lỗi backend (${response.code()}): $errorBody"))

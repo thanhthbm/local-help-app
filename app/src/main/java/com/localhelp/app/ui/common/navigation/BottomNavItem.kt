@@ -27,7 +27,7 @@ sealed class BottomNavItem(
     )
 
     object MyJobs : BottomNavItem(
-        route = Screen.PostJob,
+        route = Screen.MyJobs,
         title = "Việc đã đăng",
         icon = Icons.AutoMirrored.Outlined.Assignment,
         selectedIcon = Icons.AutoMirrored.Filled.Assignment
