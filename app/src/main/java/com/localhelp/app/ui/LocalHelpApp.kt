@@ -74,8 +74,8 @@ fun LocalHelpApp(mainViewModel: MainViewModel) {
             ){
                 authNavGraph(
                     navController = navController,
-                    onUserAuthenticated = { user ->
-                        mainViewModel.updateUser(user)
+                    onUserAuthenticated = { user, token ->
+                        mainViewModel.saveSession(user, token)
                     }
                 )
 

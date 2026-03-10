@@ -21,7 +21,7 @@ class LoginViewModel @Inject constructor(
     var isLoading by mutableStateOf(false)
     var loginError by mutableStateOf<String?>(null)
 
-    fun onLoginClick(onSuccess: (UserResponse) -> Unit) {
+    fun onLoginClick(onSuccess: (UserResponse, String) -> Unit) {
         if (email.isEmpty() || password.isEmpty()){
             loginError = "Vui lòng nhập đầy đủ thông tin đăng nhập."
             return
@@ -33,19 +33,17 @@ class LoginViewModel @Inject constructor(
         // Bước 1: Gọi Firebase thông qua callback truyền thống
         authRepository.loginFirebase(email, password) { firebaseResult ->
             firebaseResult.onSuccess { token ->
-
-                // Bước 2: Khi đã có token, dùng viewModelScope để gọi API (suspend function)
                 viewModelScope.launch {
                     val backendResult = authRepository.syncWithBackend(token)
                     isLoading = false
 
                     backendResult.onSuccess { userResponse ->
-                        onSuccess(userResponse)
+                        // TRUYỀN THÊM TOKEN RA NGOÀI
+                        onSuccess(userResponse, token)
                     }.onFailure { error ->
                         loginError = error.message
                     }
                 }
-
             }.onFailure { error ->
                 isLoading = false
                 loginError = error.message

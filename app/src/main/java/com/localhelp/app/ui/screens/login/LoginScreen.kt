@@ -42,7 +42,7 @@ import com.localhelp.app.model.response.UserResponse
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
-    onLoginSuccess: (UserResponse) -> Unit,
+    onLoginSuccess: (UserResponse, String) -> Unit,
     onRegisterNavigate: () -> Unit,
     onForgotPasswordClick: () -> Unit
 ) {
@@ -117,8 +117,8 @@ fun LoginScreen(
 
             Button (
                 onClick = {
-                    viewModel.onLoginClick { user ->
-                        onLoginSuccess(user)
+                    viewModel.onLoginClick { user, token ->
+                        onLoginSuccess(user, token)
                     }
                 },
                 enabled = !viewModel.isLoading,

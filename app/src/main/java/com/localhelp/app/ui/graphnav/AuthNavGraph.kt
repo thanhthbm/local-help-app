@@ -16,7 +16,7 @@ import com.localhelp.app.ui.screens.register.RegisterViewModel
 
 fun NavGraphBuilder.authNavGraph(
     navController: NavController,
-    onUserAuthenticated: (UserResponse) -> Unit
+    onUserAuthenticated: (UserResponse, String) -> Unit
 ){
 
     navigation(
@@ -27,8 +27,8 @@ fun NavGraphBuilder.authNavGraph(
             val loginViewModel: LoginViewModel = hiltViewModel()
             LoginScreen(
                 viewModel = loginViewModel,
-                onLoginSuccess = { user ->
-                    onUserAuthenticated(user)
+                onLoginSuccess = { user: UserResponse, token: String ->
+                    onUserAuthenticated(user, token)
                     navController.navigate(Graph.Home) {
                         popUpTo(Graph.Auth) { inclusive = true }
                     }

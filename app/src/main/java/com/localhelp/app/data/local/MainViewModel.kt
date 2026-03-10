@@ -58,6 +58,10 @@ class MainViewModel @Inject constructor(
         userManager.updateProfile(user)
     }
 
+    fun saveSession(user: UserResponse, token: String) {
+        userManager.saveSession(user, token)
+    }
+
     fun logout() {
         userManager.logout()
     }

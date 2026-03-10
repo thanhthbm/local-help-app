@@ -1,5 +1,6 @@
 package com.localhelp.app.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.localhelp.app.data.remote.AuthService
 import com.localhelp.app.model.response.UserResponse
@@ -39,15 +40,19 @@ class AuthRepository @Inject constructor(
                 val apiResponse = response.body()!!
 
                 if (apiResponse.data != null) {
+                    // IN RA XEM RETROFIT CÓ PARSE ĐÚNG DỮ LIỆU KHÔNG
+                    Log.d("DEBUG_USER", "Retrofit bóc data thành công: ${apiResponse.data}")
                     Result.success(apiResponse.data)
                 } else {
+                    Log.e("DEBUG_USER", "API trả về 200 OK nhưng cục 'data' bị rỗng!")
                     Result.failure(Exception(apiResponse.message?.toString() ?: "Dữ liệu user rỗng"))
                 }
             } else {
-                val errorBody = response.errorBody()?.string()
-                Result.failure(Exception("Lỗi backend (${response.code()}): $errorBody"))
+                Log.e("DEBUG_USER", "Lỗi Backend: ${response.code()} - ${response.errorBody()?.string()}")
+                Result.failure(Exception("Lỗi backend (${response.code()})"))
             }
         } catch (e: Exception) {
+            Log.e("DEBUG_USER", "Lỗi Crash/Network: ${e.message}", e)
             Result.failure(e)
         }
     }
