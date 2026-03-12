@@ -8,6 +8,7 @@ import com.localhelp.app.ui.screens.Graph
 import com.localhelp.app.ui.screens.Screen
 import com.localhelp.app.ui.screens.createjob.CreateJobScreen
 import com.localhelp.app.ui.screens.home.HomeScreen
+import com.localhelp.app.ui.screens.myjobs.MyJobsScreen
 
 fun NavGraphBuilder.homeNavGraph(navController: NavController){
     navigation(
@@ -23,6 +24,10 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 onBackClick = {navController.popBackStack()},
                 onJobCreated = {navController.popBackStack()}
             )
+        }
+
+        composable ( Screen.MyJobs ){
+            MyJobsScreen()
         }
     }
 }
