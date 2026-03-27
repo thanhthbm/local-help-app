@@ -3,7 +3,6 @@ package com.localhelp.app.ui.screens.createjob
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -30,7 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.localhelp.app.model.response.CategoryResponse
+import com.localhelp.app.ui.common.createjob.CategoryRow
+import com.localhelp.app.ui.common.createjob.CustomOutlinedTextField
+import com.localhelp.app.ui.common.createjob.InputSection
 
 val PrimaryOrange = Color(0xFFED7D68)
 val LightBlueAI = Color(0xFFD3E3FD)
@@ -218,81 +218,8 @@ fun CreateJobScreen(
     }
 }
 
-// --- THÀNH PHẦN PHỤ TRỢ ---
 
-@Composable
-fun InputSection(title: String, content: @Composable () -> Unit) {
-    Column {
-        Text(title, fontWeight = FontWeight.Medium, fontSize = 16.sp, color = Color.Black)
-        Spacer(modifier = Modifier.height(8.dp))
-        content()
-    }
-}
 
-@Composable
-fun CustomOutlinedTextField(
-    value: String, onValueChange: (String) -> Unit, placeholder: String,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    leadingIcon: @Composable (() -> Unit)? = null, trailingIcon: @Composable (() -> Unit)? = null
-) {
-    OutlinedTextField(
-        value = value, onValueChange = onValueChange,
-        placeholder = { Text(placeholder, color = Color.Gray) },
-        modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color.Black, unfocusedBorderColor = Color.Black,
-            focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
-        ),
-        singleLine = true, keyboardOptions = keyboardOptions,
-        leadingIcon = leadingIcon, trailingIcon = trailingIcon
-    )
-}
 
-// Render danh mục động
-@Composable
-fun CategoryRow(categories: List<CategoryResponse>, selectedId: Long?, onSelect: (Long) -> Unit) {
-    if (categories.isEmpty()) {
-        CircularProgressIndicator(modifier = Modifier.padding(16.dp), color = PrimaryOrange)
-        return
-    }
 
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(28.dp)) {
-        items(categories) { category ->
-            val isSelected = category.id == selectedId
 
-            // Xử lý an toàn khi parse mã màu từ API (Vd: #ED7D68)
-            val categoryColor = try {
-                Color(android.graphics.Color.parseColor(category.colorCode))
-            } catch (e: Exception) { PrimaryOrange }
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable { onSelect(category.id) }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (isSelected) categoryColor else Color(0xFFF5F5F5)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // Load ảnh thật từ URL thay vì icon tĩnh
-                    AsyncImage(
-                        model = category.iconUrl,
-                        contentDescription = category.name,
-                        modifier = Modifier.size(28.dp),
-                        // Đổi màu icon thành Trắng (nếu được chọn) và Xám (nếu không)
-                        colorFilter = if (isSelected) ColorFilter.tint(Color.White) else ColorFilter.tint(Color.Gray)
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = category.name,
-                    fontSize = 13.sp,
-                    color = if (isSelected) categoryColor else Color.Black,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                )
-            }
-        }
-    }
-}

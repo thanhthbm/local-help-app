@@ -77,6 +77,7 @@ dependencies {
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
     implementation(libs.androidx.compose.material.icons.extended)
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 

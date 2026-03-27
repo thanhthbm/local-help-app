@@ -1,6 +1,5 @@
 package com.localhelp.app.ui.screens.register
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.localhelp.app.ui.screens.login.CustomLoginTextField
+import com.localhelp.app.ui.common.login.CustomLoginTextField
 
 @Composable
 fun RegisterScreen(

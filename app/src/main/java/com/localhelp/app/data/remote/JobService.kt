@@ -4,6 +4,7 @@ import com.localhelp.app.model.constant.JobStatus
 import com.localhelp.app.model.request.CreateJobRequest
 import com.localhelp.app.model.response.ApiResponse
 import com.localhelp.app.model.response.JobResponse
+import com.localhelp.app.model.response.ResultPaginationDTO
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -19,4 +20,10 @@ interface JobService {
 
     @GET("/api/jobs/search")
     suspend fun searchJobs(@Query("keyword") keyword: String) : Response<ApiResponse<List<JobResponse>>>
+
+    @GET("/api/jobs")
+    suspend fun getOpenJobs(
+        @Query("current") current: Int,
+        @Query("pageSize") pageSize: Int
+    ): Response<ApiResponse<ResultPaginationDTO>>
 }
