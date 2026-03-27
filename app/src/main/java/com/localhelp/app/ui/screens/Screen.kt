@@ -1,17 +1,20 @@
 package com.localhelp.app.ui.screens
 
 object Screen {
-    const val Login = "login"
-    const val SetupProfile = "setup_profile"
-    const val Home = "home"
-    const val Register = "register"
+    const val LOGIN = "login"
+    const val SETUP_PROFILE = "setup_profile"
+    const val HOME = "home"
+    const val REGISTER = "register"
 
-    const val ResetPassword = "reset_password"
-    const val OtpVerification = "otp_verification"
-    const val NewPassword = "new_password"
+    const val RESET_PASSWORD = "reset_password"
+    const val OTP_VERIFICATION = "otp_verification"
+    const val NEW_PASSWORD = "new_password"
 
-    const val MyJobs = "my_jobs"
-    const val PostJob = "post_job"
-    const val Messages = "messages"
-    const val Profile = "profile"
+    const val MY_JOBS = "my_jobs"
+    const val POST_JOB = "post_job"
+    const val MESSAGES = "messages"
+    const val PROFILE = "profile"
+    const val SEARCH = "search"
+    const val SEARCH_DETAIL = "search_detail"
+    const val JOB_DETAIL = "job_detail"
 }

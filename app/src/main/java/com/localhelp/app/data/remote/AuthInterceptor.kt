@@ -1,5 +1,6 @@
 package com.localhelp.app.data.remote
 
+import android.util.Log
 import com.localhelp.app.data.local.TokenManager
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -12,10 +13,10 @@ class AuthInterceptor @Inject constructor(
         val token = tokenManager.getToken()
         val requestBuilder = chain.request().newBuilder()
 
-        // Nếu có token, tự động gắn vào Header
         if (!token.isNullOrEmpty()) {
             requestBuilder.addHeader("Authorization", "Bearer $token")
         }
+        Log.d("TOKEN", token.toString())
 
         return chain.proceed(requestBuilder.build())
     }

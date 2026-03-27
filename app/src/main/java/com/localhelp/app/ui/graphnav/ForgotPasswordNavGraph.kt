@@ -14,10 +14,10 @@ import com.localhelp.app.ui.screens.resetpassword.ResetPasswordScreen
 
 fun NavGraphBuilder.forgotPasswordGraph(navController: NavController) {
     navigation(
-        startDestination = Screen.ResetPassword,
+        startDestination = Screen.RESET_PASSWORD,
         route = "forgot_password_root"
     ){
-        composable(Screen.ResetPassword){ backStackEntry ->
+        composable(Screen.RESET_PASSWORD){ backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry("forgot_password_root")
             }
@@ -26,12 +26,12 @@ fun NavGraphBuilder.forgotPasswordGraph(navController: NavController) {
 
             ResetPasswordScreen(
                 viewModel = vm,
-                onOtpSent = {navController.navigate(Screen.OtpVerification)},
+                onOtpSent = {navController.navigate(Screen.OTP_VERIFICATION)},
                 onBack = {navController.popBackStack()},
             )
         }
 
-        composable(Screen.OtpVerification){ backStackEntry ->
+        composable(Screen.OTP_VERIFICATION){ backStackEntry ->
             val parentEntry = remember(backStackEntry){
                 navController.getBackStackEntry("forgot_password_root")
             }
@@ -40,11 +40,11 @@ fun NavGraphBuilder.forgotPasswordGraph(navController: NavController) {
 
             OtpVerificationScreen(
                 viewModel = vm,
-                onVerified = {navController.navigate(Screen.NewPassword)}
+                onVerified = {navController.navigate(Screen.NEW_PASSWORD)}
             )
         }
 
-        composable(Screen.NewPassword){ backStackEntry ->
+        composable(Screen.NEW_PASSWORD){ backStackEntry ->
             val parentEntry = remember(backStackEntry){
                 navController.getBackStackEntry("forgot_password_root")
             }
@@ -54,7 +54,7 @@ fun NavGraphBuilder.forgotPasswordGraph(navController: NavController) {
             NewPasswordScreen(
                 viewModel = vm,
                 onSuccess = {
-                    navController.navigate(Screen.Login){
+                    navController.navigate(Screen.LOGIN){
                         popUpTo("forgot_password_root"){
                             inclusive = true
                         }

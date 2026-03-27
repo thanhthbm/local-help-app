@@ -16,4 +16,7 @@ interface JobService {
 
     @GET("/api/jobs/my-jobs")
     suspend fun getMyJobs(@Query("status") status: JobStatus? = null): Response<ApiResponse<List<JobResponse>>>
+
+    @GET("/api/jobs/search")
+    suspend fun searchJobs(@Query("keyword") keyword: String) : Response<ApiResponse<List<JobResponse>>>
 }

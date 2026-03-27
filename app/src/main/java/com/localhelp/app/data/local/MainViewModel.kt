@@ -21,7 +21,7 @@ class MainViewModel @Inject constructor(
 
     val currentUser = userManager.currentUser
 
-    private val _startDestination = MutableStateFlow(Graph.Auth)
+    private val _startDestination = MutableStateFlow(Graph.AUTH)
     val startDestination: StateFlow<String> = _startDestination.asStateFlow()
 
     private val _isLoading = MutableStateFlow(true)
@@ -40,16 +40,16 @@ class MainViewModel @Inject constructor(
 
                 result.onSuccess { userResponse ->
                     userManager.updateProfile(userResponse)
-                    _startDestination.value = Graph.Home
+                    _startDestination.value = Graph.HOME
                 }.onFailure {
                     userManager.logout()
-                    _startDestination.value = Graph.Auth
+                    _startDestination.value = Graph.AUTH
                 }
 
                 _isLoading.value = false
             }
         } else {
-            _startDestination.value = Graph.Auth
+            _startDestination.value = Graph.AUTH
             _isLoading.value = false
         }
     }

@@ -36,6 +36,7 @@ class AuthRepository @Inject constructor(
     suspend fun syncWithBackend(token: String): Result<UserResponse> {
         return try {
             val response = authService.loginSync("Bearer $token")
+            Log.d("Debug", response.body().toString() ?: "" )
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
 

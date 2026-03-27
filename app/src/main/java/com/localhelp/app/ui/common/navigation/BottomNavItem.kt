@@ -10,9 +10,11 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.localhelp.app.ui.screens.Screen
 
+@Immutable
 sealed class BottomNavItem(
     val route: String,
     val title: String,
@@ -20,35 +22,35 @@ sealed class BottomNavItem(
     val selectedIcon: ImageVector
 ) {
     object Home : BottomNavItem(
-        route = Screen.Home,
+        route = Screen.HOME,
         title = "Khám phá",
         icon = Icons.Outlined.Home,
         selectedIcon = Icons.Filled.Home
     )
 
     object MyJobs : BottomNavItem(
-        route = Screen.MyJobs,
+        route = Screen.MY_JOBS,
         title = "Việc đã đăng",
         icon = Icons.AutoMirrored.Outlined.Assignment,
         selectedIcon = Icons.AutoMirrored.Filled.Assignment
     )
 
     object PostJob : BottomNavItem(
-        route = Screen.PostJob,
+        route = Screen.POST_JOB,
         title = "",
         icon = Icons.Default.Add,
         selectedIcon = Icons.Default.Add
     )
 
     object Messages : BottomNavItem(
-        route = Screen.Messages,
+        route = Screen.MESSAGES,
         title = "Tin nhắn",
         icon = Icons.AutoMirrored.Outlined.Chat,
         selectedIcon = Icons.AutoMirrored.Filled.Chat
     )
 
     object Profile : BottomNavItem(
-        route = Screen.Profile,
+        route = Screen.PROFILE,
         title = "Cá nhân",
         icon = Icons.Outlined.Person,
         selectedIcon = Icons.Filled.Person

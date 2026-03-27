@@ -12,21 +12,25 @@ import com.localhelp.app.ui.screens.myjobs.MyJobsScreen
 
 fun NavGraphBuilder.homeNavGraph(navController: NavController){
     navigation(
-        route = Graph.Home,
-        startDestination = Screen.Home
+        route = Graph.HOME,
+        startDestination = Screen.HOME
     ){
-        composable(Screen.Home){
-            HomeScreen()
+        composable(Screen.HOME){
+            HomeScreen(
+                onSearchClick = {
+                    navController.navigate(Graph.SEARCH)
+                }
+            )
         }
 
-        composable  (Screen.PostJob ){
+        composable  (Screen.POST_JOB ){
             CreateJobScreen(
                 onBackClick = {navController.popBackStack()},
                 onJobCreated = {navController.popBackStack()}
             )
         }
 
-        composable ( Screen.MyJobs ){
+        composable ( Screen.MY_JOBS ){
             MyJobsScreen()
         }
     }

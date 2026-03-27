@@ -1,5 +1,6 @@
 package com.localhelp.app.ui.screens.home
 
+import android.R.attr.onClick
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,8 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,7 +23,9 @@ import com.localhelp.app.ui.common.home.SearchBar
 import com.localhelp.app.ui.common.home.SectionHeader
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onSearchClick : () -> Unit
+) {
     val user = LocalUser.current
 
     var scrollState = rememberScrollState()
@@ -37,7 +39,8 @@ fun HomeScreen() {
         HomeHeader(user?.fullName ?: "Name", "Hà Nội")
 
         SearchBar(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            onSearchClick = onSearchClick
         )
 
         CategorySection()

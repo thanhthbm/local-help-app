@@ -8,7 +8,6 @@ import androidx.navigation.navigation
 import com.localhelp.app.model.response.UserResponse
 import com.localhelp.app.ui.screens.Graph
 import com.localhelp.app.ui.screens.Screen
-import com.localhelp.app.ui.screens.home.HomeScreen
 import com.localhelp.app.ui.screens.login.LoginScreen
 import com.localhelp.app.ui.screens.login.LoginViewModel
 import com.localhelp.app.ui.screens.register.RegisterScreen
@@ -18,31 +17,30 @@ fun NavGraphBuilder.authNavGraph(
     navController: NavController,
     onUserAuthenticated: (UserResponse, String) -> Unit
 ){
-
     navigation(
-        route = Graph.Auth,
-        startDestination = Screen.Login
+        route = Graph.AUTH,
+        startDestination = Screen.LOGIN
     ) {
-        composable(Screen.Login) {
+        composable(Screen.LOGIN) {
             val loginViewModel: LoginViewModel = hiltViewModel()
             LoginScreen(
                 viewModel = loginViewModel,
                 onLoginSuccess = { user: UserResponse, token: String ->
                     onUserAuthenticated(user, token)
-                    navController.navigate(Graph.Home) {
-                        popUpTo(Graph.Auth) { inclusive = true }
+                    navController.navigate(Graph.HOME) {
+                        popUpTo(Graph.AUTH) { inclusive = true }
                     }
                 },
-                onRegisterNavigate = { navController.navigate(Screen.Register) },
+                onRegisterNavigate = { navController.navigate(Screen.REGISTER) },
                 onForgotPasswordClick = { navController.navigate("forgot_password_root") }
             )
         }
 
-        composable(Screen.Register) {
+        composable(Screen.REGISTER) {
             val registerViewModel: RegisterViewModel = hiltViewModel()
             RegisterScreen(
                 viewModel = registerViewModel,
-                onRegisterSuccess = { navController.navigate(Screen.Login) },
+                onRegisterSuccess = { navController.navigate(Screen.LOGIN) },
                 onBackClick = { navController.popBackStack() }
             )
         }

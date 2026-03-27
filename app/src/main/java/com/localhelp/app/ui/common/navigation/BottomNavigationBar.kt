@@ -13,20 +13,23 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.localhelp.app.ui.screens.Screen
+import kotlin.collections.contains
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
+fun BottomNavigationBar(navController: NavController,
+                        currentDestination: NavDestination?) {
 
     NavigationBar(
         containerColor = Color.White,
@@ -89,5 +92,18 @@ fun BottomNavigationBar(navController: NavController) {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun BottomBarWrapper(navController: NavController){
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    val showBottomBar = currentDestination?.route in listOf(
+        Screen.HOME, Screen.MY_JOBS, Screen.MESSAGES, Screen.PROFILE
+    )
+    if(showBottomBar){
+        BottomNavigationBar(navController, currentDestination)
     }
 }

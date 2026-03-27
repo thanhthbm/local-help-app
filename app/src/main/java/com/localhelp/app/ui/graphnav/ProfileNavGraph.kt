@@ -12,10 +12,10 @@ import com.localhelp.app.ui.screens.profile.ProfileViewModel
 
 fun NavGraphBuilder.profileNavGraph(navController: NavController){
     navigation(
-        route = Graph.Profile,
-        startDestination = Screen.Profile
+        route = Graph.SEARCH,
+        startDestination = Screen.PROFILE
     ){
-        composable(Screen.Profile) {
+        composable(Screen.PROFILE) {
             val viewModel: ProfileViewModel = hiltViewModel()
             ProfileScreen(viewModel = viewModel)
         }

@@ -8,4 +8,5 @@
     <string name="login">Đăng nhập</string>
     <string name="or_login_with">Hoặc là đăng nhập với</string>
     <string name="password">Mật khẩu</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>
