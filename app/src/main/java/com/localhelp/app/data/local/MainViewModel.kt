@@ -7,8 +7,10 @@ import com.localhelp.app.data.repository.UserRepository
 import com.localhelp.app.model.response.UserResponse
 import com.localhelp.app.ui.screens.Graph
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,6 +28,9 @@ class MainViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _navEvent = MutableSharedFlow<String>()
+    val navEvent = _navEvent.asSharedFlow()
 
     init {
         checkAutoLogin()
@@ -64,5 +69,11 @@ class MainViewModel @Inject constructor(
 
     fun logout() {
         userManager.logout()
+    }
+
+    fun openResetPassword(code: String) {
+        viewModelScope.launch {
+            _navEvent.emit("forgot_password_root/new_password?oobCode=$code")
+        }
     }
 }

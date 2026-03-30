@@ -10,77 +10,66 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.localhelp.app.data.repository.AuthRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class ForgotPasswordViewModel: ViewModel() {
-    var phoneNumber by mutableStateOf("")
-    var verificationId by mutableStateOf("")
-    var otpCode by mutableStateOf("")
+@HiltViewModel
+class ForgotPasswordViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
+    var email by mutableStateOf("")
     var newPassword by mutableStateOf("")
     var confirmPassword by mutableStateOf("")
     var isLoading by mutableStateOf(false)
     var errorMsg by mutableStateOf<String?>(null)
 
-    private val auth = FirebaseAuth.getInstance()
+    private var oobCode: String? = null
 
-    fun sendOtp(activity: Activity, onSuccess: () -> Unit) {
-        isLoading = true
-        errorMsg = null
-
-        val options = PhoneAuthOptions.newBuilder(auth)
-            .setPhoneNumber(formatPhoneNumber(phoneNumber)) // Định dạng +84
-            .setTimeout(60L, TimeUnit.SECONDS)
-            .setActivity(activity)
-            .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                    // Tự động xác thực nếu Firebase nhận diện được tin nhắn (tùy dòng máy)
-                    isLoading = false
-                }
-
-                override fun onVerificationFailed(e: FirebaseException) {
-                    isLoading = false
-                    errorMsg = e.localizedMessage
-                }
-
-                override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
-                    isLoading = false
-                    verificationId = id
-                    onSuccess()
-                }
-            }).build()
-        PhoneAuthProvider.verifyPhoneNumber(options)
+    fun setOobCode(code: String){
+        oobCode = code
     }
 
-    fun verifyOtp(onNext: () -> Unit) {
+    fun sendResetEmail(onResult: (Boolean) -> Unit){
         isLoading = true
 
-        val credential = PhoneAuthProvider.getCredential(verificationId, otpCode)
+        authRepository.sendResetEmail(email){ success, error ->
+            isLoading = false
 
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener { task ->
-                isLoading = false
-                if (task.isSuccessful) {
-                    onNext()
-                } else {
-                    errorMsg = task.exception?.localizedMessage
-                }
+            if (success){
+                onResult(true)
+            } else {
+                errorMsg = error
+                onResult(false)
             }
+
+        }
     }
 
     fun resetPassword(onSuccess: () -> Unit){
-        if (newPassword != confirmPassword) {
+        val code = oobCode ?: return
+
+        if (newPassword != confirmPassword){
             errorMsg = "Mật khẩu không khớp"
             return
         }
 
-        if (newPassword.length < 6){
-            errorMsg = "Mật khẩu phải có ít nhất 6 ký tự"
-            return
-        }
+        isLoading = true
+
+        FirebaseAuth.getInstance()
+            .confirmPasswordReset(code, newPassword)
+            .addOnCompleteListener { task ->
+                isLoading = false
+
+                if (task.isSuccessful){
+                    onSuccess()
+                } else {
+                    errorMsg = task.exception?.message
+                }
+            }
     }
 
-    private fun formatPhoneNumber(phone: String): String{
-        return if (phone.startsWith("0")) "+84${phone.substring(1)}" else phone
-    }
+
 }
 

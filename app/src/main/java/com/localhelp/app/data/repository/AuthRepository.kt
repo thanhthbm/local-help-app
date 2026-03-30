@@ -1,6 +1,7 @@
 package com.localhelp.app.data.repository
 
 import android.util.Log
+import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.localhelp.app.data.remote.AuthService
 import com.localhelp.app.model.response.UserResponse
@@ -69,6 +70,29 @@ class AuthRepository @Inject constructor(
             }
             .addOnFailureListener { exception ->
                 onResult(Result.failure(exception))
+            }
+    }
+
+    fun sendResetEmail(email: String, onComplete: (Boolean, String?) -> Unit){
+        val auth = FirebaseAuth.getInstance()
+
+        val actionCodeSettings = ActionCodeSettings.newBuilder()
+            .setUrl("localhelp://reset")
+            .setHandleCodeInApp(true)
+            .setAndroidPackageName(
+                "com.localhelp.app",
+                true,
+                null
+            )
+            .build()
+
+        auth.sendPasswordResetEmail(email, actionCodeSettings)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful){
+                    onComplete(true, null)
+                } else {
+                    onComplete(false, task.exception?.message)
+                }
             }
     }
 }

@@ -12,6 +12,7 @@ import com.localhelp.app.ui.screens.login.LoginScreen
 import com.localhelp.app.ui.screens.login.LoginViewModel
 import com.localhelp.app.ui.screens.register.RegisterScreen
 import com.localhelp.app.ui.screens.register.RegisterViewModel
+import com.localhelp.app.ui.graphnav.forgotPasswordGraph
 
 fun NavGraphBuilder.authNavGraph(
     navController: NavController,

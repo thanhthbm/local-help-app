@@ -33,6 +33,7 @@ import com.localhelp.app.ui.graphnav.profileNavGraph
 import com.localhelp.app.ui.graphnav.searchNavGraph
 import com.localhelp.app.ui.screens.Graph
 import com.localhelp.app.ui.screens.Screen
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun LocalHelpApp(
@@ -45,7 +46,11 @@ fun LocalHelpApp(
     val startDestination by mainViewModel.startDestination.collectAsState()
     val isLoading by mainViewModel.isLoading.collectAsState()
 
-
+    LaunchedEffect(Unit) {
+        mainViewModel.navEvent.collectLatest { route ->
+            navController.navigate(route)
+        }
+    }
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
