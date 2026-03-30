@@ -36,9 +36,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.localhelp.app.model.response.JobResponse
+import java.text.DecimalFormat
 
 @Composable
-fun RecentJobCard() {
+fun RecentJobCard(job: JobResponse) {
+    val df = DecimalFormat("#,###")
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -54,12 +58,14 @@ fun RecentJobCard() {
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Dọn dẹp nhà cửa theo giờ",
+                        text = job.title?: "Không có tiêu đề",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "Cần người dọn dẹp căn hộ 2 phòng ngủ, đầy đủ dụng cụ...",
+                        text = job.description ?: "",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
                         maxLines = 1,
@@ -72,7 +78,7 @@ fun RecentJobCard() {
                     modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.CleaningServices,
+                        imageVector = Icons.Default.CleaningServices, //fixed icon
                         contentDescription = null,
                         tint = Color(0xFF4CAF50),
                         modifier = Modifier.padding(8.dp)
@@ -84,8 +90,8 @@ fun RecentJobCard() {
                 modifier = Modifier.padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                InfoChip(icon = Icons.Default.LocationOn, label = "0.8 km")
-                InfoChip(icon = Icons.Default.AccessTime, label = "10 phút trước")
+                InfoChip(icon = Icons.Default.LocationOn, label = job.address ?: "Đang cập nhật")
+                InfoChip(icon = Icons.Default.AccessTime, label = "Mới đây")
             }
 
             Row(
@@ -93,7 +99,7 @@ fun RecentJobCard() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
-                    model = "https://i.pravatar.cc/150?u=a",
+                    model = if (job.creatorAvatar.isNullOrEmpty()) "https://i.pravatar.cc/150?u=a" else job.creatorAvatar,
                     contentDescription = null,
                     modifier = Modifier
                         .size(32.dp)
@@ -106,12 +112,12 @@ fun RecentJobCard() {
                         .padding(start = 8.dp)
                         .weight(1f)
                 ) {
-                    Text(text = "Lan Anh", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    Text(text = "★ 4.8", color = Color(0xFFFFB300), fontSize = 10.sp)
+                    Text(text = job.creatorName ?: "Người dùng", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(text = "★ ${job.creatorRating ?: "0.0"}", color = Color(0xFFFFB300), fontSize = 10.sp)
                 }
 
                 Text(
-                    text = "150.000đ",
+                    text = "${df.format(job.price ?: 0.0)}đ",
                     color = Color(0xFFED7D68),
                     fontWeight = FontWeight.ExtraBold,
                     modifier = Modifier.padding(horizontal = 8.dp)

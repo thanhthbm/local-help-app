@@ -15,6 +15,7 @@ data class JobResponse(
     val categoryName: String? = "",
     val categoryIcon: String? = "",
     val creatorName: String? = "",
+    val creatorId: String? = "",
     val creatorAvatar: String? = "",
     val creatorRating: Double? = 0.0,
     val images: List<String>? = emptyList(),

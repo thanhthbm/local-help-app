@@ -1,5 +1,6 @@
 package com.localhelp.app.ui.screens.profile
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -23,7 +24,7 @@ import com.localhelp.app.ui.common.profile.ProfileCard
 import com.localhelp.app.ui.common.profile.ReviewsSection
 import com.localhelp.app.ui.common.profile.StatsSection
 
-// Mã màu tĩnh (Sau này bạn có thể chuyển vào file Theme/Color.kt)
+
 val OrangePrimary = Color(0xFFF06A50)
 val OrangeLight = Color(0xFFFFF0ED)
 val GreenLight = Color(0xFFE8F8F0)
@@ -38,6 +39,7 @@ fun ProfileScreen(
 ) {
     val scrollState = rememberScrollState()
     val user by viewModel.currentUser.collectAsState()
+
 
     Column(
         modifier = modifier

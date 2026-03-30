@@ -2,7 +2,7 @@ package com.localhelp.app.model.constant
 
 object ApiConstants {
     // server
-    const val BASE_URL = "http://192.168.1.13:6363"
+    const val BASE_URL = "http://10.0.2.2:3636"
 
     // Track asia map
     const val BASE_URL_MAP_VN = "https://maps.track-asia.com/"

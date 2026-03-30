@@ -48,7 +48,7 @@ class JobRepository @Inject constructor(
         }
     }
 
-    suspend fun getOpenJobs(current: Int, pageSize: Int): Result<ResultPaginationDTO> {
+    suspend fun getOpenJobs(current: Int, pageSize: Int): Result<ResultPaginationDTO<List<JobResponse>>> {
         return try {
             val response = jobService.getOpenJobs(current, pageSize)
 

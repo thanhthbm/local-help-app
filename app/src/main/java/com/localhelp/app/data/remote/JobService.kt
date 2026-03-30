@@ -25,5 +25,5 @@ interface JobService {
     suspend fun getOpenJobs(
         @Query("current") current: Int,
         @Query("pageSize") pageSize: Int
-    ): Response<ApiResponse<ResultPaginationDTO>>
+    ): Response<ApiResponse<ResultPaginationDTO<List<JobResponse>>>>
 }

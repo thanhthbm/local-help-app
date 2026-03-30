@@ -1,8 +1,8 @@
 package com.localhelp.app.model.response
 
-data class ResultPaginationDTO(
+data class ResultPaginationDTO<T>(
     val meta: Meta,
-    val result: Object
+    val result: T
 )
 
 data class Meta (

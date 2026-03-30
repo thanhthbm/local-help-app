@@ -12,7 +12,7 @@ import com.localhelp.app.ui.screens.profile.ProfileViewModel
 
 fun NavGraphBuilder.profileNavGraph(navController: NavController){
     navigation(
-        route = Graph.SEARCH,
+        route = Graph.PROFILE,
         startDestination = Screen.PROFILE
     ){
         composable(Screen.PROFILE) {

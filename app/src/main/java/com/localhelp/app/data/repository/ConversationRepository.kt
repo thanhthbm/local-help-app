@@ -24,4 +24,18 @@ class ConversationRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    suspend fun startConversation(targetUserId: String): Result<ConversationResponse>{
+        val response = conversationService.startConversation(targetUserId)
+        if (response.isSuccessful && response.body() != null){
+            val apiResponse = response.body()!!
+            if (apiResponse.data != null){
+                return Result.success(apiResponse.data)
+            } else {
+                return Result.failure(Exception("Lỗi tạo chat (${response.code()})"))
+            }
+        }else {
+            return Result.failure(Exception("Lỗi tạo chat (${response.code()})"))
+        }
+    }
 }

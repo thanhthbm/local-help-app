@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.localhelp.app.ui.screens.login.CustomLoginTextField
+import com.localhelp.app.ui.common.login.CustomLoginTextField
 
 @Composable
 fun NewPasswordScreen(
