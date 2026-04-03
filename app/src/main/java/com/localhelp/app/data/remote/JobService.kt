@@ -9,6 +9,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface JobService {
@@ -26,4 +27,7 @@ interface JobService {
         @Query("current") current: Int,
         @Query("pageSize") pageSize: Int
     ): Response<ApiResponse<ResultPaginationDTO<List<JobResponse>>>>
+
+    @GET("/api/jobs/{id}")
+    suspend fun getJobById(@Path("id") id: Long): Response<ApiResponse<JobResponse>>
 }

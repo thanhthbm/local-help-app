@@ -98,7 +98,9 @@ fun HomeScreen(
             }
         } else {
             items(recentJobs) { job ->
-                RecentJobCard(job = job)
+                if (job.creatorId != user?.id){
+                    RecentJobCard(job = job)
+                }
             }
         }
 

@@ -1,5 +1,6 @@
 package com.localhelp.app.ui.screens.myjobs
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.localhelp.app.data.repository.JobRepository
@@ -16,6 +17,8 @@ import javax.inject.Inject
 class MyJobsViewModel @Inject constructor(
     private val jobRepository: JobRepository
 ) : ViewModel() {
+
+    val TAG = "FETCH_MY_JOBS"
 
     val filters = listOf("Tất cả", "Đang tìm người", "Đang thực hiện", "Đã hoàn thành")
 
@@ -51,6 +54,7 @@ class MyJobsViewModel @Inject constructor(
         _isLoading.value = true
         viewModelScope.launch {
             val result = jobRepository.getMyJobs(status)
+            Log.d(TAG, "fetchMyJobs: $result")
 
             result.onSuccess { list ->
                 _jobs.value = list

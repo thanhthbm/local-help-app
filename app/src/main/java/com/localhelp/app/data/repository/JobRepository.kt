@@ -69,4 +69,24 @@ class JobRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    suspend fun getJobById(id: Long): Result<JobResponse> {
+        return try {
+            val response = jobService.getJobById(id)
+
+            if (response.isSuccessful && response.body() != null){
+                val apiResponse = response.body()!!
+
+                if (apiResponse.data != null){
+                    Result.success(apiResponse.data)
+                } else {
+                    Result.failure(Exception("Dữ liệu trả về bị rỗng"))
+                }
+            } else {
+                Result.failure(Exception("Lỗi backend (${response.code()})"))
+            }
+        } catch (e: Exception){
+            Result.failure(e)
+        }
+    }
 }
