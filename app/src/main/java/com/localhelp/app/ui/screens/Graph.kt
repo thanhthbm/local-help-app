@@ -6,4 +6,5 @@ object Graph {
     const val HOME = "home_graph"
     const val PROFILE = "profile_graph"
     const val SEARCH = "search_graph"
+    const val MAP = "map_graph"
 }

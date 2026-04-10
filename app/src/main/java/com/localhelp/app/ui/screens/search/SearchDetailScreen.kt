@@ -36,13 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.DecimalFormat
 
-val jobList = listOf<JobResponse>(
+//val jobList = listOf(
 //    JobResponse(1, "Tổng vệ sinh căn hộ 2PN", "Minh Tú", 300.000),
 //    JobResponse(2, "Lau dọn cửa kính chung cư", "Lan Anh", 150.000),
 //    JobResponse(3, "Dọn dẹp nhà bếp chuyên sâu", "Hoàng Nam", 250.000),
-//    JobResponse(4, "Hút bụi & giặt thảm phòng khách", "Thanh Thảo", 450.000),
-    // Thêm dữ liệu khác ở đây
-)
+//    JobResponse(4, "Hút bụi & giặt thảm phòng khách", "Thanh Thảo", 450.000)
+//)
 
 //@Preview(showBackground = true)
 //@Composable

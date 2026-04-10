@@ -44,7 +44,7 @@ fun NavGraphBuilder.searchNavGraph(navController: NavController) {
                 viewModel = searchDetailViewModel,
                 keyword = keyword,
                 onNavigateToJobDetail = {id ->
-                    navController.navigate("${Screen.JOB_DETAIL}/$id}")
+                    navController.navigate("${Screen.JOB_DETAIL}/$id")
                 }
             )
         }

@@ -24,6 +24,9 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
             HomeScreen(
                 onSearchClick = {
                     navController.navigate(Graph.SEARCH)
+                },
+                onDirection = { destination ->
+                    navController.navigate("${Screen.MAP_DIRECTION}/${destination.latitude},${destination.longitude}")
                 }
             )
         }

@@ -17,4 +17,6 @@ object Screen {
     const val SEARCH = "search"
     const val SEARCH_DETAIL = "search_detail"
     const val JOB_DETAIL = "job_detail"
+    const val MAP_DIRECTION = "map_direction"
+    const val MAP_TRACKING = "map_tracking"
 }

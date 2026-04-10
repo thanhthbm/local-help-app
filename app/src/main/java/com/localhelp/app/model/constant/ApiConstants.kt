@@ -1,8 +1,10 @@
 package com.localhelp.app.model.constant
 
+import com.localhelp.app.BuildConfig
+
 object ApiConstants {
     // server
-    const val BASE_URL = "http://10.0.2.2:3636"
+    const val BASE_URL = "http://152.69.221.87:3636"
 
     // Track asia map
     const val BASE_URL_MAP_VN = "https://maps.track-asia.com/"
@@ -19,6 +21,5 @@ object ApiConstants {
     const val ELEVATION_ENDPOINT = "api/v1/elevation"
 
     // API Keys
-    const val PUBLIC_KEY = "public_key"
-    const val PRIVATE_KEY = ""
+    const val TRACK_ASIA_KEY = BuildConfig.TRACK_ASIA_API_KEY
 }

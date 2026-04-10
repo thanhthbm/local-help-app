@@ -1,6 +1,5 @@
 package com.localhelp.app.ui
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -15,20 +14,19 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect // Import thêm cái này
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.localhelp.app.data.local.LocalUser
 import com.localhelp.app.data.local.MainViewModel
 import com.localhelp.app.ui.common.navigation.BottomBarWrapper
-import com.localhelp.app.ui.common.navigation.BottomNavigationBar
 import com.localhelp.app.ui.graphnav.authNavGraph
 import com.localhelp.app.ui.graphnav.homeNavGraph
+import com.localhelp.app.ui.graphnav.mapNavGraph
 import com.localhelp.app.ui.graphnav.profileNavGraph
 import com.localhelp.app.ui.graphnav.searchNavGraph
 import com.localhelp.app.ui.screens.Graph
@@ -121,6 +119,7 @@ fun LocalHelpApp(
                 homeNavGraph(navController = navController)
                 profileNavGraph(navController = navController)
                 searchNavGraph(navController = navController)
+                mapNavGraph(navController = navController)
             }
         }
     }

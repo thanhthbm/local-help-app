@@ -32,6 +32,7 @@ class SearchDetailViewModel @Inject constructor(
     init{
         viewModelScope.launch{
             val keyword: String = savedStateHandle.get<String>("keyword") ?: ""
+
             val listJobsResult = repository.searchJob(keyword)
             listJobsResult.onSuccess { listJobs ->
                 _uiState.update{ SearchDetailUiState.Success(listJobs) }

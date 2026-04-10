@@ -9,6 +9,7 @@ pluginManagement {
             }
         }
         mavenCentral()
+        gradlePluginPortal()
     }
 }
 plugins {
@@ -19,6 +20,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = java.net.URI("https://jitpack.io") }
+        maven { url = java.net.URI("https://api.mapbox.com/downloads/v2/releases/maven") }
+        maven { url = java.net.URI("https://maven.track-asia.com/repository/maven-releases/") }
     }
 }
 

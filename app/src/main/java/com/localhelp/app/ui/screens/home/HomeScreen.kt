@@ -2,18 +2,18 @@ package com.localhelp.app.ui.screens.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,12 +29,13 @@ import com.localhelp.app.ui.common.home.RecentJobCard
 import com.localhelp.app.ui.common.home.SearchBar
 import com.localhelp.app.ui.common.home.SectionHeader
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import com.trackasia.android.geometry.LatLng
 
 @Composable
 fun HomeScreen(
+    onDirection : (destination :LatLng) -> Unit,
     onSearchClick : () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -66,6 +67,21 @@ fun HomeScreen(
             .background(Color(0xFFFDFDFD))
     ) {
         item {
+            Button(
+                onClick = {
+                    onDirection(
+                        LatLng(
+                            21.0285, 105.8542
+                        )
+                    )
+                },
+                modifier = Modifier.size(20.dp)
+            ) {
+                Text("check map")
+            }
+        }
+
+        item {
             HomeHeader(user?.fullName ?: "Name", "Hà Nội")
         }
 
@@ -90,7 +106,9 @@ fun HomeScreen(
         if (isLoading) {
             item {
                 Box(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = Color(0xFFED7D68))
@@ -106,7 +124,9 @@ fun HomeScreen(
 
         if (isLoading) {
             item {
-                Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = Color(0xFFED7D68))
                 }
             }

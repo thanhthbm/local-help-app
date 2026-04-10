@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -18,7 +20,18 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        val localProps = Properties().apply {
+            load(project.rootProject.file("local.properties").inputStream())
+        }
+
+        val trackAsiaKey = localProps.getProperty("TRACK_ASIA_PRIVATE_KEY") ?: "public_key"
+
+        buildConfigField("String", "TRACK_ASIA_API_KEY", "\"$trackAsiaKey\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
+        }
     }
 
     buildTypes {
@@ -38,11 +51,26 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
+        dataBinding = true
+        viewBinding = true
     }
 }
 
 dependencies {
+    implementation("io.github.track-asia:android-sdk:2.0.2")
+// TrackAsia Data Models
+    implementation("io.github.track-asia:android-sdk-geojson:2.0.1")
+    implementation("io.github.track-asia:android-sdk-turf:2.0.1")
+// TrackAsia Plugins
+    implementation("io.github.track-asia:android-plugin-annotation-v9:2.0.1")
+// TrackAsia Navigation
+    implementation("io.github.track-asia:libandroid-navigation-ui:2.0.0")
+    implementation("io.github.track-asia:libandroid-navigation:2.0.0")
+// Location Services
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -73,6 +101,9 @@ dependencies {
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.retrofit2:adapter-rxjava2:2.9.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
