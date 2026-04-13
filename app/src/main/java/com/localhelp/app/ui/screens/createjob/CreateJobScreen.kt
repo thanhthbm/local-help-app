@@ -40,13 +40,17 @@ val LightBlueAI = Color(0xFFD3E3FD)
 fun CreateJobScreen(
     onBackClick: () -> Unit,
     onJobCreated: () -> Unit,
+    onSelectLocation: (Double, Double) -> Unit,
     viewModel: CreateJobViewModel = hiltViewModel()
 ) {
     val title by viewModel.title.collectAsState()
     val description by viewModel.description.collectAsState()
     val price by viewModel.price.collectAsState()
     val address by viewModel.address.collectAsState()
+    val latitude by viewModel.latitude.collectAsState()
+    val longitude by viewModel.longitude.collectAsState()
     val imageUris by viewModel.selectedImageUris.collectAsState()
+    val isEditMode = viewModel.isEditMode
 
     // Thu thập danh sách categories động từ API
     val categories by viewModel.categories.collectAsState()
@@ -68,7 +72,7 @@ fun CreateJobScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Đăng việc mới", fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                title = { Text(if (isEditMode) "Chỉnh sửa công việc" else "Đăng việc mới", fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Quay lại")
@@ -115,7 +119,12 @@ fun CreateJobScreen(
             InputSection("Địa chỉ") {
                 CustomOutlinedTextField(
                     value = address, onValueChange = { viewModel.address.value = it }, placeholder = "101 Yên Xá",
-                    leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color.Black) }
+                    leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color.Black) },
+                    trailingIcon = {
+                        IconButton(onClick = { onSelectLocation(latitude, longitude) }) {
+                            Icon(Icons.Default.Map, contentDescription = "Chọn trên bản đồ", tint = PrimaryOrange)
+                        }
+                    }
                 )
             }
 
@@ -206,9 +215,9 @@ fun CreateJobScreen(
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                        Text("Đăng yêu cầu", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(if (isEditMode) "Cập nhật yêu cầu" else "Đăng yêu cầu", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(Icons.AutoMirrored.Filled.Send, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Icon(if (isEditMode) Icons.Default.Save else Icons.AutoMirrored.Filled.Send, null, tint = Color.White, modifier = Modifier.size(20.dp))
                     }
                 }
             }

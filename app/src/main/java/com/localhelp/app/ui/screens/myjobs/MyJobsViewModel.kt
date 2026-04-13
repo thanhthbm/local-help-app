@@ -50,7 +50,7 @@ class MyJobsViewModel @Inject constructor(
         fetchMyJobs(statusQuery)
     }
 
-    private fun fetchMyJobs(status: JobStatus?) {
+    fun fetchMyJobs(status: JobStatus?) {
         _isLoading.value = true
         viewModelScope.launch {
             val result = jobRepository.getMyJobs(status)
@@ -63,6 +63,15 @@ class MyJobsViewModel @Inject constructor(
             }
 
             _isLoading.value = false
+        }
+    }
+
+    fun deleteJob(jobId: Long) {
+        viewModelScope.launch {
+            val result = jobRepository.deleteJob(jobId)
+            result.onSuccess {
+                fetchMyJobs(null)
+            }
         }
     }
 }

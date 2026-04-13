@@ -33,7 +33,7 @@ fun FeaturedJobsList() {
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(5){
-
+            FeaturedJobCard()
         }
     }
 }

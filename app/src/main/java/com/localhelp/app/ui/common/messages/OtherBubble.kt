@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 
 @Composable
-fun OtherBubble(text: String, time: String, avatarUrl: String) {
+fun OtherBubble(text: String, time: String, avatarUrl: String, mediaUrls: List<String> = emptyList()) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Bottom) {
         if (avatarUrl.isNotEmpty()) {
             AsyncImage(
@@ -40,13 +40,30 @@ fun OtherBubble(text: String, time: String, avatarUrl: String) {
         }
         Spacer(modifier = Modifier.width(8.dp))
         Column(horizontalAlignment = Alignment.Start) {
-            Surface(
-                color = Color.White,
-                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 4.dp, bottomEnd = 16.dp),
-                border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
-                modifier = Modifier.widthIn(max = 260.dp)
-            ) {
-                Text(text = text, color = Color.Black, fontSize = 15.sp, modifier = Modifier.padding(12.dp))
+            if (mediaUrls.isNotEmpty()) {
+                mediaUrls.forEach { url ->
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.padding(bottom = 4.dp).widthIn(max = 240.dp)
+                    ) {
+                        AsyncImage(
+                            model = url,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxWidth(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+            }
+            if (text.isNotBlank()) {
+                Surface(
+                    color = Color.White,
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 4.dp, bottomEnd = 16.dp),
+                    border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                    modifier = Modifier.widthIn(max = 260.dp)
+                ) {
+                    Text(text = text, color = Color.Black, fontSize = 15.sp, modifier = Modifier.padding(12.dp))
+                }
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = time, color = Color.Gray, fontSize = 11.sp)

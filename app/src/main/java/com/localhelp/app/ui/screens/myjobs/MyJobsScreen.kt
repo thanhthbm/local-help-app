@@ -22,6 +22,7 @@ val PrimaryOrange = Color(0xFFED7D68)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyJobsScreen(
+    onEditJob: (Long) -> Unit,
     viewModel: MyJobsViewModel = hiltViewModel()
 ) {
     val jobs by viewModel.jobs.collectAsState()
@@ -64,7 +65,11 @@ fun MyJobsScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(jobs) { job ->
-                            MyJobCard(job = job)
+                            MyJobCard(
+                                job = job,
+                                onEditClick = { onEditJob(job.id) },
+                                onDeleteClick = { viewModel.deleteJob(job.id) }
+                            )
                         }
                         item { Spacer(modifier = Modifier.height(80.dp)) }
                     }

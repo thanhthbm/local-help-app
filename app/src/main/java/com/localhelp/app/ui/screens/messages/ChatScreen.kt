@@ -1,12 +1,18 @@
 package com.localhelp.app.ui.screens.messages
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,15 +42,27 @@ fun ChatScreen(
     viewModel: ChatViewModel = hiltViewModel()
 ) {
     var messageText by remember { mutableStateOf("") }
+    var selectedMediaUris by remember { mutableStateOf<List<android.net.Uri>>(emptyList()) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uris ->
+        selectedMediaUris = selectedMediaUris + uris
+    }
 
     // Thu thập dữ liệu realtime từ Firebase
     val messages by viewModel.messages.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val isSending by viewModel.isSending.collectAsState()
+    val error by viewModel.error.collectAsState()
     val myUserId = viewModel.myUserId
 
     // Giải mã lại URL ảnh do Navigation bắt buộc phải mã hóa
     val decodedAvatar = remember(viewModel.partnerAvatar) {
         try {
-            if (viewModel.partnerAvatar != "none") URLDecoder.decode(viewModel.partnerAvatar, "UTF-8") else ""
+            if (viewModel.partnerAvatar != "none" && viewModel.partnerAvatar.isNotEmpty()) 
+                URLDecoder.decode(viewModel.partnerAvatar, "UTF-8") 
+            else ""
         } catch (e: Exception) {
             ""
         }
@@ -84,31 +102,94 @@ fun ChatScreen(
             )
         },
         bottomBar = {
-            ChatBottomInput(
-                value = messageText,
-                onValueChange = { messageText = it },
-                onSend = {
-                    viewModel.sendMessage(messageText)
-                    messageText = ""
+            Column {
+                if (selectedMediaUris.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFF5F5F5))
+                            .padding(8.dp)
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        selectedMediaUris.forEach { uri ->
+                            Box(modifier = Modifier.size(80.dp)) {
+                                AsyncImage(
+                                    model = uri,
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                                IconButton(
+                                    onClick = { selectedMediaUris = selectedMediaUris - uri },
+                                    modifier = Modifier.align(Alignment.TopEnd).size(24.dp).background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                                ) {
+                                    Icon(Icons.Default.Close, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                }
+                            }
+                        }
+                    }
                 }
-            )
+                ChatBottomInput(
+                    value = messageText,
+                    onValueChange = { messageText = it },
+                    onSend = {
+                        viewModel.sendMessage(messageText, selectedMediaUris)
+                        messageText = ""
+                        selectedMediaUris = emptyList()
+                    },
+                    onAddMedia = { launcher.launch("*/*") } // Hỗ trợ cả image và video
+                )
+            }
         },
         containerColor = Color.White
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(messages) { msg ->
-                val isMe = msg.senderId == myUserId
-                // Format lại timestamp Firebase thành giờ phút (vd: 09:34)
-                val timeString = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(msg.timestamp))
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = PrimaryOrange)
+            } else if (error != null) {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text("Oops!", fontWeight = FontWeight.Bold, fontSize = 24.sp, color = Color.Gray)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(error ?: "Có lỗi xảy ra", color = Color.Gray, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                }
+            } else if (messages.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!", color = Color.Gray, fontSize = 14.sp)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(messages) { msg ->
+                        val isMe = msg.senderId == myUserId
+                        val timeString = try {
+                            SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(msg.timestamp))
+                        } catch (e: Exception) {
+                            "--:--"
+                        }
 
-                if (isMe) {
-                    MyBubble(text = msg.text, time = timeString)
-                } else {
-                    OtherBubble(text = msg.text, time = timeString, avatarUrl = decodedAvatar)
+                        if (isMe) {
+                            MyBubble(text = msg.text, time = timeString, mediaUrls = msg.mediaUrls)
+                        } else {
+                            OtherBubble(text = msg.text, time = timeString, avatarUrl = decodedAvatar, mediaUrls = msg.mediaUrls)
+                        }
+                    }
+                }
+            }
+
+            if (isSending) {
+                Box(
+                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = PrimaryOrange)
                 }
             }
         }

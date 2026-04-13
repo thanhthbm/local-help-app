@@ -28,14 +28,22 @@ import androidx.compose.ui.unit.dp
 import com.localhelp.app.ui.screens.messages.PrimaryOrange
 
 @Composable
-fun ChatBottomInput(value: String, onValueChange: (String) -> Unit, onSend: () -> Unit) {
+fun ChatBottomInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onSend: () -> Unit,
+    onAddMedia: () -> Unit = {}
+) {
     Surface(color = Color.White, shadowElevation = 8.dp) {
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier.size(36.dp).background(Color(0xFF9E9E9E), CircleShape),
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(Color(0xFFF5F5F5), CircleShape)
+                    .clickable { onAddMedia() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.Add, null, tint = Color.Gray, modifier = Modifier.size(20.dp))
             }
             Spacer(modifier = Modifier.width(12.dp))
             OutlinedTextField(

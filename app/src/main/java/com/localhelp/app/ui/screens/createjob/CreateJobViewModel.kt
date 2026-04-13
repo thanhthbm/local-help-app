@@ -1,6 +1,8 @@
 package com.localhelp.app.ui.screens.createjob
 
 import android.net.Uri
+import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.localhelp.app.data.repository.CategoryRepository
@@ -11,17 +13,21 @@ import com.localhelp.app.utils.CloudinaryHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import android.util.Log
 @HiltViewModel
 class CreateJobViewModel @Inject constructor(
     private val jobRepository: JobRepository,
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    private val jobId: Long? = savedStateHandle.get<String>("jobId")?.toLongOrNull()
+    val isEditMode = jobId != null
 
     // Form states
     val title = MutableStateFlow("")
@@ -36,6 +42,7 @@ class CreateJobViewModel @Inject constructor(
     val selectedCategoryId = MutableStateFlow<Long?>(null)
 
     val selectedImageUris = MutableStateFlow<List<Uri>>(emptyList())
+    val existingImageUrls = MutableStateFlow<List<String>>(emptyList())
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -50,8 +57,35 @@ class CreateJobViewModel @Inject constructor(
         selectedImageUris.value = uris
     }
 
+    fun setLocation(lat: Double, lng: Double, addr: String) {
+        latitude.value = lat
+        longitude.value = lng
+        address.value = addr
+    }
+
     init {
         fetchCategories()
+        if (isEditMode) {
+            fetchJobDetails()
+        }
+    }
+
+    private fun fetchJobDetails() {
+        jobId?.let { id ->
+            viewModelScope.launch {
+                val result = jobRepository.getJobById(id)
+                result.onSuccess { job ->
+                    title.value = job.title ?: ""
+                    description.value = job.description ?: ""
+                    price.value = job.price?.toLong()?.toString() ?: ""
+                    address.value = job.address ?: ""
+                    latitude.value = job.latitude ?: 20.9800
+                    longitude.value = job.longitude ?: 105.7950
+                    selectedCategoryId.value = job.categoryId
+                    existingImageUrls.value = job.images ?: emptyList()
+                }
+            }
+        }
     }
 
     private fun fetchCategories(){
@@ -82,9 +116,13 @@ class CreateJobViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val uploadedUrls = selectedImageUris.value.map { uri ->
-                    async { CloudinaryHelper.uploadImage(uri) }
-                }.awaitAll()
+                val uploadedUrls = coroutineScope {
+                    selectedImageUris.value.map { uri ->
+                        async { CloudinaryHelper.uploadMedia(uri) }
+                    }.awaitAll()
+                }
+
+                val allImageUrls = existingImageUrls.value + uploadedUrls
 
                 val request = CreateJobRequest(
                     title = title.value,
@@ -94,17 +132,22 @@ class CreateJobViewModel @Inject constructor(
                     latitude = latitude.value,
                     longitude = longitude.value,
                     categoryId = selectedCategoryId.value ?: 1L,
-                    imageUrls = uploadedUrls
+                    imageUrls = allImageUrls
                 )
 
-                val result = jobRepository.createJob(request)
+                val result = if (isEditMode) {
+                    jobRepository.updateJob(jobId!!, request)
+                } else {
+                    jobRepository.createJob(request)
+                }
+
                 result.onSuccess {
                     _createSuccess.value = true
                 }.onFailure { error ->
-                    _errorMessage.value = error.message ?: "Có lỗi xảy ra khi đăng việc"
+                    _errorMessage.value = error.message ?: "Có lỗi xảy ra"
                 }
             } catch (e: Exception) {
-                _errorMessage.value = "Lỗi tải ảnh: ${e.localizedMessage}"
+                _errorMessage.value = "Lỗi: ${e.localizedMessage}"
             } finally {
                 _isLoading.value = false
             }

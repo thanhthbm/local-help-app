@@ -36,11 +36,16 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            isMinifyEnabled = false
+            // Optional: speed up debug builds by disabling some optimizations
         }
     }
     compileOptions {
@@ -53,8 +58,6 @@ android {
     buildFeatures {
         buildConfig = true
         compose = true
-        dataBinding = true
-        viewBinding = true
     }
 }
 

@@ -19,4 +19,5 @@ object Screen {
     const val JOB_DETAIL = "job_detail"
     const val MAP_DIRECTION = "map_direction"
     const val MAP_TRACKING = "map_tracking"
+    const val SELECT_LOCATION = "select_location"
 }

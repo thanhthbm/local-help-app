@@ -12,6 +12,7 @@ data class JobResponse(
     val longitude: Double? = null,
     val status: JobStatus ? = JobStatus.OPEN,
     val bio: String? = "",
+    val categoryId: Long? = 0L,
     val categoryName: String? = "",
     val categoryIcon: String? = "",
     val creatorName: String? = "",

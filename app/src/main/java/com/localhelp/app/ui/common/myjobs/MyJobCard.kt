@@ -35,7 +35,11 @@ import com.localhelp.app.model.response.JobResponse
 import com.localhelp.app.ui.screens.myjobs.PrimaryOrange
 
 @Composable
-fun MyJobCard(job: JobResponse) {
+fun MyJobCard(
+    job: JobResponse,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -98,7 +102,11 @@ fun MyJobCard(job: JobResponse) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Trạng thái & Hành động
-                JobStatusActionRow(job)
+                JobStatusActionRow(
+                    job = job,
+                    onEditClick = onEditClick,
+                    onDeleteClick = onDeleteClick
+                )
             }
 
             Spacer(modifier = Modifier.width(12.dp))

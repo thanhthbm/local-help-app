@@ -24,7 +24,7 @@ class UserManager @Inject constructor(
         tokenManager.saveToken(token)
         _currentUser.value = user
 
-        Log.d("DEBUG_USER", "Đã gán xong _currentUser. Giá trị hiện tại: ${_currentUser.value?.fullName}")
+        Log.d("DEBUG_USER", "Đã gán xong _currentUser. Object: ${_currentUser.value}")
     }
 
     fun updateProfile(user: UserResponse) {

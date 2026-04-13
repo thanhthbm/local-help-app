@@ -9,10 +9,12 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.localhelp.app.ui.screens.Graph
 import com.localhelp.app.ui.screens.Screen
+import com.localhelp.app.ui.screens.jobdetail.JobDetailScreen
 import com.localhelp.app.ui.screens.search.SearchDetailRoute
 import com.localhelp.app.ui.screens.search.SearchDetailViewModel
 import com.localhelp.app.ui.screens.search.SearchRoute
 import com.localhelp.app.ui.screens.search.SearchViewModel
+import java.net.URLEncoder
 
 fun NavGraphBuilder.searchNavGraph(navController: NavController) {
     navigation(
@@ -54,6 +56,14 @@ fun NavGraphBuilder.searchNavGraph(navController: NavController) {
             arguments = listOf(
                 navArgument("id") {type = NavType.LongType}
             )
-        ){}
+        ) {
+            JobDetailScreen(
+                onBackClick = { navController.popBackStack() },
+                onMessageClick = { conversationId, partnerName, avatarUrl ->
+                    val encodedUrl = if (avatarUrl.isNullOrEmpty()) "none" else URLEncoder.encode(avatarUrl, "UTF-8")
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
+                }
+            )
+        }
     }
 }

@@ -25,15 +25,32 @@ import androidx.compose.ui.unit.sp
 import com.localhelp.app.ui.screens.messages.PrimaryOrange
 
 @Composable
-fun MyBubble(text: String, time: String) {
+fun MyBubble(text: String, time: String, mediaUrls: List<String> = emptyList()) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Bottom) {
         Column(horizontalAlignment = Alignment.End) {
-            Surface(
-                color = PrimaryOrange,
-                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 4.dp),
-                modifier = Modifier.widthIn(max = 260.dp)
-            ) {
-                Text(text = text, color = Color.White, fontSize = 15.sp, modifier = Modifier.padding(12.dp))
+            if (mediaUrls.isNotEmpty()) {
+                mediaUrls.forEach { url ->
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.padding(bottom = 4.dp).widthIn(max = 240.dp)
+                    ) {
+                        coil.compose.AsyncImage(
+                            model = url,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxWidth(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    }
+                }
+            }
+            if (text.isNotBlank()) {
+                Surface(
+                    color = PrimaryOrange,
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 4.dp),
+                    modifier = Modifier.widthIn(max = 260.dp)
+                ) {
+                    Text(text = text, color = Color.White, fontSize = 15.sp, modifier = Modifier.padding(12.dp))
+                }
             }
             Spacer(modifier = Modifier.height(4.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {

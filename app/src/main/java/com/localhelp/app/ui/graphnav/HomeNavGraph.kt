@@ -1,5 +1,7 @@
 package com.localhelp.app.ui.graphnav
 
+import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -9,10 +11,13 @@ import androidx.navigation.navigation
 import com.localhelp.app.ui.screens.Graph
 import com.localhelp.app.ui.screens.Screen
 import com.localhelp.app.ui.screens.createjob.CreateJobScreen
+import com.localhelp.app.ui.screens.createjob.CreateJobViewModel
 import com.localhelp.app.ui.screens.home.HomeScreen
 import com.localhelp.app.ui.screens.messages.ChatScreen
 import com.localhelp.app.ui.screens.messages.MessagesScreen
 import com.localhelp.app.ui.screens.myjobs.MyJobsScreen
+import com.localhelp.app.ui.screens.map.MapRoute
+import com.localhelp.app.ui.screens.map.SelectLocationScreen
 import java.net.URLEncoder
 
 fun NavGraphBuilder.homeNavGraph(navController: NavController){
@@ -27,25 +32,76 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 },
                 onDirection = { destination ->
                     navController.navigate("${Screen.MAP_DIRECTION}/${destination.latitude},${destination.longitude}")
+                },
+                onNavigateToChat = { conversationId, partnerName, avatarUrl ->
+                    val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
                 }
             )
         }
 
-        composable  (Screen.POST_JOB ){
+        composable(
+            route = "${Screen.POST_JOB}?jobId={jobId}",
+            arguments = listOf(navArgument("jobId") { nullable = true })
+        ) { backStackEntry ->
+            val viewModel: CreateJobViewModel = hiltViewModel()
+
+            // Handle location result from SelectLocationScreen
+            val selectedLat = backStackEntry.savedStateHandle.get<Double>("lat")
+            val selectedLng = backStackEntry.savedStateHandle.get<Double>("lng")
+            val selectedAddr = backStackEntry.savedStateHandle.get<String>("address")
+
+            LaunchedEffect(selectedLat, selectedLng, selectedAddr) {
+                if (selectedLat != null && selectedLng != null && selectedAddr != null) {
+                    viewModel.setLocation(selectedLat, selectedLng, selectedAddr)
+                }
+            }
+
             CreateJobScreen(
-                onBackClick = {navController.popBackStack()},
-                onJobCreated = {navController.popBackStack()}
+                onBackClick = { navController.popBackStack() },
+                onJobCreated = { navController.popBackStack() },
+                onSelectLocation = { lat, lng ->
+                    navController.navigate("${Screen.SELECT_LOCATION}/$lat/$lng")
+                },
+                viewModel = viewModel
             )
         }
 
-        composable ( Screen.MY_JOBS ){
-            MyJobsScreen()
+        composable(
+            route = "${Screen.SELECT_LOCATION}/{lat}/{lng}",
+            arguments = listOf(
+                navArgument("lat") { type = NavType.FloatType },
+                navArgument("lng") { type = NavType.FloatType }
+            )
+        ) { backStackEntry ->
+            val lat = backStackEntry.arguments?.getFloat("lat")?.toDouble() ?: 20.9800
+            val lng = backStackEntry.arguments?.getFloat("lng")?.toDouble() ?: 105.7950
+
+            SelectLocationScreen(
+                initialLat = lat,
+                initialLng = lng,
+                onBack = { navController.popBackStack() },
+                onLocationConfirmed = { selectedLat, selectedLng, address ->
+                    navController.previousBackStackEntry?.savedStateHandle?.set("lat", selectedLat)
+                    navController.previousBackStackEntry?.savedStateHandle?.set("lng", selectedLng)
+                    navController.previousBackStackEntry?.savedStateHandle?.set("address", address)
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.MY_JOBS){
+            MyJobsScreen(
+                onEditJob = { jobId: Long ->
+                    navController.navigate("${Screen.POST_JOB}?jobId=$jobId")
+                }
+            )
         }
 
         composable(Screen.MESSAGES){
             MessagesScreen(
-                onNavigateToChat = { conversationId, partnerName, avatarUrl ->
-                    val encodedUrl = URLEncoder.encode(avatarUrl, "UTF-8")
+                onNavigateToChat = { conversationId: String, partnerName: String, avatarUrl: String? ->
+                    val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
                     navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
                 }
             )

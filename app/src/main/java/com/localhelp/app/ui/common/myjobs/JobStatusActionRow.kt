@@ -30,7 +30,11 @@ import com.localhelp.app.ui.screens.myjobs.PrimaryOrange
 import java.text.DecimalFormat
 
 @Composable
-fun JobStatusActionRow(job: JobResponse) {
+fun JobStatusActionRow(
+    job: JobResponse,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
     val df = DecimalFormat("#,###")
 
     Row(
@@ -41,15 +45,31 @@ fun JobStatusActionRow(job: JobResponse) {
         when (job.status) {
             JobStatus.OPEN -> {
                 // Đang tìm người (Màu vàng)
-                Text(
-                    text = "Đang tìm người •",
-                    color = Color(0xFFF5B041),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .background(Color(0xFFFEF9E7), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Đang tìm người •",
+                        color = Color(0xFFF5B041),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .background(Color(0xFFFEF9E7), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Sửa",
+                        color = Color.Blue,
+                        fontSize = 12.sp,
+                        modifier = Modifier.clickable { onEditClick() }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Xóa",
+                        color = Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.clickable { onDeleteClick() }
+                    )
+                }
                 Text(
                     text = "${df.format(job.price)}đ",
                     color = PrimaryOrange,

@@ -30,6 +30,37 @@ class JobRepository @Inject constructor(
         }
     }
 
+    suspend fun updateJob(id: Long, request: CreateJobRequest): Result<JobResponse> {
+        return try {
+            val response = jobService.updateJob(id, request)
+            if (response.isSuccessful && response.body() != null) {
+                val apiResponse = response.body()!!
+                if (apiResponse.data != null) {
+                    Result.success(apiResponse.data)
+                } else {
+                    Result.failure(Exception(apiResponse.message?.toString() ?: "Dữ liệu trả về rỗng"))
+                }
+            } else {
+                Result.failure(Exception("Lỗi backend (${response.code()})"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteJob(id: Long): Result<Unit> {
+        return try {
+            val response = jobService.deleteJob(id)
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Lỗi backend (${response.code()})"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getMyJobs(status: JobStatus?): Result<List<JobResponse>> {
         return try {
             val response = jobService.getMyJobs(status)
@@ -86,6 +117,24 @@ class JobRepository @Inject constructor(
                 Result.failure(Exception("Lỗi backend (${response.code()})"))
             }
         } catch (e: Exception){
+            Result.failure(e)
+        }
+    }
+
+    suspend fun acceptJob(id: Long): Result<JobResponse> {
+        return try {
+            val response = jobService.acceptJob(id)
+            if (response.isSuccessful && response.body() != null) {
+                val apiResponse = response.body()!!
+                if (apiResponse.data != null) {
+                    Result.success(apiResponse.data)
+                } else {
+                    Result.failure(Exception(apiResponse.message?.toString() ?: "Lỗi khi nhận việc"))
+                }
+            } else {
+                Result.failure(Exception("Lỗi máy chủ (${response.code()})"))
+            }
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

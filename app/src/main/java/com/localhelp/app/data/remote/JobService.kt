@@ -12,9 +12,19 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
+import retrofit2.http.DELETE
+import retrofit2.http.PATCH
+import retrofit2.http.PUT
+
 interface JobService {
     @POST("/api/jobs")
     suspend fun createJob(@Body request: CreateJobRequest): Response<ApiResponse<JobResponse>>
+
+    @PUT("/api/jobs/{id}")
+    suspend fun updateJob(@Path("id") id: Long, @Body request: CreateJobRequest): Response<ApiResponse<JobResponse>>
+
+    @DELETE("/api/jobs/{id}")
+    suspend fun deleteJob(@Path("id") id: Long): Response<ApiResponse<Unit>>
 
     @GET("/api/jobs/my-jobs")
     suspend fun getMyJobs(@Query("status") status: JobStatus? = null): Response<ApiResponse<List<JobResponse>>>
@@ -30,4 +40,7 @@ interface JobService {
 
     @GET("/api/jobs/{id}")
     suspend fun getJobById(@Path("id") id: Long): Response<ApiResponse<JobResponse>>
+
+    @POST("/api/jobs/{id}/accept")
+    suspend fun acceptJob(@Path("id") id: Long): Response<ApiResponse<JobResponse>>
 }

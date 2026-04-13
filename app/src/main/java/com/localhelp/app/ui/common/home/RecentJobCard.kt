@@ -37,11 +37,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.localhelp.app.model.response.JobResponse
+import androidx.compose.runtime.remember
 import java.text.DecimalFormat
 
 @Composable
 fun RecentJobCard(job: JobResponse) {
-    val df = DecimalFormat("#,###")
+    val df = remember { DecimalFormat("#,###") }
 
     Card(
         modifier = Modifier
