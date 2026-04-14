@@ -32,9 +32,7 @@ import java.text.DecimalFormat
 
 @Composable
 fun JobStatusActionRow(
-    job: JobResponse,
-    onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    job: JobResponse
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -55,22 +53,6 @@ fun JobStatusActionRow(
                         modifier = Modifier
                             .background(Color(0xFFFEF9E7), RoundedCornerShape(8.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Sửa",
-                        color = Color(0xFF5DADE2),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.clickable { onEditClick() }
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Xóa",
-                        color = Color(0xFFE74C3C),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.clickable { onDeleteClick() }
                     )
                 }
             }

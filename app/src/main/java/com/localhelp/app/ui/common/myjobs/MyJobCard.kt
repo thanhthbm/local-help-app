@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
@@ -36,8 +37,7 @@ import com.localhelp.app.utils.FormatterUtils
 @Composable
 fun MyJobCard(
     job: JobResponse,
-    onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onClick: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -49,6 +49,7 @@ fun MyJobCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
+            .clickable { onClick() }
     ) {
         Row(
             modifier = Modifier
@@ -136,9 +137,7 @@ fun MyJobCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 JobStatusActionRow(
-                    job = job,
-                    onEditClick = onEditClick,
-                    onDeleteClick = onDeleteClick
+                    job = job
                 )
             }
         }

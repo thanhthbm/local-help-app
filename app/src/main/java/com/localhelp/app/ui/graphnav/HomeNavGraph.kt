@@ -13,10 +13,10 @@ import com.localhelp.app.ui.screens.Screen
 import com.localhelp.app.ui.screens.createjob.CreateJobScreen
 import com.localhelp.app.ui.screens.createjob.CreateJobViewModel
 import com.localhelp.app.ui.screens.home.HomeScreen
+import com.localhelp.app.ui.screens.jobdetail.JobDetailScreen
 import com.localhelp.app.ui.screens.messages.ChatScreen
 import com.localhelp.app.ui.screens.messages.MessagesScreen
 import com.localhelp.app.ui.screens.myjobs.MyJobsScreen
-import com.localhelp.app.ui.screens.map.MapRoute
 import com.localhelp.app.ui.screens.map.SelectLocationScreen
 import java.net.URLEncoder
 
@@ -36,6 +36,9 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 onNavigateToChat = { conversationId, partnerName, avatarUrl ->
                     val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
                     navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
+                },
+                onJobClick = { jobId ->
+                    navController.navigate("${Screen.JOB_DETAIL}/$jobId")
                 }
             )
         }
@@ -90,10 +93,32 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
             )
         }
 
+        composable(
+            route = "${Screen.JOB_DETAIL}/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.LongType })
+        ) {
+            JobDetailScreen(
+                onBackClick = { navController.popBackStack() },
+                onMessageClick = { conversationId: String, partnerName: String, avatarUrl: String? ->
+                    val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
+                },
+                onEditJob = { jobId ->
+                    navController.navigate("${Screen.POST_JOB}?jobId=$jobId")
+                },
+                onUserClick = { userId ->
+                    navController.navigate("${Screen.PROFILE}/$userId")
+                }
+            )
+        }
+
         composable(Screen.MY_JOBS){
             MyJobsScreen(
                 onEditJob = { jobId: Long ->
                     navController.navigate("${Screen.POST_JOB}?jobId=$jobId")
+                },
+                onJobClick = { jobId ->
+                    navController.navigate("${Screen.JOB_DETAIL}/$jobId")
                 }
             )
         }

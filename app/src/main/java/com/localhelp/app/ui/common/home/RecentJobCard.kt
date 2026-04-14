@@ -41,13 +41,14 @@ import androidx.compose.runtime.remember
 import java.text.DecimalFormat
 
 @Composable
-fun RecentJobCard(job: JobResponse) {
+fun RecentJobCard(job: JobResponse, onClick: () -> Unit) {
     val df = remember { DecimalFormat("#,###") }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
+        onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)

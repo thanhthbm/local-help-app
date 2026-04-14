@@ -44,6 +44,7 @@ fun HomeScreen(
     onDirection : (destination :LatLng) -> Unit,
     onSearchClick : () -> Unit,
     onNavigateToChat: (String, String, String?) -> Unit,
+    onJobClick: (Long) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val user = LocalUser.current
@@ -114,28 +115,6 @@ fun HomeScreen(
                 .background(Color(0xFFFDFDFD))
         ) {
             item {
-                Button(
-                    onClick = { viewModel.startChatWithUser(6L) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    Text("Test Chat with User 6")
-                }
-            }
-
-            item {
-                Button(
-                    onClick = { onDirection(LatLng(21.0285, 105.8542)) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    Text("Check Map Direction")
-                }
-            }
-
-            item {
                 HomeHeader(user?.fullName ?: "Tài khoản", currentAddress)
             }
 
@@ -158,7 +137,7 @@ fun HomeScreen(
                 SectionHeader(title = "Nổi bật quanh bạn", onSeeMore = { /* TODO */ })
                 FeaturedJobsList(
                     featuredJobs = featuredJobs,
-                    onJobClick = { /* TODO */ }
+                    onJobClick = { job -> onJobClick(job.id) }
                 )
             }
 
@@ -184,7 +163,7 @@ fun HomeScreen(
                     key = { it.id } // CRITICAL for performance
                 ) { job ->
                     if (job.creatorId != user?.id) {
-                        RecentJobCard(job = job)
+                        RecentJobCard(job = job, onClick = { onJobClick(job.id) })
                     }
                 }
 

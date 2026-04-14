@@ -40,7 +40,8 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val scrollState = rememberScrollState()
-    val user by viewModel.currentUser.collectAsState()
+    val user by viewModel.user.collectAsState()
+    val isMyProfile = viewModel.isMyProfile
 
 
     Column(
@@ -58,13 +59,15 @@ fun ProfileScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Hồ sơ cá nhân", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Row {
-                IconButton(onClick = onEditProfile) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Chỉnh sửa hồ sơ", tint = Color(0xFFF06A50))
-                }
-                IconButton(onClick = { viewModel.logout() }) {
-                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Đăng xuất", tint = Color.Red)
+            Text(if (isMyProfile) "Hồ sơ cá nhân" else "Hồ sơ người dùng", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            if (isMyProfile) {
+                Row {
+                    IconButton(onClick = onEditProfile) {
+                        Icon(Icons.Filled.Edit, contentDescription = "Chỉnh sửa hồ sơ", tint = Color(0xFFF06A50))
+                    }
+                    IconButton(onClick = { viewModel.logout() }) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Đăng xuất", tint = Color.Red)
+                    }
                 }
             }
         }
@@ -88,9 +91,10 @@ fun ProfileScreen(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-        FinanceButton()
-
-        Spacer(modifier = Modifier.height(24.dp))
+        if (isMyProfile) {
+            FinanceButton()
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
         // --- PHẦN ĐÁNH GIÁ ---
         ReviewsSection(

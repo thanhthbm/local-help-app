@@ -14,6 +14,9 @@ interface UserService {
     @GET("/api/users/me")
     suspend fun getProfile(): Response<ApiResponse<UserResponse>>
 
+    @GET("/api/users/{id}")
+    suspend fun getUserById(@retrofit2.http.Path("id") id: Long): Response<ApiResponse<UserResponse>>
+
     /**
      * Cập nhật hồ sơ (text + avatar tuỳ chọn) bằng multipart/form-data.
      * - [data]   : JSON của UpdateProfileRequest (có thể null nếu chỉ đổi avatar)

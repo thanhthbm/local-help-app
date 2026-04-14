@@ -21,40 +21,12 @@ val PrimaryOrange = Color(0xFFED7D68)
 @Composable
 fun MyJobsScreen(
     onEditJob: (Long) -> Unit,
+    onJobClick: (Long) -> Unit,
     viewModel: MyJobsViewModel = hiltViewModel()
 ) {
     val jobs by viewModel.jobs.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     
-    var showDeleteConfirm by remember { mutableStateOf<Long?>(null) }
-
-    if (showDeleteConfirm != null) {
-        AlertDialog(
-            onDismissRequest = { showDeleteConfirm = null },
-            title = { Text("Xác nhận xóa") },
-            text = { Text("Bạn có chắc chắn muốn xóa công việc này không? Thao tác này không thể hoàn tác.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteConfirm?.let { viewModel.deleteJob(it) }
-                        showDeleteConfirm = null
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
-                ) {
-                    Text("Xóa")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = null }) {
-                    Text("Hủy")
-                }
-            },
-            containerColor = Color.White,
-            titleContentColor = Color.Black,
-            textContentColor = Color.Black
-        )
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -97,8 +69,7 @@ fun MyJobsScreen(
                         items(jobs) { job ->
                             MyJobCard(
                                 job = job,
-                                onEditClick = { onEditJob(job.id) },
-                                onDeleteClick = { showDeleteConfirm = job.id }
+                                onClick = { onJobClick(job.id) }
                             )
                         }
                         item { Spacer(modifier = Modifier.height(80.dp)) }

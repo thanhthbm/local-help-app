@@ -6,10 +6,32 @@ import com.localhelp.app.model.response.FirestoreMessage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import com.localhelp.app.data.remote.ConversationService
+import com.localhelp.app.model.response.ConversationResponse
 import javax.inject.Inject
 
-class ChatRepository @Inject constructor(){
+class ChatRepository @Inject constructor(
+    private val conversationService: ConversationService
+){
     private val db = FirebaseFirestore.getInstance()
+
+    suspend fun startConversation(targetUserId: String): Result<ConversationResponse> {
+        return try {
+            val response = conversationService.startConversation(targetUserId)
+            if (response.isSuccessful && response.body() != null) {
+                val apiResponse = response.body()!!
+                if (apiResponse.data != null) {
+                    Result.success(apiResponse.data)
+                } else {
+                    Result.failure(Exception(apiResponse.message?.toString() ?: "Lỗi bắt đầu trò chuyện"))
+                }
+            } else {
+                Result.failure(Exception("Lỗi backend (${response.code()})"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     fun getMessagesRealtime(conversationId: String): Flow<List<FirestoreMessage>> = callbackFlow {
         val listenerRegistration = try {

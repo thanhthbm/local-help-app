@@ -27,6 +27,24 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun getUserById(userId: Long): Result<UserResponse> {
+        return try {
+            val response = userService.getUserById(userId)
+            if (response.isSuccessful && response.body() != null) {
+                val apiResponse = response.body()!!
+                if (apiResponse.data != null) {
+                    Result.success(apiResponse.data)
+                } else {
+                    Result.failure(Exception(apiResponse.message?.toString() ?: "Dữ liệu user rỗng"))
+                }
+            } else {
+                Result.failure(Exception("Không lấy được user (${response.code()})"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     /**
      * Gửi một request duy nhất PUT /api/users/me (multipart/form-data).
      * Cả [data] (JSON text fields) và [avatarPart] (file ảnh) đều là tuỳ chọn.
