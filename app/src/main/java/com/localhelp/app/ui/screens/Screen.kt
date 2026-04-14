@@ -14,6 +14,7 @@ object Screen {
     const val POST_JOB = "post_job"
     const val MESSAGES = "messages"
     const val PROFILE = "profile"
+    const val EDIT_PROFILE = "edit_profile"
     const val SEARCH = "search"
     const val SEARCH_DETAIL = "search_detail"
     const val JOB_DETAIL = "job_detail"

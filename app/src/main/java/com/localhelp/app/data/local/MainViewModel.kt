@@ -3,9 +3,12 @@ package com.localhelp.app.data.local
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.localhelp.app.data.local.UserManager
 import com.localhelp.app.data.repository.UserRepository
 import com.localhelp.app.model.response.UserResponse
+import com.localhelp.app.ui.graphnav.needsProfileSetup
 import com.localhelp.app.ui.screens.Graph
+import com.localhelp.app.ui.screens.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,7 +48,11 @@ class MainViewModel @Inject constructor(
 
                 result.onSuccess { userResponse ->
                     userManager.updateProfile(userResponse)
-                    _startDestination.value = Graph.HOME
+                    _startDestination.value = if (userResponse.needsProfileSetup()) {
+                        Screen.SETUP_PROFILE
+                    } else {
+                        Graph.HOME
+                    }
                 }.onFailure {
                     userManager.logout()
                     _startDestination.value = Graph.AUTH

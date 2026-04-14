@@ -20,10 +20,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.localhelp.app.data.local.LocalUser
 import com.localhelp.app.data.local.MainViewModel
 import com.localhelp.app.ui.common.navigation.BottomBarWrapper
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.localhelp.app.ui.graphnav.authNavGraph
 import com.localhelp.app.ui.graphnav.homeNavGraph
 import com.localhelp.app.ui.graphnav.mapNavGraph
@@ -31,6 +33,8 @@ import com.localhelp.app.ui.graphnav.profileNavGraph
 import com.localhelp.app.ui.graphnav.searchNavGraph
 import com.localhelp.app.ui.screens.Graph
 import com.localhelp.app.ui.screens.Screen
+import com.localhelp.app.ui.screens.profile.SetupProfileScreen
+import com.localhelp.app.ui.screens.profile.SetupProfileViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -120,6 +124,24 @@ fun LocalHelpApp(
                 profileNavGraph(navController = navController)
                 searchNavGraph(navController = navController)
                 mapNavGraph(navController = navController)
+
+                // Route độc lập cho trường hợp auto-login mà profile chưa setup
+                composable(Screen.SETUP_PROFILE) {
+                    val setupViewModel: SetupProfileViewModel = hiltViewModel()
+                    SetupProfileScreen(
+                        onProfileSaved = {
+                            navController.navigate(Graph.HOME) {
+                                popUpTo(Screen.SETUP_PROFILE) { inclusive = true }
+                            }
+                        },
+                        onSkip = {
+                            navController.navigate(Graph.HOME) {
+                                popUpTo(Screen.SETUP_PROFILE) { inclusive = true }
+                            }
+                        },
+                        viewModel = setupViewModel
+                    )
+                }
             }
         }
     }

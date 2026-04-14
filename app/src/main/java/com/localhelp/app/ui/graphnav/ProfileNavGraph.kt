@@ -7,17 +7,29 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.localhelp.app.ui.screens.Graph
 import com.localhelp.app.ui.screens.Screen
+import com.localhelp.app.ui.screens.profile.EditProfileScreen
+import com.localhelp.app.ui.screens.profile.EditProfileViewModel
 import com.localhelp.app.ui.screens.profile.ProfileScreen
 import com.localhelp.app.ui.screens.profile.ProfileViewModel
 
-fun NavGraphBuilder.profileNavGraph(navController: NavController){
+fun NavGraphBuilder.profileNavGraph(navController: NavController) {
     navigation(
         route = Graph.PROFILE,
         startDestination = Screen.PROFILE
-    ){
+    ) {
         composable(Screen.PROFILE) {
             val viewModel: ProfileViewModel = hiltViewModel()
-            ProfileScreen(viewModel = viewModel)
+            ProfileScreen(
+                viewModel = viewModel,
+                onEditProfile = { navController.navigate(Screen.EDIT_PROFILE) }
+            )
+        }
+        composable(Screen.EDIT_PROFILE) {
+            val viewModel: EditProfileViewModel = hiltViewModel()
+            EditProfileScreen(
+                onNavigateBack = { navController.popBackStack() },
+                viewModel = viewModel
+            )
         }
     }
 }

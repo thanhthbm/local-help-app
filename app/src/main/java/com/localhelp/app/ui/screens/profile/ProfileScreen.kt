@@ -7,6 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,6 +36,7 @@ val GrayBackground = Color(0xFFF7F7F7)
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
+    onEditProfile: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val scrollState = rememberScrollState()
@@ -57,8 +59,13 @@ fun ProfileScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Hồ sơ cá nhân", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            IconButton(onClick = { viewModel.logout() }) {
-                Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Đăng xuất", tint = Color.Red)
+            Row {
+                IconButton(onClick = onEditProfile) {
+                    Icon(Icons.Filled.Edit, contentDescription = "Chỉnh sửa hồ sơ", tint = Color(0xFFF06A50))
+                }
+                IconButton(onClick = { viewModel.logout() }) {
+                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Đăng xuất", tint = Color.Red)
+                }
             }
         }
 
