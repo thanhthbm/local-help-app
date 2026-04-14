@@ -2,7 +2,7 @@ package com.localhelp.app.ui.common.myjobs
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,9 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.localhelp.app.model.constant.JobStatus
 import com.localhelp.app.model.response.JobResponse
-import com.localhelp.app.ui.screens.myjobs.PrimaryOrange
+import com.localhelp.app.utils.FormatterUtils
 
 @Composable
 fun MyJobCard(
@@ -41,91 +39,94 @@ fun MyJobCard(
     onDeleteClick: () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)),
-        modifier = Modifier.fillMaxWidth()
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth()
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            val imageUrl = if (!job.images.isNullOrEmpty()) job.images.first() else job.categoryIcon
+            
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(70.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFFF5F5F5)),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
             Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val isCompleted = job.status == JobStatus.COMPLETED
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = job.categoryName?.uppercase() ?: "KHÁC",
-                        color = if (isCompleted) Color.Gray else PrimaryOrange,
+                        color = Color(0xFFED7D68),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .background(if (isCompleted) Color(0xFFF5F5F5) else Color(0xFFFFF0ED), RoundedCornerShape(4.dp))
+                            .background(Color(0xFFFFF0ED), RoundedCornerShape(4.dp))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = job.createdAt ?: "", color = Color.Gray, fontSize = 12.sp)
+                    Text(
+                        text = FormatterUtils.formatDateTime(job.createdAt),
+                        color = Color.Gray,
+                        fontSize = 10.sp
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-                // Tiêu đề
                 Text(
                     text = job.title ?: "Không có tiêu đề",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     color = Color(0xFF2C3E50)
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
-                // Vị trí / Địa chỉ
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val isCompleted = job.status == JobStatus.COMPLETED
                     Icon(
-                        imageVector = if (isCompleted) Icons.Default.CheckCircle else Icons.Default.LocationOn,
+                        imageVector = Icons.Default.LocationOn,
                         contentDescription = null,
                         tint = Color.Gray,
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(12.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = if (isCompleted) "Đã hoàn thành" else (job.address ?: ""),
+                        text = job.address ?: "Không có địa chỉ",
                         color = Color.Gray,
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                // Trạng thái & Hành động
                 JobStatusActionRow(
                     job = job,
                     onEditClick = onEditClick,
                     onDeleteClick = onDeleteClick
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            val imageUrl = job.images?.firstOrNull()
-            if (!imageUrl.isNullOrEmpty()) {
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .background(Color(0xFFF0F0F0), RoundedCornerShape(12.dp))
                 )
             }
         }

@@ -26,30 +26,49 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.localhelp.app.R
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.items
+import coil.compose.AsyncImage
+import com.localhelp.app.model.response.JobResponse
+import java.text.DecimalFormat
+
 @Composable
-fun FeaturedJobsList() {
+fun FeaturedJobsList(
+    featuredJobs: List<JobResponse>,
+    onJobClick: (JobResponse) -> Unit
+) {
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(5){
-            FeaturedJobCard()
+        items(featuredJobs) { job ->
+            FeaturedJobCard(job = job, onClick = { onJobClick(job) })
         }
     }
 }
 
 @Composable
-fun FeaturedJobCard(){
+fun FeaturedJobCard(
+    job: JobResponse,
+    onClick: () -> Unit
+){
+    val currencyFormat = DecimalFormat("#,###đ")
+
     Card(
-        modifier = Modifier.size(width = 280.dp, height = 180.dp),
+        modifier = Modifier
+            .size(width = 280.dp, height = 180.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp)
     ) {
         Box(){
-            Image(
-                painter = painterResource(R.drawable.welcome_image),
+            val imageUrl = job.images?.firstOrNull() ?: R.drawable.welcome_image
+            AsyncImage(
+                model = imageUrl,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                error = painterResource(R.drawable.welcome_image),
+                placeholder = painterResource(R.drawable.welcome_image)
             )
 
             Column(
@@ -59,10 +78,23 @@ fun FeaturedJobCard(){
                     .padding(12.dp),
                 verticalArrangement = Arrangement.Bottom
             ) {
-                Text("Sửa đường ống nước bị vỡ", color = Color.White, fontWeight = FontWeight.Bold)
+                Text(
+                    text = job.title ?: "Không có tiêu đề",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("250.000đ", color = Color(0xFFED7D68), fontWeight = FontWeight.Bold)
-                    Text("Cách 0.8Km", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp)
+                    Text(
+                        text = currencyFormat.format(job.price ?: 0.0),
+                        color = Color(0xFFED7D68),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = job.categoryName ?: "",
+                        color = Color.White.copy(alpha = 0.8f),
+                        fontSize = 12.sp
+                    )
                 }
             }
         }

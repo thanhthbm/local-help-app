@@ -13,7 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.localhelp.app.model.constant.JobStatus
 import com.localhelp.app.model.response.JobResponse
-import com.localhelp.app.ui.screens.myjobs.PrimaryOrange
+import com.localhelp.app.utils.FormatterUtils
 import java.text.DecimalFormat
 
 @Composable
@@ -35,95 +36,96 @@ fun JobStatusActionRow(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
-    val df = DecimalFormat("#,###")
-
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val orangePrimary = Color(0xFFED7D68)
+        
         when (job.status) {
             JobStatus.OPEN -> {
                 // Đang tìm người (Màu vàng)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Đang tìm người •",
+                        text = "Đang tìm người",
                         color = Color(0xFFF5B041),
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .background(Color(0xFFFEF9E7), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                            .background(Color(0xFFFEF9E7), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = "Sửa",
-                        color = Color.Blue,
-                        fontSize = 12.sp,
+                        color = Color(0xFF5DADE2),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
                         modifier = Modifier.clickable { onEditClick() }
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = "Xóa",
-                        color = Color.Red,
-                        fontSize = 12.sp,
+                        color = Color(0xFFE74C3C),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
                         modifier = Modifier.clickable { onDeleteClick() }
                     )
                 }
                 Text(
-                    text = "${df.format(job.price)}đ",
-                    color = PrimaryOrange,
+                    text = "${FormatterUtils.formatPrice(job.price)}đ",
+                    color = orangePrimary,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 15.sp
                 )
             }
             JobStatus.IN_PROGRESS -> {
                 // Đang thực hiện (Màu xanh ngọc)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Đang thực hiện •",
+                        text = "Đang thực hiện",
                         color = Color(0xFF45B39D),
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .background(Color(0xFFE8F8F5), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    AsyncImage(
-                        model = "https://i.pravatar.cc/150?img=47",
-                        contentDescription = null,
-                        modifier = Modifier.size(26.dp).clip(CircleShape)
+                            .background(Color(0xFFE8F8F5), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
                 // Nút nhắn tin
-                Text(
-                    text = "Nhắn tin",
-                    color = PrimaryOrange,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .background(Color(0xFFFFF0ED), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                        .clickable { /* Mở màn hình chat */ }
-                )
+                Surface(
+                    color = Color(0xFFFFF0ED),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.clickable { /* Mở màn hình chat */ }
+                ) {
+                    Text(
+                        text = "Nhắn tin",
+                        color = orangePrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
             }
             JobStatus.COMPLETED -> {
                 // Đã hoàn thành (Màu xanh lá)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Đã đánh giá ${job.creatorRating}",
-                        color = Color(0xFF4CAF50),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
+                        text = "Hoàn thành",
+                        color = Color(0xFF27AE60),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .background(Color(0xFFE9F7EF), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
                 Text(
-                    text = "Xem lại",
+                    text = "Chi tiết",
                     color = Color.Gray,
                     fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
                     modifier = Modifier.clickable { /* Mở lại Job */ }
                 )
             }

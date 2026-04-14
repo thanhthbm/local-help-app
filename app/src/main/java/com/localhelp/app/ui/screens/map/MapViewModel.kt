@@ -51,21 +51,33 @@ class MapViewModel @Inject constructor(
     var trackAsiaNavigation: TrackAsiaNavigation? = null
     private val destination : LatLng by lazy {
         val destinationFromPath : String? = savedStateHandle.get<String>("destination")
-        var destination = LatLng()
-        destinationFromPath?.let{
-            val (lat, lng) = it.split(",").map { value -> value.toDouble() }
-            destination = LatLng(lat, lng)
+        var destination = LatLng(0.0, 0.0)
+        try {
+            destinationFromPath?.let {
+                val parts = it.split(",")
+                if (parts.size >= 2) {
+                    val lat = parts[0].trim().toDouble()
+                    val lng = parts[1].trim().toDouble()
+                    destination = LatLng(lat, lng)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("MapViewModel", "Error parsing destination: $destinationFromPath", e)
         }
         destination
     }
 
     init {
-        val options = TrackAsiaNavigationOptions.Builder()
-            .withIsDebugLoggingEnabled(true)
-            .withDefaultMilestonesEnabled(false)
-            .build()
-        trackAsiaNavigation = TrackAsiaNavigation(context, options)
-        setupListeners()
+        try {
+            val options = TrackAsiaNavigationOptions.Builder()
+                .withIsDebugLoggingEnabled(true)
+                .withDefaultMilestonesEnabled(false)
+                .build()
+            trackAsiaNavigation = TrackAsiaNavigation(context, options)
+            setupListeners()
+        } catch (e: Exception) {
+            Log.e("MapViewModel", "Error initializing navigation", e)
+        }
 //        onGetDirection()
     }
 

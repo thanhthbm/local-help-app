@@ -38,7 +38,6 @@ fun CategoryRow(categories: List<CategoryResponse>, selectedId: Long?, onSelect:
         items(categories) { category ->
             val isSelected = category.id == selectedId
 
-            // Xử lý an toàn khi parse mã màu từ API (Vd: #ED7D68)
             val categoryColor = try {
                 Color(android.graphics.Color.parseColor(category.colorCode))
             } catch (e: Exception) { PrimaryOrange }
@@ -54,13 +53,10 @@ fun CategoryRow(categories: List<CategoryResponse>, selectedId: Long?, onSelect:
                         .background(if (isSelected) categoryColor else Color(0xFFF5F5F5)),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Load ảnh thật từ URL thay vì icon tĩnh
                     AsyncImage(
                         model = category.iconUrl,
                         contentDescription = category.name,
-                        modifier = Modifier.size(28.dp),
-                        // Đổi màu icon thành Trắng (nếu được chọn) và Xám (nếu không)
-                        colorFilter = if (isSelected) ColorFilter.tint(Color.White) else ColorFilter.tint(Color.Gray)
+                        modifier = Modifier.size(28.dp)
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))

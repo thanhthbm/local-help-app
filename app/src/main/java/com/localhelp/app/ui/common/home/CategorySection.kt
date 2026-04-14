@@ -2,6 +2,7 @@ package com.localhelp.app.ui.common.home
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,62 +27,94 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import coil.compose.AsyncImage
+import com.localhelp.app.model.response.CategoryResponse
+
 @Composable
-fun CategorySection() {
-    Row(
+fun CategorySection(
+    categories: List<CategoryResponse>,
+    selectedCategoryId: Long? = null,
+    onCategoryClick: (Long?) -> Unit
+) {
+    LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        CategoryItem(
-            title = "Tất cả",
-            icon = Icons.Default.GridView ,
-            containerColor = Color(0xFFED7D68),
-            contentColor = Color.White
-        )
-        CategoryItem(
-            title = "Dọn dẹp",
-            icon = Icons.Default.CleaningServices,
-            containerColor = Color.White,
-            contentColor = Color(0xFF4CAF50)
-        )
-        CategoryItem(
-            title = "Giao hàng",
-            icon = Icons.Default.LocalShipping,
-            containerColor = Color.White,
-            contentColor = Color(0xFF2196F3)
-        )
+        item {
+            CategoryItem(
+                title = "Tất cả",
+                icon = {
+                    Icon(
+                        Icons.Default.GridView,
+                        contentDescription = null,
+                        tint = if (selectedCategoryId == null) Color.White else Color(0xFFED7D68),
+                        modifier = Modifier.size(18.dp)
+                    )
+                },
+                containerColor = if (selectedCategoryId == null) Color(0xFFED7D68) else Color.White,
+                contentColor = if (selectedCategoryId == null) Color.White else Color.Black,
+                onClick = { onCategoryClick(null) }
+            )
+        }
+
+        items(categories) { category ->
+            val isSelected = selectedCategoryId == category.id
+            val color = try {
+                Color(android.graphics.Color.parseColor(category.colorCode))
+            } catch (e: Exception) {
+                Color(0xFF4CAF50) // Default green
+            }
+
+            CategoryItem(
+                title = category.name,
+                icon = {
+                    AsyncImage(
+                        model = category.iconUrl,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                },
+                containerColor = if (isSelected) color else Color.White,
+                contentColor = if (isSelected) Color.White else color,
+                onClick = { onCategoryClick(category.id) }
+            )
+        }
     }
 }
 
 @Composable
 fun CategoryItem(
     title: String,
-    icon: ImageVector,
+    icon: @Composable () -> Unit,
     containerColor: Color,
-    contentColor: Color
+    contentColor: Color,
+    onClick: () -> Unit
 ){
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = containerColor,
         border = if (containerColor == Color.White) BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)) else null,
-        modifier = Modifier.height(40.dp)
+        modifier = Modifier
+            .height(40.dp)
+            .clickable { onClick() }
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Icon(icon, contentDescription = null,
-                tint = contentColor,
-                modifier = Modifier.size(18.dp)
-            )
+            icon()
 
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(text = title,
-                color = if (containerColor == Color.White) Color.Black else Color.White,
+                color = contentColor,
                 style = MaterialTheme.typography.bodyMedium
             )
         }

@@ -32,7 +32,10 @@ fun MyJobsScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Danh sách công việc", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black
+                )
             )
         },
         containerColor = Color.White
@@ -42,7 +45,7 @@ fun MyJobsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            FilterSection()
+            FilterSection(viewModel = viewModel)
 
             Spacer(modifier = Modifier.height(8.dp))
 

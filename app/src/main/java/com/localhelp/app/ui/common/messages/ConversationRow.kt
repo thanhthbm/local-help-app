@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,14 +39,19 @@ fun ConversationRow(conversation: ConversationResponse, onClick: () -> Unit) {
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top
     ) {
-        if (!partner.avatarUrl.isNullOrEmpty()) {
+        if (!partner.avatarUrl.isNullOrEmpty() && partner.avatarUrl != "none") {
             AsyncImage(
                 model = partner.avatarUrl, contentDescription = null,
                 modifier = Modifier.size(56.dp).clip(CircleShape).background(Color(0xFFF0F0F0)),
                 contentScale = ContentScale.Crop
             )
         } else {
-            Box(modifier = Modifier.size(56.dp).clip(CircleShape).background(Color.LightGray))
+            Box(
+                modifier = Modifier.size(56.dp).clip(CircleShape).background(Color.LightGray),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.Person, contentDescription = null, tint = Color.White, modifier = Modifier.size(32.dp))
+            }
         }
 
         Spacer(modifier = Modifier.width(16.dp))
