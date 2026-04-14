@@ -28,10 +28,16 @@ val Warning          = Color(0xFFFFC107)
 val Error            = Color(0xFFE53935)
 
 // ─── Dark theme ───────────────────────────────────────────
-val OrangePrimaryDark = Color(0xFFFF8A70)
-val BackgroundDark    = Color(0xFF121212)
-val SurfaceDark       = Color(0xFF121212)
-val SurfaceVariantDark= Color(0xFF1E1E1E)
-val TextPrimaryDark   = Color(0xFFEEEEEE)
-val TextSecondaryDark = Color(0xFF9E9E9E)
-val DividerDark       = Color(0xFF2C2C2C)
+val OrangePrimaryDark = Color(0xFFFFB4A2) // Softer orange for dark mode
+val OnOrangePrimaryDark = Color(0xFF561E00)
+val OrangeContainerDark = Color(0xFF7D2C00)
+val OnOrangeContainerDark = Color(0xFFFFDBCF)
+
+val BackgroundDark    = Color(0xFF0F0F0F) // Deeper black for better contrast
+val SurfaceDark       = Color(0xFF141414) // Slightly lighter than background
+val SurfaceVariantDark= Color(0xFF262626) // For search bars, etc.
+val SurfaceContainerDark = Color(0xFF1E1E1E) // For cards
+
+val TextPrimaryDark   = Color(0xFFE6E1E5)
+val TextSecondaryDark = Color(0xFFCAC4D0)
+val DividerDark       = Color(0xFF333333)

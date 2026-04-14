@@ -3,12 +3,15 @@ package com.localhelp.app.ui.screens.map
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.compose.material3.CircularProgressIndicator
 import android.os.Bundle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,6 +75,12 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
 
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
 @Composable
 fun MapRoute(
     viewModel: MapViewModel,
@@ -79,7 +88,7 @@ fun MapRoute(
 ){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val activity = context as Activity
+    val activity = remember(context) { context.findActivity() }
 
     val enableGPSLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
@@ -116,9 +125,11 @@ fun MapRoute(
         if (granted) {
             checkGpsAndFetchLocation()
         } else {
-            val shouldShow = ActivityCompat.shouldShowRequestPermissionRationale(
-                activity, Manifest.permission.ACCESS_FINE_LOCATION
-            )
+            val shouldShow = activity?.let {
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    it, Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            } ?: false
             if (!shouldShow) {
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                     data = Uri.fromParts("package", context.packageName, null)
@@ -278,11 +289,11 @@ fun MapScreen(
                 .align(Alignment.TopStart)
                 .padding(16.dp)
                 .background(
-                    color = MaterialTheme.colorScheme.surface,
+                    color = Color.White,
                     shape = CircleShape
                 )
         ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
         }
         Column(
             modifier = Modifier
@@ -300,9 +311,9 @@ fun MapScreen(
                     .background(
                         color =
                             if (uiState.autoCenter)
-                                MaterialTheme.colorScheme.onPrimaryContainer
+                                Color(0xFFED7D68)
                             else
-                                MaterialTheme.colorScheme.primaryContainer,
+                                Color(0xFFFFF0ED),
                         shape = CircleShape
                     )
             ) {
@@ -310,7 +321,7 @@ fun MapScreen(
                     text = "A",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = if (uiState.autoCenter) Color.White else Color(0xFFED7D68)
                 )
             }
             Surface(
@@ -319,7 +330,7 @@ fun MapScreen(
                     .padding(start = 16.dp, end = 16.dp, bottom = 25.dp)
                     .align (Alignment.CenterHorizontally),
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
+                color = Color.White.copy(alpha = 0.95f),
                 tonalElevation = 8.dp,
                 shadowElevation = 4.dp
             ) {
@@ -331,7 +342,7 @@ fun MapScreen(
                         text = uiState.currPath,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = Color.Black,
                         textAlign = TextAlign.Left
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -340,7 +351,7 @@ fun MapScreen(
                             text = "${ uiState.stepDistanceMeters.roundToInt() } m",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = Color.Black,
                             textAlign = TextAlign.Left
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -349,7 +360,7 @@ fun MapScreen(
                             text = uiState.instruction,
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = Color.Black,
                             textAlign = TextAlign.Left
                         )
                     }
@@ -361,7 +372,7 @@ fun MapScreen(
                             text = "${String.format("%.1f", uiState.totalDistanceKm)} km",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Thin,
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = Color.Gray,
                             textAlign = TextAlign.Left
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -369,7 +380,7 @@ fun MapScreen(
                             text = "${uiState.totalDurationMin.roundToInt()} Phút",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Thin,
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = Color.Gray,
                             textAlign = TextAlign.Left
                         )
                     }

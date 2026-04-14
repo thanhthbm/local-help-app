@@ -30,13 +30,23 @@ interface JobService {
     suspend fun getMyJobs(@Query("status") status: JobStatus? = null): Response<ApiResponse<List<JobResponse>>>
 
     @GET("/api/jobs/search")
-    suspend fun searchJobs(@Query("keyword") keyword: String) : Response<ApiResponse<List<JobResponse>>>
+    suspend fun searchJobs(
+        @Query("keyword") keyword: String,
+        @Query("current") current: Int,
+        @Query("pageSize") pageSize: Int
+    ) : Response<ApiResponse<ResultPaginationDTO<List<JobResponse>>>>
 
     @GET("/api/jobs")
     suspend fun getOpenJobs(
         @Query("current") current: Int,
-        @Query("pageSize") pageSize: Int
+        @Query("pageSize") pageSize: Int,
+        @Query("categoryId") categoryId: Long? = null,
+        @Query("lat") latitude: Double? = null,
+        @Query("lng") longitude: Double? = null
     ): Response<ApiResponse<ResultPaginationDTO<List<JobResponse>>>>
+
+    @GET("/api/jobs/featured")
+    suspend fun getFeaturedJobs(): Response<ApiResponse<List<JobResponse>>>
 
     @GET("/api/jobs/{id}")
     suspend fun getJobById(@Path("id") id: Long): Response<ApiResponse<JobResponse>>

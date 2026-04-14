@@ -79,9 +79,15 @@ class JobRepository @Inject constructor(
         }
     }
 
-    suspend fun getOpenJobs(current: Int, pageSize: Int): Result<ResultPaginationDTO<List<JobResponse>>> {
+    suspend fun getOpenJobs(
+        current: Int,
+        pageSize: Int,
+        categoryId: Long? = null,
+        lat: Double? = null,
+        lng: Double? = null
+    ): Result<ResultPaginationDTO<List<JobResponse>>> {
         return try {
-            val response = jobService.getOpenJobs(current, pageSize)
+            val response = jobService.getOpenJobs(current, pageSize, categoryId, lat, lng)
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
@@ -92,6 +98,25 @@ class JobRepository @Inject constructor(
                 } else {
                     //Nếu API trả về 200 nhưng cục data bị mất, báo lỗi luôn
                     Result.failure(Exception("Dữ liệu trả về bị rỗng"))
+                }
+            } else {
+                Result.failure(Exception("Lỗi backend (${response.code()})"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getFeaturedJobs(): Result<List<JobResponse>> {
+        return try {
+            val response = jobService.getFeaturedJobs()
+
+            if (response.isSuccessful && response.body() != null) {
+                val apiResponse = response.body()!!
+                if (apiResponse.data != null) {
+                    Result.success(apiResponse.data)
+                } else {
+                    Result.success(emptyList())
                 }
             } else {
                 Result.failure(Exception("Lỗi backend (${response.code()})"))

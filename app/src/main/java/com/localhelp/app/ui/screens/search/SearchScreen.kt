@@ -1,5 +1,6 @@
 package com.localhelp.app.ui.screens.search
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -96,7 +97,7 @@ fun SearchScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color.White)
             .padding(top = 16.dp)
     ) {
         Row(
@@ -110,7 +111,7 @@ fun SearchScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Quay lại",
-                    tint = MaterialTheme.colorScheme.onBackground
+                    tint = Color.Black
                 )
             }
 
@@ -124,7 +125,7 @@ fun SearchScreen(
                         text = "Bạn muốn làm công việc gì hôm nay...",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.Gray
                     )
                 },
                 modifier = Modifier
@@ -133,12 +134,12 @@ fun SearchScreen(
                 shape = RoundedCornerShape(24.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                    focusedBorderColor = Color(0xFFED7D68),
+                    unfocusedBorderColor = Color(0xFFF0F0F0),
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White
                 )
             )
 
@@ -150,14 +151,14 @@ fun SearchScreen(
                     navigateToSearchDetail(searchQuery)
                 },
                 modifier = Modifier.background(
-                    color = MaterialTheme.colorScheme.primary,
+                    color = Color(0xFFED7D68),
                     shape = CircleShape
                 )
             ) {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Tìm kiếm",
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = Color.White
                 )
             }
         }
@@ -176,11 +177,11 @@ fun SearchScreen(
                     text = "Tìm kiếm gần đây",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = Color.Black
                 )
                 Text(
                     text = "Xóa tất cả",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = Color(0xFFED7D68),
                     fontSize = 12.sp,
                     modifier = Modifier.clickable { onClearAllRecent() }
                 )
@@ -207,7 +208,7 @@ fun SearchScreen(
                         Icon(
                             imageVector = Icons.Default.History,
                             contentDescription = "History",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = Color.Gray,
                             modifier = Modifier.size(20.dp)
                         )
 
@@ -215,7 +216,7 @@ fun SearchScreen(
 
                         Text(
                             text = item,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = Color.Black,
                             modifier = Modifier.weight(1f)
                         )
 
@@ -226,7 +227,7 @@ fun SearchScreen(
                             Icon(
                                 imageVector = Icons.Default.Clear,
                                 contentDescription = "Xóa",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = Color.Gray
                             )
                         }
                     }

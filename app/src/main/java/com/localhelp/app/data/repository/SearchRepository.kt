@@ -26,12 +26,12 @@ class SearchRepository @Inject constructor(
 
     suspend fun searchJob(keyword: String): Result<List<JobResponse>> {
         return try {
-            val response = jobService.searchJobs(keyword)
+            val response = jobService.searchJobs(keyword, 1, 10)
 
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body?.data != null) {
-                    Result.success(body.data)
+                    Result.success(body.data.result)
                 } else {
                     Result.failure(Exception(response.message()))
                 }

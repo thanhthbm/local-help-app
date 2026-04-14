@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -73,7 +74,7 @@ fun ChatScreen(
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (decodedAvatar.isNotEmpty()) {
+                        if (!decodedAvatar.isNullOrBlank() && decodedAvatar != "none") {
                             AsyncImage(
                                 model = decodedAvatar,
                                 contentDescription = null,
@@ -81,7 +82,12 @@ fun ChatScreen(
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            Box(modifier = Modifier.size(40.dp).background(Color.LightGray, CircleShape))
+                            Box(
+                                modifier = Modifier.size(40.dp).clip(CircleShape).background(Color.LightGray),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Person, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
+                            }
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {

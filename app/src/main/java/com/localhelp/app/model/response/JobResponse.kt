@@ -20,6 +20,7 @@ data class JobResponse(
     val creatorAvatar: String? = "",
     val creatorRating: Double? = 0.0,
     val images: List<String>? = emptyList(),
+    val distance: Double? = null,
 
     val createdAt: String? = ""
 )

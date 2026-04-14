@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,13 +33,18 @@ import coil.compose.AsyncImage
 @Composable
 fun OtherBubble(text: String, time: String, avatarUrl: String, mediaUrls: List<String> = emptyList()) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Bottom) {
-        if (avatarUrl.isNotEmpty()) {
+        if (!avatarUrl.isNullOrBlank() && avatarUrl != "none") {
             AsyncImage(
                 model = avatarUrl, contentDescription = null,
                 modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(0xFFF0F0F0)), contentScale = ContentScale.Crop
             )
         } else {
-            Box(modifier = Modifier.size(32.dp).background(Color.LightGray, CircleShape))
+            Box(
+                modifier = Modifier.size(32.dp).clip(CircleShape).background(Color.LightGray),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.Person, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+            }
         }
         Spacer(modifier = Modifier.width(8.dp))
         Column(horizontalAlignment = Alignment.Start) {

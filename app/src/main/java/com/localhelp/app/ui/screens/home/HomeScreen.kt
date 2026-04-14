@@ -44,9 +44,13 @@ fun HomeScreen(
 ) {
     val user = LocalUser.current
     val recentJobs by viewModel.recentJobs.collectAsState()
+    val featuredJobs by viewModel.featuredJobs.collectAsState()
+    val categories by viewModel.categories.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val currentLocation by viewModel.currentLocation.collectAsState()
     val currentAddress by viewModel.currentAddress.collectAsState()
+    
+    var selectedCategoryId by remember { mutableStateOf<Long?>(null) }
 
     val context = LocalContext.current
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -129,11 +133,20 @@ fun HomeScreen(
             )
         }
 
-        item { CategorySection() }
+        item { 
+            CategorySection(
+                categories = categories,
+                selectedCategoryId = selectedCategoryId,
+                onCategoryClick = { selectedCategoryId = it }
+            ) 
+        }
 
         item {
             SectionHeader(title = "Nổi bật quanh bạn", onSeeMore = { /* TODO */})
-            FeaturedJobsList()
+            FeaturedJobsList(
+                featuredJobs = featuredJobs,
+                onJobClick = { /* TODO */ }
+            )
         }
 
         item {

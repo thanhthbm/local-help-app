@@ -86,7 +86,7 @@ fun SearchDetailScreen(
     onNavigateToJobDetail: (Long) -> Unit
 ) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.White,
         topBar = {
             TopSearchBar(
                 keyword = keyword,
@@ -105,7 +105,7 @@ fun SearchDetailScreen(
             Text(
                 text = "Tìm thấy ${listJobs.size} kết quả cho \"$keyword\"",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = Color.Gray,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
 
@@ -136,7 +136,7 @@ private fun TopSearchBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(Color.White)
             .padding(horizontal = 8.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -145,7 +145,7 @@ private fun TopSearchBar(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Quay lại",
-                tint = MaterialTheme.colorScheme.onSurface
+                tint = Color.Black
             )
         }
 
@@ -154,7 +154,7 @@ private fun TopSearchBar(
                 .weight(1f)
                 .height(44.dp)
                 .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), // Màu xám nhạt
+                    color = Color(0xFFF8F8F8), // Màu xám nhạt
                     shape = RoundedCornerShape(24.dp)
                 )
                 .clickable { /* Xử lý khi user muốn sửa từ khóa */ }
@@ -164,13 +164,13 @@ private fun TopSearchBar(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
-                tint = MaterialTheme.colorScheme.primary // Icon kính lúp màu cam (giống design)
+                tint = Color(0xFFED7D68) // Icon kính lúp màu cam (giống design)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = keyword,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = Color.Black,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -184,14 +184,14 @@ private fun TopSearchBar(
             modifier = Modifier
                 .size(44.dp)
                 .background(
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = Color(0xFFFFF0ED),
                     shape = CircleShape
                 )
         ) {
             Icon(
                 imageVector = Icons.Default.Tune,
                 contentDescription = "Bộ lọc",
-                tint = MaterialTheme.colorScheme.primary // Màu cam chính
+                tint = Color(0xFFED7D68) // Màu cam chính
             )
         }
         Spacer(modifier = Modifier.width(8.dp))
@@ -205,7 +205,7 @@ private fun FilterChipsRow() {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(Color.White)
             .padding(bottom = 8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -216,11 +216,11 @@ private fun FilterChipsRow() {
 
                 }.border(
                     width = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant,
+                    color = Color(0xFFF0F0F0),
                     shape = RoundedCornerShape(50)
                 ),
                 shape = RoundedCornerShape(50),
-                color = MaterialTheme.colorScheme.surface
+                color = Color.White
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -229,13 +229,13 @@ private fun FilterChipsRow() {
                     Text(
                         text = filterName,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.Gray
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = Color.Gray,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -264,7 +264,7 @@ private fun JobItemCard(
             .clickable { onClick() }, // Bấm vào cả thẻ để xem chi tiết
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface // Thẻ màu trắng
+            containerColor = Color.White // Thẻ màu trắng
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -289,13 +289,13 @@ private fun JobItemCard(
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                        .background(Color(0xFFF5F5F5)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Person,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = Color.Gray,
                         modifier = Modifier.size(36.dp)
                     )
                 }
@@ -306,14 +306,14 @@ private fun JobItemCard(
                         .size(22.dp)
                         .align(Alignment.TopStart)
                         .offset(x = (-2).dp, y = (-2).dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
-                        .border(1.dp, MaterialTheme.colorScheme.surface, CircleShape),
+                        .background(Color(0xFFFFF0ED), CircleShape)
+                        .border(1.dp, Color.White, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.WorkOutline,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary, // Icon màu cam
+                        tint = Color(0xFFED7D68), // Icon màu cam
                         modifier = Modifier.size(12.dp)
                     )
                 }
@@ -330,7 +330,7 @@ private fun JobItemCard(
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     ),
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = Color.Black,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -342,14 +342,14 @@ private fun JobItemCard(
                     Icon(
                         imageVector = Icons.Outlined.Person,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = Color.Gray,
                         modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "${job.creatorName}  •  ${job.latitude}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.Gray
                     )
                 }
 
@@ -367,14 +367,14 @@ private fun JobItemCard(
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
                         ),
-                        color = MaterialTheme.colorScheme.primary // Tiền màu cam
+                        color = Color(0xFFED7D68) // Tiền màu cam
                     )
 
                     Button(
                         onClick = onClick,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
+                            containerColor = Color(0xFFED7D68),
+                            contentColor = Color.White
                         ),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
                         modifier = Modifier.height(32.dp),

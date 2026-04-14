@@ -79,7 +79,11 @@ fun CreateJobScreen(
                     }
                 },
                 actions = { Spacer(modifier = Modifier.width(48.dp)) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black,
+                    navigationIconContentColor = Color.Black
+                )
             )
         },
         containerColor = Color.White
@@ -102,14 +106,16 @@ fun CreateJobScreen(
             // --- TÊN CÔNG VIỆC ---
             InputSection("Tên công việc cần giúp") {
                 CustomOutlinedTextField(
-                    value = title, onValueChange = { viewModel.title.value = it }, placeholder = "Mua giúp thuốc"
+                    value = title, 
+                    onValueChange = { viewModel.title.value = it }, 
+                    placeholder = "Mua giúp thuốc"
                 )
             }
 
             // --- THÙ LAO ---
             InputSection("Thù lao dự kiến") {
                 CustomOutlinedTextField(
-                    value = price, onValueChange = { viewModel.price.value = it }, placeholder = "250.000",
+                    value = price, onValueChange = { viewModel.updatePrice(it) }, placeholder = "250.000",
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     trailingIcon = { Text("VNĐ", color = Color.Gray, modifier = Modifier.padding(end = 16.dp)) }
                 )
@@ -128,36 +134,25 @@ fun CreateJobScreen(
                 )
             }
 
-            // --- MÔ TẢ CHI TIẾT CÓ NÚT AI ---
+            // --- MÔ TẢ CHI TIẾT ---
             InputSection("Mô tả chi tiết") {
-                Box {
-                    OutlinedTextField(
-                        value = description, onValueChange = { viewModel.description.value = it },
-                        placeholder = { Text("Mô tả chi tiết công việc và những lưu ý đặc biệt...", color = Color.Gray) },
-                        modifier = Modifier.fillMaxWidth().height(150.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Black, unfocusedBorderColor = Color.Black,
-                            focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
-                        )
+                OutlinedTextField(
+                    value = description, onValueChange = { viewModel.description.value = it },
+                    placeholder = { Text("Mô tả chi tiết công việc và những lưu ý đặc biệt...", color = Color.Gray) },
+                    modifier = Modifier.fillMaxWidth().height(150.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Black,
+                        unfocusedBorderColor = Color.LightGray,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White
                     )
-
-                    Surface(
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp).clickable { /* Call AI */ },
-                        color = LightBlueAI, shape = RoundedCornerShape(20.dp)
-                    ) {
-                        Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.AutoAwesome, null, tint = Color.Black, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Viết bằng AI", color = Color.Black, fontWeight = FontWeight.Medium, fontSize = 13.sp)
-                        }
-                    }
-                }
+                )
             }
 
             // --- ẢNH MINH HỌA ---
             Column {
-                Text("Ảnh minh họa (nếu cần)", fontWeight = FontWeight.Medium, fontSize = 16.sp)
+                Text("Ảnh minh họa (nếu cần)", fontWeight = FontWeight.Medium, fontSize = 16.sp, color = Color.Black)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
@@ -185,7 +180,7 @@ fun CreateJobScreen(
             // --- DANH MỤC (Đã lấy từ API) ---
             Column {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("Danh mục", fontWeight = FontWeight.Medium, fontSize = 16.sp)
+                    Text("Danh mục", fontWeight = FontWeight.Medium, fontSize = 16.sp, color = Color.Black)
                     Text("Xem tất cả", color = PrimaryOrange, fontSize = 13.sp)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -208,16 +203,19 @@ fun CreateJobScreen(
             Button(
                 onClick = { viewModel.createJob() },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PrimaryOrange,
+                    contentColor = Color.White
+                ),
                 enabled = !isLoading, shape = RoundedCornerShape(12.dp)
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                        Text(if (isEditMode) "Cập nhật yêu cầu" else "Đăng yêu cầu", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(if (isEditMode) "Cập nhật yêu cầu" else "Đăng yêu cầu", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(if (isEditMode) Icons.Default.Save else Icons.AutoMirrored.Filled.Send, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Icon(if (isEditMode) Icons.Default.Save else Icons.AutoMirrored.Filled.Send, null, modifier = Modifier.size(20.dp))
                     }
                 }
             }

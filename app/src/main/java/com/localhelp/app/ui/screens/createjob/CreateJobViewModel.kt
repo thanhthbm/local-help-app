@@ -10,6 +10,7 @@ import com.localhelp.app.data.repository.JobRepository
 import com.localhelp.app.model.request.CreateJobRequest
 import com.localhelp.app.model.response.CategoryResponse
 import com.localhelp.app.utils.CloudinaryHelper
+import com.localhelp.app.utils.FormatterUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -63,6 +64,15 @@ class CreateJobViewModel @Inject constructor(
         address.value = addr
     }
 
+    fun updatePrice(newPrice: String) {
+        val clean = FormatterUtils.cleanPrice(newPrice)
+        if (clean.isEmpty()) {
+            price.value = ""
+        } else {
+            price.value = FormatterUtils.formatPrice(clean)
+        }
+    }
+
     init {
         fetchCategories()
         if (isEditMode) {
@@ -77,11 +87,16 @@ class CreateJobViewModel @Inject constructor(
                 result.onSuccess { job ->
                     title.value = job.title ?: ""
                     description.value = job.description ?: ""
-                    price.value = job.price?.toLong()?.toString() ?: ""
+                    price.value = FormatterUtils.formatPrice(job.price ?: 0.0)
                     address.value = job.address ?: ""
                     latitude.value = job.latitude ?: 20.9800
                     longitude.value = job.longitude ?: 105.7950
-                    selectedCategoryId.value = job.categoryId
+                    
+                    // Cập nhật selectedCategoryId và đảm bảo nó được chọn đúng
+                    if (job.categoryId != null && job.categoryId != 0L) {
+                        selectedCategoryId.value = job.categoryId
+                    }
+                    
                     existingImageUrls.value = job.images ?: emptyList()
                 }
             }
@@ -95,7 +110,8 @@ class CreateJobViewModel @Inject constructor(
                 Log.d("CreateJob", "Lấy thành công ${list.size} danh mục")
                 categories.value = list
 
-                if (list.isNotEmpty() && selectedCategoryId.value == null){
+                // Chỉ tự động chọn danh mục đầu tiên nếu đang tạo mới và chưa có category nào được chọn
+                if (!isEditMode && list.isNotEmpty() && selectedCategoryId.value == null){
                     selectedCategoryId.value = list[0].id
                 }
             }.onFailure { error ->
@@ -127,7 +143,7 @@ class CreateJobViewModel @Inject constructor(
                 val request = CreateJobRequest(
                     title = title.value,
                     description = description.value,
-                    price = price.value.replace(".", "").toDoubleOrNull() ?: 0.0,
+                    price = FormatterUtils.cleanPrice(price.value).toDoubleOrNull() ?: 0.0,
                     address = address.value,
                     latitude = latitude.value,
                     longitude = longitude.value,
