@@ -3,11 +3,8 @@ package com.localhelp.app.ui.screens.search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.key
-import androidx.compose.ui.tooling.preview.Preview
 import com.localhelp.app.model.response.JobResponse
 import androidx.compose.runtime.getValue
-import com.localhelp.app.ui.theme.LocalHelpTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,37 +23,25 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.WorkOutline
 import androidx.compose.material3.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.localhelp.app.model.response.CategoryResponse
+import com.localhelp.app.ui.common.myjobs.JobFilterSheet
+import com.localhelp.app.ui.common.myjobs.MyJobCard
+import com.localhelp.app.ui.theme.LocalHelpTheme
 import java.text.DecimalFormat
-
-//val jobList = listOf(
-//    JobResponse(1, "Tổng vệ sinh căn hộ 2PN", "Minh Tú", 300.000),
-//    JobResponse(2, "Lau dọn cửa kính chung cư", "Lan Anh", 150.000),
-//    JobResponse(3, "Dọn dẹp nhà bếp chuyên sâu", "Hoàng Nam", 250.000),
-//    JobResponse(4, "Hút bụi & giặt thảm phòng khách", "Thanh Thảo", 450.000)
-//)
-
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewSearchDetailScreen(){
-//    LocalHelpTheme(
-//        content = {SearchDetailScreen(
-//            onBackClick = {},
-//            keyword = "abc",
-//            listJobs = jobList,
-//            onNavigateToJobDetail = {}
-//        )},
-//        darkTheme = false
-//    )
-//}
 
 @Composable
 fun SearchDetailRoute(
@@ -64,34 +50,107 @@ fun SearchDetailRoute(
     keyword: String,
     onNavigateToJobDetail: (Long) -> Unit
 ){
+    LaunchedEffect(Unit) {
+        viewModel.initSearch(keyword = keyword)
+    }
+
     val uiState by viewModel.uiState.collectAsState()
-    when(uiState){
-        is SearchDetailUiState.Loading -> CircularProgressIndicator()
-        is SearchDetailUiState.Success -> {
-            SearchDetailScreen(
-                onBackClick = onBackClick,
-                keyword = keyword,
-                listJobs = (uiState as SearchDetailUiState.Success).listJobs,
-                onNavigateToJobDetail = onNavigateToJobDetail
-            )
+    val listCategories by viewModel.listCategory.collectAsState()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (uiState) {
+            is SearchDetailUiState.Loading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+            is SearchDetailUiState.Success -> {
+                val successState = uiState as SearchDetailUiState.Success
+                SearchDetailScreen(
+                    keyword = keyword,
+                    listJobs = successState.listJobs,
+                    isPaginating = successState.isPaginating,
+                    onBackClick = onBackClick,
+                    onNavigateToJobDetail = onNavigateToJobDetail,
+                    onLoadMore = {
+                        viewModel.loadJobs(isLoadMore = true)
+                    },
+                    applyFilters = viewModel::applyFilters,
+                    availableCategories = listCategories
+                )
+            }
+            is SearchDetailUiState.Error -> {
+                val error = uiState as SearchDetailUiState.Error
+                Box(modifier = Modifier.fillMaxSize()){
+                    Text(text = error.message, modifier = Modifier.align(Alignment.Center))
+                }
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchDetailScreen(
-    onBackClick: () -> Unit,
     keyword: String,
     listJobs: List<JobResponse>,
-    onNavigateToJobDetail: (Long) -> Unit
+    isPaginating: Boolean,
+    onBackClick: () -> Unit,
+    onNavigateToJobDetail: (Long) -> Unit,
+    onLoadMore: () -> Unit,
+    applyFilters: (keyword: String,
+                   distance: Float,
+                   minSalary: Float,
+                   categories: Set<Long>,
+                   timeFilter: String) -> Unit,
+    availableCategories: List<CategoryResponse>
 ) {
+    val listState = rememberLazyListState()
+
+    val isAtBottom by remember {
+        derivedStateOf {
+            val layoutInfo = listState.layoutInfo
+            val totalItems = layoutInfo.totalItemsCount
+            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+
+            lastVisibleItem >= totalItems - 1 && totalItems > 0
+        }
+    }
+
+    LaunchedEffect(isAtBottom) {
+        if (isAtBottom && !isPaginating) {
+            onLoadMore()
+        }
+    }
+    var showFilterSheet by remember { mutableStateOf(false) }
+
+    if (showFilterSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showFilterSheet = false },
+            containerColor = Color.White
+        ) {
+            JobFilterSheet(
+                onCloseClick = { showFilterSheet = false },
+                onApplyClick = { dist, salary, categories, time ->
+                    showFilterSheet = false
+                    applyFilters(
+                        keyword,
+                        dist,
+                        salary,
+                        categories,
+                        time
+                    )
+                },
+                availableCategories = availableCategories
+            )
+        }
+    }
+
     Scaffold(
         containerColor = Color.White,
         topBar = {
             TopSearchBar(
                 keyword = keyword,
                 onBackClick = onBackClick,
-                onFilterClick = { /* Xử lý mở bộ lọc */ }
+                onFilterClick = { showFilterSheet = true}
             )
         }
     ) { innerPadding ->
@@ -103,13 +162,14 @@ fun SearchDetailScreen(
             FilterChipsRow()
 
             Text(
-                text = "Tìm thấy ${listJobs.size} kết quả cho \"$keyword\"",
+                text = "Tìm thấy kết quả cho \"$keyword\"",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
 
             LazyColumn(
+                state = listState,
                 contentPadding = PaddingValues(bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -117,10 +177,27 @@ fun SearchDetailScreen(
                     items = listJobs,
                     key = { it.id }
                 ) { job ->
-                    JobItemCard(
+                    MyJobCard(
                         job = job,
                         onClick = { onNavigateToJobDetail(job.id) }
                     )
+                }
+
+                if (isPaginating) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(32.dp),
+                                color = Color(0xFFED7D68),
+                                strokeWidth = 3.dp
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -140,7 +217,6 @@ private fun TopSearchBar(
             .padding(horizontal = 8.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Nút Back
         IconButton(onClick = onBackClick) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -154,17 +230,16 @@ private fun TopSearchBar(
                 .weight(1f)
                 .height(44.dp)
                 .background(
-                    color = Color(0xFFF8F8F8), // Màu xám nhạt
+                    color = Color(0xFFF8F8F8),
                     shape = RoundedCornerShape(24.dp)
                 )
-                .clickable { /* Xử lý khi user muốn sửa từ khóa */ }
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
-                tint = Color(0xFFED7D68) // Icon kính lúp màu cam (giống design)
+                tint = Color(0xFFED7D68)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
@@ -178,7 +253,6 @@ private fun TopSearchBar(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        // Nút Mở bộ lọc (Hình tròn, nền cam nhạt, icon cam đậm)
         IconButton(
             onClick = onFilterClick,
             modifier = Modifier
@@ -191,7 +265,7 @@ private fun TopSearchBar(
             Icon(
                 imageVector = Icons.Default.Tune,
                 contentDescription = "Bộ lọc",
-                tint = Color(0xFFED7D68) // Màu cam chính
+                tint = MaterialTheme.colorScheme.primary
             )
         }
         Spacer(modifier = Modifier.width(8.dp))
@@ -205,7 +279,7 @@ private fun FilterChipsRow() {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(bottom = 8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -216,11 +290,11 @@ private fun FilterChipsRow() {
 
                 }.border(
                     width = 1.dp,
-                    color = Color(0xFFF0F0F0),
+                    color = MaterialTheme.colorScheme.outlineVariant,
                     shape = RoundedCornerShape(50)
                 ),
                 shape = RoundedCornerShape(50),
-                color = Color.White
+                color = MaterialTheme.colorScheme.surface
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -229,13 +303,13 @@ private fun FilterChipsRow() {
                     Text(
                         text = filterName,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = null,
-                        tint = Color.Gray,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -249,7 +323,6 @@ private fun JobItemCard(
     job: JobResponse,
     onClick: () -> Unit
 ) {
-    // Format tiền Việt Nam: 300000 -> 300.000
     val formatter = DecimalFormat("#,###").apply {
         val symbols = decimalFormatSymbols
         symbols.groupingSeparator = '.'
@@ -261,10 +334,10 @@ private fun JobItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .clickable { onClick() }, // Bấm vào cả thẻ để xem chi tiết
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White // Thẻ màu trắng
+            containerColor = Color.White
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -272,10 +345,8 @@ private fun JobItemCard(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Khối chứa Ảnh đại diện và Icon Badge
             Box(modifier = Modifier.size(72.dp)) {
 
-                // NẾU DÙNG COIL, thay Box này bằng AsyncImage:
                 /*
                 AsyncImage(
                     model = job.imageUrl,

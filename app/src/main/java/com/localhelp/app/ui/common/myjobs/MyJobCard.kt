@@ -2,6 +2,8 @@ package com.localhelp.app.ui.common.myjobs
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,7 +39,7 @@ import com.localhelp.app.utils.FormatterUtils
 @Composable
 fun MyJobCard(
     job: JobResponse,
-    onClick: () -> Unit
+    onClick: () -> Unit = {}
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -58,7 +60,7 @@ fun MyJobCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val imageUrl = if (!job.images.isNullOrEmpty()) job.images.first() else job.categoryIcon
-            
+
             AsyncImage(
                 model = imageUrl,
                 contentDescription = null,

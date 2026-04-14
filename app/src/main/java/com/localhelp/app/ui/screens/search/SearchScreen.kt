@@ -42,26 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.localhelp.app.ui.theme.LocalHelpTheme
 
-
-//@Preview(showBackground = true)
-//@Composable
-//fun SearchPreview() {
-//    LocalHelpTheme(
-//        darkTheme = false,
-//        dynamicColor = false,
-//        { SearchScreen(
-//            searchQuery = "",
-//            recentSearches = listOf("a", "b", "c"),
-//            onQueryChange = { },
-//            addToRecentSearch = {  },
-//            onRemoveRecentItem = {  },
-//            onClearAllRecent = {  },
-//            onBackClick = { },
-//            navigateToSearchDetail = {}
-//        ) }
-//    )
-//}
-
 @Composable
 fun SearchRoute(
     onBackClick: () -> Unit,
@@ -199,7 +179,7 @@ fun SearchScreen(
                             .fillMaxWidth()
                             .clickable {
                                 onQueryChange(item)
-                                navigateToSearchDetail(searchQuery)
+                                navigateToSearchDetail(item)
                             }
                             .padding(vertical = 12.dp, horizontal = 8.dp),
                         verticalAlignment = Alignment.CenterVertically

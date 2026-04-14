@@ -2,6 +2,7 @@ package com.localhelp.app.data.remote
 
 import com.localhelp.app.model.constant.JobStatus
 import com.localhelp.app.model.request.CreateJobRequest
+import com.localhelp.app.model.request.SearchJobRequest
 import com.localhelp.app.model.response.ApiResponse
 import com.localhelp.app.model.response.JobResponse
 import com.localhelp.app.model.response.ResultPaginationDTO
@@ -29,12 +30,10 @@ interface JobService {
     @GET("/api/jobs/my-jobs")
     suspend fun getMyJobs(@Query("status") status: JobStatus? = null): Response<ApiResponse<List<JobResponse>>>
 
-    @GET("/api/jobs/search")
+    @POST("api/jobs/search")
     suspend fun searchJobs(
-        @Query("keyword") keyword: String,
-        @Query("current") current: Int,
-        @Query("pageSize") pageSize: Int
-    ) : Response<ApiResponse<ResultPaginationDTO<List<JobResponse>>>>
+        @Body request: SearchJobRequest
+    ): Response<ApiResponse<ResultPaginationDTO<List<JobResponse>>>>
 
     @GET("/api/jobs")
     suspend fun getOpenJobs(
