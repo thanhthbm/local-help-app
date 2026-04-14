@@ -73,12 +73,6 @@ fun JobStatusActionRow(
                         modifier = Modifier.clickable { onDeleteClick() }
                     )
                 }
-                Text(
-                    text = "${FormatterUtils.formatPrice(job.price)}đ",
-                    color = orangePrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp
-                )
             }
             JobStatus.IN_PROGRESS -> {
                 // Đang thực hiện (Màu xanh ngọc)

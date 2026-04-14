@@ -17,7 +17,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,6 +38,7 @@ import com.localhelp.app.ui.common.home.SearchBar
 import com.localhelp.app.ui.common.home.SectionHeader
 import com.trackasia.android.geometry.LatLng
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onDirection : (destination :LatLng) -> Unit,
@@ -98,82 +102,107 @@ fun HomeScreen(
         }
     }
 
-    LazyColumn(
-        state = listState,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFDFDFD))
+    PullToRefreshBox(
+        isRefreshing = isLoading,
+        onRefresh = { viewModel.refreshAll() },
+        modifier = Modifier.fillMaxSize()
     ) {
-        item {
-            Button(
-                onClick = { viewModel.startChatWithUser(6L) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-            ) {
-                Text("Test Chat with User 6")
-            }
-        }
-
-        item {
-            Button(
-                onClick = { onDirection(LatLng(21.0285, 105.8542)) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-            ) {
-                Text("Check Map Direction")
-            }
-        }
-
-        item {
-            HomeHeader(user?.fullName ?: "Tài khoản", currentAddress)
-        }
-
-        item {
-            SearchBar(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                onSearchClick = onSearchClick
-            )
-        }
-
-        item { 
-            CategorySection(
-                categories = categories,
-                selectedCategoryId = selectedCategoryId,
-                onCategoryClick = { selectedCategoryId = it }
-            ) 
-        }
-
-        item {
-            SectionHeader(title = "Nổi bật quanh bạn", onSeeMore = { /* TODO */})
-            FeaturedJobsList(
-                featuredJobs = featuredJobs,
-                onJobClick = { /* TODO */ }
-            )
-        }
-
-        item {
-            SectionHeader(title = "Việc mới nhất", onSeeMore = {/* TODO */})
-        }
-
-        // Optimized List: Always show items, append loader at bottom
-        items(
-            items = recentJobs,
-            key = { it.id } // CRITICAL for performance
-        ) { job ->
-            if (job.creatorId != user?.id){
-                RecentJobCard(job = job)
-            }
-        }
-
-        if (isLoading) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFFDFDFD))
+        ) {
             item {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    contentAlignment = Alignment.Center
+                Button(
+                    onClick = { viewModel.startChatWithUser(6L) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 ) {
-                    CircularProgressIndicator(color = Color(0xFFED7D68))
+                    Text("Test Chat with User 6")
                 }
             }
-        }
 
-        item { Spacer(modifier = Modifier.height(80.dp)) }
+            item {
+                Button(
+                    onClick = { onDirection(LatLng(21.0285, 105.8542)) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text("Check Map Direction")
+                }
+            }
+
+            item {
+                HomeHeader(user?.fullName ?: "Tài khoản", currentAddress)
+            }
+
+            item {
+                SearchBar(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    onSearchClick = onSearchClick
+                )
+            }
+
+            item {
+                CategorySection(
+                    categories = categories,
+                    selectedCategoryId = selectedCategoryId,
+                    onCategoryClick = { selectedCategoryId = it }
+                )
+            }
+
+            item {
+                SectionHeader(title = "Nổi bật quanh bạn", onSeeMore = { /* TODO */ })
+                FeaturedJobsList(
+                    featuredJobs = featuredJobs,
+                    onJobClick = { /* TODO */ }
+                )
+            }
+
+            item {
+                SectionHeader(title = "Việc mới nhất", onSeeMore = { /* TODO */ })
+            }
+
+            if (isLoading && recentJobs.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color(0xFFED7D68))
+                    }
+                }
+            } else {
+                // Optimized List: Always show items, append loader at bottom
+                items(
+                    items = recentJobs,
+                    key = { it.id } // CRITICAL for performance
+                ) { job ->
+                    if (job.creatorId != user?.id) {
+                        RecentJobCard(job = job)
+                    }
+                }
+
+                if (isLoading) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = Color(0xFFED7D68))
+                        }
+                    }
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(80.dp)) }
+        }
     }
 }

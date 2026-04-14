@@ -4,9 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +25,35 @@ fun MyJobsScreen(
 ) {
     val jobs by viewModel.jobs.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    
+    var showDeleteConfirm by remember { mutableStateOf<Long?>(null) }
+
+    if (showDeleteConfirm != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = null },
+            title = { Text("Xác nhận xóa") },
+            text = { Text("Bạn có chắc chắn muốn xóa công việc này không? Thao tác này không thể hoàn tác.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirm?.let { viewModel.deleteJob(it) }
+                        showDeleteConfirm = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
+                ) {
+                    Text("Xóa")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = null }) {
+                    Text("Hủy")
+                }
+            },
+            containerColor = Color.White,
+            titleContentColor = Color.Black,
+            textContentColor = Color.Black
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -71,7 +98,7 @@ fun MyJobsScreen(
                             MyJobCard(
                                 job = job,
                                 onEditClick = { onEditJob(job.id) },
-                                onDeleteClick = { viewModel.deleteJob(job.id) }
+                                onDeleteClick = { showDeleteConfirm = job.id }
                             )
                         }
                         item { Spacer(modifier = Modifier.height(80.dp)) }

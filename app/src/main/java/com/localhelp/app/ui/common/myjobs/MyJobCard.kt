@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.localhelp.app.model.constant.ApiConstants
 import com.localhelp.app.model.response.JobResponse
 import com.localhelp.app.utils.FormatterUtils
 
@@ -70,6 +71,7 @@ fun MyJobCard(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
+                // Category and Time
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -90,6 +92,16 @@ fun MyJobCard(
                         fontSize = 10.sp
                     )
                 }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Price under category
+                Text(
+                    text = "${FormatterUtils.formatPrice(job.price)}đ",
+                    color = Color(0xFFED7D68),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
+                )
 
                 Spacer(modifier = Modifier.height(4.dp))
 

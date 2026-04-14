@@ -39,10 +39,10 @@ fun HomeHeader(userName: String, address: String) {
                 Text(text = address, fontWeight = FontWeight.Bold, fontSize = 14.sp)
             }
         }
-        Icon(
+        /* Icon(
             Icons.Default.NotificationsNone,
             contentDescription = null,
             modifier = Modifier.size(28.dp)
-        )
+        ) */
     }
 }

@@ -82,6 +82,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
+    implementation("io.coil-kt:coil-svg:2.7.0")
     implementation("com.cloudinary:cloudinary-android:3.1.2")
     implementation("androidx.lifecycle:lifecycle-runtime-compose")
 

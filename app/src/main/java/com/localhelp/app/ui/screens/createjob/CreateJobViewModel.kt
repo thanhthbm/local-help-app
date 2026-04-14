@@ -27,7 +27,7 @@ class CreateJobViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val jobId: Long? = savedStateHandle.get<String>("jobId")?.toLongOrNull()
+    private val jobId: Long? = savedStateHandle.get<String>("jobId")?.toLongOrNull() ?: savedStateHandle.get<Long>("jobId")
     val isEditMode = jobId != null
 
     // Form states
@@ -83,8 +83,10 @@ class CreateJobViewModel @Inject constructor(
     private fun fetchJobDetails() {
         jobId?.let { id ->
             viewModelScope.launch {
+                Log.d("CreateJob", "Fetching job details for id: $id")
                 val result = jobRepository.getJobById(id)
                 result.onSuccess { job ->
+                    Log.d("CreateJob", "Fetched job details: $job")
                     title.value = job.title ?: ""
                     description.value = job.description ?: ""
                     price.value = FormatterUtils.formatPrice(job.price ?: 0.0)
@@ -94,10 +96,15 @@ class CreateJobViewModel @Inject constructor(
                     
                     // Cập nhật selectedCategoryId và đảm bảo nó được chọn đúng
                     if (job.categoryId != null && job.categoryId != 0L) {
+                        Log.d("CreateJob", "Setting selectedCategoryId to: ${job.categoryId}")
                         selectedCategoryId.value = job.categoryId
+                    } else {
+                        Log.d("CreateJob", "Job categoryId is null or 0")
                     }
                     
                     existingImageUrls.value = job.images ?: emptyList()
+                }.onFailure { error ->
+                    Log.e("CreateJob", "Failed to fetch job details: ${error.message}")
                 }
             }
         }
@@ -152,14 +159,18 @@ class CreateJobViewModel @Inject constructor(
                 )
 
                 val result = if (isEditMode) {
+                    Log.d("CreateJob", "Updating job $jobId with request: $request")
                     jobRepository.updateJob(jobId!!, request)
                 } else {
+                    Log.d("CreateJob", "Creating job with request: $request")
                     jobRepository.createJob(request)
                 }
 
                 result.onSuccess {
+                    Log.d("CreateJob", "Job operation successful")
                     _createSuccess.value = true
                 }.onFailure { error ->
+                    Log.e("CreateJob", "Job operation failed: ${error.message}")
                     _errorMessage.value = error.message ?: "Có lỗi xảy ra"
                 }
             } catch (e: Exception) {

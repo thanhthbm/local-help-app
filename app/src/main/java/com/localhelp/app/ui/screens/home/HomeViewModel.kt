@@ -59,10 +59,39 @@ class HomeViewModel @Inject constructor(
     val selectedCategoryId: StateFlow<Long?> = _selectedCategoryId.asStateFlow()
 
     init {
-        loadCurrentLocation()
-        loadCategories()
-        loadFeaturedJobs()
-        loadMoreJobs()
+        refreshAll()
+    }
+
+    fun refreshAll() {
+        if (_isLoading.value) return
+        
+        viewModelScope.launch {
+            _isLoading.value = true
+            currentPage = 1
+            isLastPage = false
+            _recentJobs.value = emptyList()
+            
+            loadCurrentLocation()
+            loadCategories()
+            loadFeaturedJobs()
+            
+            // loadMoreJobs will be called after reset
+            val result = jobRepository.getOpenJobs(
+                current = currentPage,
+                pageSize = pageSize,
+                categoryId = _selectedCategoryId.value,
+                lat = _currentLocation.value?.latitude,
+                lng = _currentLocation.value?.longitude
+            )
+
+            result.onSuccess { paginationData ->
+                _recentJobs.value = paginationData.result
+                isLastPage = currentPage >= paginationData.meta.pages
+                if (!isLastPage) currentPage++
+            }
+            
+            _isLoading.value = false
+        }
     }
 
     fun onCategorySelected(categoryId: Long?) {

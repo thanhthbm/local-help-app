@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,7 +36,20 @@ fun CategoryRow(categories: List<CategoryResponse>, selectedId: Long?, onSelect:
         return
     }
 
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(28.dp)) {
+    val listState = rememberLazyListState()
+
+    // Tự động cuộn đến danh mục được chọn khi vào màn hình (đặc biệt hữu ích khi Edit)
+    LaunchedEffect(selectedId) {
+        val index = categories.indexOfFirst { it.id == selectedId }
+        if (index >= 0) {
+            listState.animateScrollToItem(index)
+        }
+    }
+
+    LazyRow(
+        state = listState,
+        horizontalArrangement = Arrangement.spacedBy(28.dp)
+    ) {
         items(categories) { category ->
             val isSelected = category.id == selectedId
 
