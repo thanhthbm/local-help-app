@@ -50,6 +50,7 @@ fun CreateJobScreen(
     val latitude by viewModel.latitude.collectAsState()
     val longitude by viewModel.longitude.collectAsState()
     val imageUris by viewModel.selectedImageUris.collectAsState()
+    val existingImageUrls by viewModel.existingImageUrls.collectAsState()
     val isEditMode = viewModel.isEditMode
 
     // Thu thập danh sách categories động từ API
@@ -62,7 +63,11 @@ fun CreateJobScreen(
 
     val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5),
-        onResult = { uris -> viewModel.updateImages(uris) }
+        onResult = { uris -> 
+            if (uris.isNotEmpty()) {
+                viewModel.updateImages(imageUris + uris)
+            }
+        }
     )
 
     LaunchedEffect(createSuccess) {
@@ -164,14 +169,64 @@ fun CreateJobScreen(
                     Text("Tải ảnh lên", color = Color.White, fontSize = 14.sp)
                 }
 
-                if (imageUris.isNotEmpty()) {
+                if (imageUris.isNotEmpty() || existingImageUrls.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(12.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Ảnh đã có trên server
+                        items(existingImageUrls) { url ->
+                            Box(modifier = Modifier.size(80.dp)) {
+                                AsyncImage(
+                                    model = url,
+                                    contentDescription = "Existing Image",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(8.dp))
+                                )
+                                IconButton(
+                                    onClick = { viewModel.removeExistingImage(url) },
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .size(24.dp)
+                                        .padding(4.dp),
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = Color.Black.copy(alpha = 0.5f),
+                                        contentColor = Color.White
+                                    )
+                                ) {
+                                    Icon(Icons.Default.Close, contentDescription = "Remove", modifier = Modifier.size(12.dp))
+                                }
+                            }
+                        }
+
+                        // Ảnh mới chọn từ máy
                         items(imageUris) { uri ->
-                            AsyncImage(
-                                model = uri, contentDescription = null, contentScale = ContentScale.Crop,
-                                modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp))
-                            )
+                            Box(modifier = Modifier.size(80.dp)) {
+                                AsyncImage(
+                                    model = uri,
+                                    contentDescription = "New Image",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(8.dp))
+                                )
+                                IconButton(
+                                    onClick = { viewModel.removeSelectedImage(uri) },
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .size(24.dp)
+                                        .padding(4.dp),
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = Color.Black.copy(alpha = 0.5f),
+                                        contentColor = Color.White
+                                    )
+                                ) {
+                                    Icon(Icons.Default.Close, contentDescription = "Remove", modifier = Modifier.size(12.dp))
+                                }
+                            }
                         }
                     }
                 }

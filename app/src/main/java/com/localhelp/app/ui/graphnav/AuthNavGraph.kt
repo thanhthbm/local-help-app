@@ -38,8 +38,8 @@ fun NavGraphBuilder.authNavGraph(
                 viewModel = loginViewModel,
                 onLoginSuccess = { user: UserResponse, token: String ->
                     onUserAuthenticated(user, token)
-                    // Nếu tất cả 5 trường đều null → đến setup profile, ngược lại → trang chủ
-                    val destination = if (user.needsProfileSetup()) {
+                    // Sử dụng flag isNew từ backend để điều hướng. isNew == false nghĩa là user mới.
+                    val destination = if (user.isNew == false) {
                         Screen.SETUP_PROFILE
                     } else {
                         Graph.HOME

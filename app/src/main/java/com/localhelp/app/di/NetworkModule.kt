@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import com.localhelp.app.data.remote.AuthInterceptor
 import com.localhelp.app.data.remote.AuthService
 import com.localhelp.app.data.remote.CategoryService
+import com.localhelp.app.data.remote.CloudinaryService
 import com.localhelp.app.data.remote.ConversationService
 import com.localhelp.app.data.remote.JobService
 import com.localhelp.app.data.remote.TokenAuthenticator
@@ -80,8 +81,8 @@ object NetworkModule {
         }
 
         return OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .addInterceptor(authInterceptor)
+            .addInterceptor(authInterceptor) // Add Auth first
+            .addInterceptor(loggingInterceptor) // Then Logging so we see the headers
             .authenticator(tokenAuthenticator)
             .build()
     }
@@ -135,5 +136,18 @@ object NetworkModule {
     @Singleton
     fun provideTrackAsiaApiService(@Named("trackasia") retrofit: Retrofit): TrackAsiaApiService {
         return retrofit.create(TrackAsiaApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCloudinaryService(): CloudinaryService {
+        return Retrofit.Builder()
+            .baseUrl("https://api.cloudinary.com/v1_1/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(OkHttpClient.Builder().addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            }).build())
+            .build()
+            .create(CloudinaryService::class.java)
     }
 }

@@ -5,13 +5,14 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.localhelp.app.data.remote.CloudinaryService
 import com.localhelp.app.data.repository.CategoryRepository
 import com.localhelp.app.data.repository.JobRepository
 import com.localhelp.app.model.request.CreateJobRequest
 import com.localhelp.app.model.response.CategoryResponse
-import com.localhelp.app.utils.CloudinaryHelper
 import com.localhelp.app.utils.FormatterUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -19,12 +20,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 @HiltViewModel
 class CreateJobViewModel @Inject constructor(
     private val jobRepository: JobRepository,
     private val categoryRepository: CategoryRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val cloudinaryService: CloudinaryService,
+    private val savedStateHandle: SavedStateHandle,
+    @ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
 
     private val jobId: Long? = savedStateHandle.get<String>("jobId")?.toLongOrNull() ?: savedStateHandle.get<Long>("jobId")
@@ -56,6 +62,14 @@ class CreateJobViewModel @Inject constructor(
 
     fun updateImages(uris: List<Uri>) {
         selectedImageUris.value = uris
+    }
+
+    fun removeExistingImage(url: String) {
+        existingImageUrls.value = existingImageUrls.value.filter { it != url }
+    }
+
+    fun removeSelectedImage(uri: Uri) {
+        selectedImageUris.value = selectedImageUris.value.filter { it != uri }
     }
 
     fun setLocation(lat: Double, lng: Double, addr: String) {
@@ -139,9 +153,32 @@ class CreateJobViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
+                // 1. Upload new images to Cloudinary via CloudinaryService (Direct)
                 val uploadedUrls = coroutineScope {
                     selectedImageUris.value.map { uri ->
-                        async { CloudinaryHelper.uploadMedia(uri) }
+                        async {
+                            val stream = context.contentResolver.openInputStream(uri)
+                            val bytes = stream?.readBytes() ?: throw Exception("Cannot read file")
+                            stream.close()
+                            
+                            val filePart = MultipartBody.Part.createFormData(
+                                "file", "job_image.jpg",
+                                bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                            )
+                            val presetPart = "localhelp_preset".toRequestBody("text/plain".toMediaTypeOrNull())
+                            
+                            val response = cloudinaryService.uploadImage(
+                                cloudName = "dwtpcdjhe",
+                                uploadPreset = presetPart,
+                                file = filePart
+                            )
+                            
+                            if (response.isSuccessful) {
+                                response.body()?.secure_url ?: throw Exception("URL is null")
+                            } else {
+                                throw Exception("Upload failed: ${response.code()}")
+                            }
+                        }
                     }.awaitAll()
                 }
 
@@ -174,6 +211,7 @@ class CreateJobViewModel @Inject constructor(
                     _errorMessage.value = error.message ?: "Có lỗi xảy ra"
                 }
             } catch (e: Exception) {
+                Log.e("CreateJob", "Error in createJob", e)
                 _errorMessage.value = "Lỗi: ${e.localizedMessage}"
             } finally {
                 _isLoading.value = false

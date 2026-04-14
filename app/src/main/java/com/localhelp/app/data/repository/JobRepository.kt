@@ -23,7 +23,8 @@ class JobRepository @Inject constructor(
                     Result.failure(Exception(apiResponse.message?.toString() ?: "Dữ liệu trả về rỗng"))
                 }
             } else {
-                Result.failure(Exception("Lỗi backend (${response.code()})"))
+                val errorMsg = response.errorBody()?.string() ?: ""
+                Result.failure(Exception("Lỗi backend (${response.code()} - $errorMsg)"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -41,7 +42,8 @@ class JobRepository @Inject constructor(
                     Result.failure(Exception(apiResponse.message?.toString() ?: "Dữ liệu trả về rỗng"))
                 }
             } else {
-                Result.failure(Exception("Lỗi backend (${response.code()})"))
+                val errorMsg = response.errorBody()?.string() ?: ""
+                Result.failure(Exception("Lỗi backend (${response.code()} - $errorMsg)"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -54,7 +56,8 @@ class JobRepository @Inject constructor(
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
-                Result.failure(Exception("Lỗi backend (${response.code()})"))
+                val errorMsg = response.errorBody()?.string() ?: ""
+                Result.failure(Exception("Lỗi backend (${response.code()} - $errorMsg)"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -72,7 +75,8 @@ class JobRepository @Inject constructor(
                     Result.success(emptyList())
                 }
             } else {
-                Result.failure(Exception("Lỗi backend (${response.code()})"))
+                val errorMsg = response.errorBody()?.string() ?: ""
+                Result.failure(Exception("Lỗi backend (${response.code()} - $errorMsg)"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -100,7 +104,8 @@ class JobRepository @Inject constructor(
                     Result.failure(Exception("Dữ liệu trả về bị rỗng"))
                 }
             } else {
-                Result.failure(Exception("Lỗi backend (${response.code()})"))
+                val errorMsg = response.errorBody()?.string() ?: ""
+                Result.failure(Exception("Lỗi backend (${response.code()} - $errorMsg)"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -119,7 +124,8 @@ class JobRepository @Inject constructor(
                     Result.success(emptyList())
                 }
             } else {
-                Result.failure(Exception("Lỗi backend (${response.code()})"))
+                val errorMsg = response.errorBody()?.string() ?: ""
+                Result.failure(Exception("Lỗi backend (${response.code()} - $errorMsg)"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -139,7 +145,8 @@ class JobRepository @Inject constructor(
                     Result.failure(Exception("Dữ liệu trả về bị rỗng"))
                 }
             } else {
-                Result.failure(Exception("Lỗi backend (${response.code()})"))
+                val errorMsg = response.errorBody()?.string() ?: ""
+                Result.failure(Exception("Lỗi backend (${response.code()} - $errorMsg)"))
             }
         } catch (e: Exception){
             Result.failure(e)

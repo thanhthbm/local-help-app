@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.localhelp.app.data.local.UserManager
+import com.localhelp.app.data.remote.CloudinaryService
 import com.localhelp.app.data.repository.UserRepository
 import com.localhelp.app.model.constant.GenderEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,7 +34,8 @@ data class EditProfileUiState(
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val userManager: UserManager
+    private val userManager: UserManager,
+    private val cloudinaryService: CloudinaryService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditProfileUiState())
@@ -75,30 +77,61 @@ class EditProfileViewModel @Inject constructor(
     fun saveProfile(context: Context) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-
             val state = _uiState.value
 
-            // 1. Chuẩn bị phần JSON (data)
+            var uploadedAvatarUrl: String? = null
+
+            // 1. Upload to Cloudinary if a new local image was selected
+            state.localAvatarUri?.let { uri ->
+                try {
+                    context.contentResolver.openInputStream(uri)?.use { stream ->
+                        val bytes = stream.readBytes()
+                        val filePart = MultipartBody.Part.createFormData(
+                            "file", "avatar.jpg",
+                            bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                        )
+                        val presetPart = "localhelp_preset".toRequestBody("text/plain".toMediaTypeOrNull())
+                        
+                        val cloudResponse = cloudinaryService.uploadImage(
+                            cloudName = "dwtpcdjhe",
+                            uploadPreset = presetPart,
+                            file = filePart
+                        )
+                        
+                        if (cloudResponse.isSuccessful) {
+                            uploadedAvatarUrl = cloudResponse.body()?.secure_url
+                        } else {
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false, 
+                                errorMessage = "Lỗi upload ảnh: ${cloudResponse.code()}"
+                            )
+                            return@launch
+                        }
+                    }
+                } catch (e: Exception) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false, 
+                        errorMessage = "Lỗi kết nối Cloudinary: ${e.message}"
+                    )
+                    return@launch
+                }
+            }
+
+            // 2. Prepare JSON with the new avatarUrl
             val jsonObject = JSONObject().apply {
-                if (state.fullName.isNotBlank()) put("fullName", state.fullName)
-                if (state.phone.isNotBlank())    put("phone",    state.phone)
-                if (state.bio.isNotBlank())      put("bio",      state.bio)
+                put("fullName", state.fullName)
+                put("phone",    state.phone)
+                put("bio",      state.bio)
                 state.gender?.let { put("gender", it.name) }
+                if (uploadedAvatarUrl != null) {
+                    put("avatarUrl", uploadedAvatarUrl)
+                }
             }
             val dataPart = jsonObject.toString()
                 .toRequestBody("application/json".toMediaTypeOrNull())
 
-            // 2. Chuẩn bị phần avatar (tuỳ chọn)
-            val avatarPart: MultipartBody.Part? = state.localAvatarUri?.let { uri ->
-                context.contentResolver.openInputStream(uri)?.use { stream ->
-                    val bytes = stream.readBytes()
-                    val body = bytes.toRequestBody("image/*".toMediaTypeOrNull())
-                    MultipartBody.Part.createFormData("avatar", "avatar.jpg", body)
-                }
-            }
-
-            // 3. Một lần gọi API duy nhất
-            val result = userRepository.updateProfile(dataPart, avatarPart)
+            // 3. Call backend with null avatarPart (since we sent avatarUrl in JSON)
+            val result = userRepository.updateProfile(dataPart, null)
             if (result.isSuccess) {
                 userManager.updateProfile(result.getOrThrow())
                 _uiState.value = _uiState.value.copy(isLoading = false, isSaveSuccess = true)

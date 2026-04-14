@@ -52,9 +52,9 @@ class SetupProfileViewModel @Inject constructor(
 
             // Part 1: JSON data
             val json = JSONObject().apply {
-                if (state.fullName.isNotBlank()) put("fullName", state.fullName)
-                if (state.phone.isNotBlank())    put("phone",    state.phone)
-                if (state.bio.isNotBlank())      put("bio",      state.bio)
+                put("fullName", state.fullName)
+                put("phone",    state.phone)
+                put("bio",      state.bio)
                 state.gender?.let { put("gender", it.name) }
             }
             val dataPart = json.toString().toRequestBody("application/json".toMediaTypeOrNull())
@@ -63,7 +63,7 @@ class SetupProfileViewModel @Inject constructor(
             val avatarPart: MultipartBody.Part? = state.localAvatarUri?.let { uri ->
                 context.contentResolver.openInputStream(uri)?.use { stream ->
                     val bytes = stream.readBytes()
-                    val body = bytes.toRequestBody("image/*".toMediaTypeOrNull())
+                    val body = bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
                     MultipartBody.Part.createFormData("avatar", "avatar.jpg", body)
                 }
             }

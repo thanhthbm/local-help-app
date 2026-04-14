@@ -23,5 +23,6 @@ data class UserResponse(
     val completedJobs: Int = 0,
     val totalReviews: Int = 0,
     val averageRating: Double = 0.0,
-    val responseRate: Double = 0.0
+    val responseRate: Double = 0.0,
+    val isNew: Boolean? = false
 )

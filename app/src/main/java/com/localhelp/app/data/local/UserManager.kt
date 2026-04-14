@@ -28,7 +28,7 @@ class UserManager @Inject constructor(
     }
 
     fun updateProfile(user: UserResponse) {
-        Log.d("DEBUG_USER", "===> Gọi hàm updateProfile! Name=${user.fullName}")
+        Log.d("DEBUG_USER", "===> Gọi hàm updateProfile! Name=${user.fullName}, isNew=${user.isNew}")
         _currentUser.value = user
     }
 
