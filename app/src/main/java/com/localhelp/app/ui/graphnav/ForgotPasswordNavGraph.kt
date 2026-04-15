@@ -12,6 +12,7 @@ import androidx.navigation.navigation
 import com.localhelp.app.ui.screens.Screen
 import com.localhelp.app.ui.screens.resetpassword.ForgotPasswordViewModel
 import com.localhelp.app.ui.screens.resetpassword.NewPasswordScreen
+import com.localhelp.app.ui.screens.resetpassword.OtpVerificationScreen
 import com.localhelp.app.ui.screens.resetpassword.ResetPasswordScreen
 
 fun NavGraphBuilder.forgotPasswordGraph(navController: NavController) {
@@ -29,31 +30,36 @@ fun NavGraphBuilder.forgotPasswordGraph(navController: NavController) {
 
             ResetPasswordScreen(
                 viewModel = vm,
+                onOtpSent = {
+                    navController.navigate(Screen.OTP_VERIFICATION)
+                },
                 onBack = {navController.popBackStack()}
             )
         }
 
-        composable(
-            route = "${Screen.NEW_PASSWORD}?oobCode={oobCode}",
-            arguments = listOf(
-                navArgument("oobCode") {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                }
-            )
-        ){ backStackEntry ->
-            val oobCode = backStackEntry.arguments?.getString("oobCode")
+        composable(Screen.OTP_VERIFICATION) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("forgot_password_root")
+            }
+            val vm: ForgotPasswordViewModel = hiltViewModel(parentEntry)
 
+            OtpVerificationScreen(
+                viewModel = vm,
+                onOtpVerified = {
+                    navController.navigate(Screen.NEW_PASSWORD)
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.NEW_PASSWORD
+        ){ backStackEntry ->
             val parentEntry = remember(backStackEntry){
                 navController.getBackStackEntry("forgot_password_root")
             }
 
             val vm: ForgotPasswordViewModel = hiltViewModel(parentEntry)
-
-            LaunchedEffect(oobCode) {
-                oobCode?.let { vm.setOobCode(it) }
-            }
 
             NewPasswordScreen(
                 viewModel = vm,

@@ -1,18 +1,13 @@
 package com.localhelp.app.ui.screens.resetpassword
 
-import android.app.Activity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.google.firebase.FirebaseException
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.PhoneAuthCredential
-import com.google.firebase.auth.PhoneAuthOptions
-import com.google.firebase.auth.PhoneAuthProvider
+import androidx.lifecycle.viewModelScope
 import com.localhelp.app.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,56 +15,82 @@ class ForgotPasswordViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
     var email by mutableStateOf("")
+    var otp by mutableStateOf("")
     var newPassword by mutableStateOf("")
     var confirmPassword by mutableStateOf("")
     var isLoading by mutableStateOf(false)
     var errorMsg by mutableStateOf<String?>(null)
 
-    private var oobCode: String? = null
+    private var resetToken: String? = null
 
-    fun setOobCode(code: String){
-        oobCode = code
+    fun setOobCode(code: String) {
+        resetToken = code
     }
 
-    fun sendResetEmail(onResult: (Boolean) -> Unit){
+    fun sendOtp(onResult: (Boolean) -> Unit) {
+        if (email.isBlank()) {
+            errorMsg = "Vui lòng nhập email"
+            return
+        }
         isLoading = true
-
-        authRepository.sendResetEmail(email){ success, error ->
-            isLoading = false
-
-            if (success){
-                onResult(true)
-            } else {
-                errorMsg = error
-                onResult(false)
-            }
-
+        viewModelScope.launch {
+            authRepository.sendOtp(email)
+                .onSuccess {
+                    isLoading = false
+                    onResult(true)
+                }
+                .onFailure {
+                    isLoading = false
+                    errorMsg = it.message
+                    onResult(false)
+                }
         }
     }
 
-    fun resetPassword(onSuccess: () -> Unit){
-        val code = oobCode ?: return
+    fun verifyOtp(onResult: (Boolean) -> Unit) {
+        if (otp.length < 6) {
+            errorMsg = "Vui lòng nhập mã OTP"
+            return
+        }
+        isLoading = true
+        viewModelScope.launch {
+            authRepository.verifyOtp(email, otp)
+                .onSuccess { token ->
+                    resetToken = token
+                    isLoading = false
+                    onResult(true)
+                }
+                .onFailure {
+                    isLoading = false
+                    errorMsg = it.message
+                    onResult(false)
+                }
+        }
+    }
 
-        if (newPassword != confirmPassword){
+    fun resetPassword(onSuccess: () -> Unit) {
+        val token = resetToken
+        if (token == null) {
+            errorMsg = "Phiên xác thực đã hết hạn"
+            return
+        }
+
+        if (newPassword != confirmPassword) {
             errorMsg = "Mật khẩu không khớp"
             return
         }
 
         isLoading = true
-
-        FirebaseAuth.getInstance()
-            .confirmPasswordReset(code, newPassword)
-            .addOnCompleteListener { task ->
-                isLoading = false
-
-                if (task.isSuccessful){
+        viewModelScope.launch {
+            authRepository.resetPassword(email, token, newPassword)
+                .onSuccess {
+                    isLoading = false
                     onSuccess()
-                } else {
-                    errorMsg = task.exception?.message
                 }
-            }
+                .onFailure {
+                    isLoading = false
+                    errorMsg = it.message
+                }
+        }
     }
-
-
 }
-

@@ -95,4 +95,37 @@ class AuthRepository @Inject constructor(
                 }
             }
     }
+
+    suspend fun sendOtp(email: String): Result<Unit> {
+        return try {
+            val response = authService.sendOtp(email)
+            if (response.isSuccessful) Result.success(Unit)
+            else Result.failure(Exception("Lỗi gửi OTP: ${response.message()}"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun verifyOtp(email: String, otp: String): Result<String> {
+        return try {
+            val response = authService.verifyOtp(email, otp)
+            if (response.isSuccessful && response.body()?.data != null) {
+                Result.success(response.body()!!.data!!.resetToken)
+            } else {
+                Result.failure(Exception("OTP không chính xác hoặc đã hết hạn"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun resetPassword(email: String, resetToken: String, newPassword: String): Result<Unit> {
+        return try {
+            val response = authService.resetPassword(email, resetToken, newPassword)
+            if (response.isSuccessful) Result.success(Unit)
+            else Result.failure(Exception("Lỗi đặt lại mật khẩu: ${response.message()}"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
