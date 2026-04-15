@@ -2,9 +2,10 @@ package com.localhelp.app.model.constant
 
 enum class JobStatus {
     OPEN,
-    IN_PROGRESS,
+    ACCEPTED,
+    ON_THE_WAY,
+    WORKING,
+    PENDING_PAYMENT,
     COMPLETED,
-    CANCELLED,
-    CLOSED,
-    ASSIGNED
+    CANCELLED
 }

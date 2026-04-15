@@ -44,7 +44,7 @@ class SearchRepository @Inject constructor(
                 if (paginationData != null) {
                     emit(Result.success(paginationData))
                 } else {
-                    val emptyMeta = Meta(page = 0, size = 10, pages = 0, total = 0L)
+                    val emptyMeta = Meta(page = 1, size = 10, pages = 0, total = 0L)
                     val emptyList : List<JobResponse> = listOf()
                     val emptyPagination = ResultPaginationDTO(meta = emptyMeta, result = emptyList)
                     emit(Result.success(emptyPagination))
