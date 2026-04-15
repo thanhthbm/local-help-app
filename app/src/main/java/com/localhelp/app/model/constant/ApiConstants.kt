@@ -4,7 +4,7 @@ import com.localhelp.app.BuildConfig
 
 object ApiConstants {
     // server
-    const val BASE_URL = "http://192.168.1.9:6363"
+    const val BASE_URL = "http://152.69.221.87:3636"
 
     // Track asia map
     const val BASE_URL_MAP_VN = "https://maps.track-asia.com/"
