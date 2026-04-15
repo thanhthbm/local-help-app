@@ -1,5 +1,6 @@
 package com.localhelp.app.ui.screens.profile
 
+import android.graphics.Color as AndroidColor
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,8 +34,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.localhelp.app.model.response.CategoryItemDTO
+import com.localhelp.app.model.response.TransactionItemDTO
 import java.text.NumberFormat
 import java.util.Locale
+import java.util.Calendar
 
 // ─── Color tokens ──────────────────────────────────────────────────────────────
 private val Orange = Color(0xFFF06A50)
@@ -44,70 +50,28 @@ private val GrayBg = Color(0xFFF7F7F7)
 private val Blue = Color(0xFF4A90D9)
 private val Purple = Color(0xFF9B59B6)
 
-// ─── Mock data ─────────────────────────────────────────────────────────────────
-data class SpendingCategory(
-    val id: Int,
-    val name: String,
-    val icon: ImageVector,
-    val iconBg: Color,
-    val iconTint: Color,
-    val amount: Long,
-    val percent: Int,
-    val barColor: Color
-)
+private fun parseColor(hex: String?, defaultColor: Color): Color {
+    if (hex.isNullOrEmpty()) return defaultColor
+    return try {
+        Color(AndroidColor.parseColor(hex))
+    } catch (e: Exception) {
+        defaultColor
+    }
+}
 
-data class TransactionItem(
-    val id: Int,
-    val name: String,
-    val icon: ImageVector,
-    val iconBg: Color,
-    val iconTint: Color,
-    val dateTime: String,
-    val amount: Long,
-    val status: String,           // "Hoàn tất" | "Đang chờ"
-    val statusColor: Color,
-    val statusBg: Color
-)
+private fun getIconByName(name: String?): ImageVector {
+    val low = name?.lowercase() ?: ""
+    return when {
+        low.contains("dọn") -> Icons.Filled.Brush
+        low.contains("giao") || low.contains("thuê") -> Icons.Filled.LocalShipping
+        low.contains("chó") || low.contains("chăm") -> Icons.Filled.Pets
+        else -> Icons.Filled.Info
+    }
+}
 
-// --- Chi tiêu ---
-private val mockCategories = listOf(
-    SpendingCategory(1, "Dọn dẹp nhà cửa", Icons.Filled.Brush, Color(0xFFFFF0E0), Color(0xFFF0A040), 2_100_000, 50, Orange),
-    SpendingCategory(2, "Giao hàng", Icons.Filled.LocalShipping, Color(0xFFE0F0FF), Blue, 1_260_000, 30, Blue),
-    SpendingCategory(3, "Chăm sóc thú cưng", Icons.Filled.Pets, Color(0xFFFFE8F0), Color(0xFFE06080), 840_000, 20, Purple)
-)
-
-private val mockTransactions = listOf(
-    TransactionItem(1, "Dọn nhà theo giờ", Icons.Filled.Brush, Color(0xFFFFF0E0), Color(0xFFF0A040),
-        "Hôm nay, 14:30", 250_000, "Hoàn tất", Green, GreenBg),
-    TransactionItem(2, "Giao hàng nhanh", Icons.Filled.LocalShipping, Color(0xFFE0F0FF), Blue,
-        "Hôm qua, 09:15", 45_000, "Đang chờ", Color(0xFFF0A040), Color(0xFFFFF0D0)),
-    TransactionItem(3, "Dắt chó đi dạo", Icons.Filled.Pets, Color(0xFFFFE8F0), Color(0xFFE06080),
-        "22 Th10, 2023", 150_000, "Hoàn tất", Green, GreenBg)
-)
-
-// --- Thu nhập ---
-private val mockEarningCategories = listOf(
-    SpendingCategory(101, "Giao hàng", Icons.Filled.LocalShipping, Color(0xFFE0F0FF), Blue, 3_500_000, 55, Blue),
-    SpendingCategory(102, "Dọn dẹp nhà cửa", Icons.Filled.Brush, Color(0xFFFFF0E0), Color(0xFFF0A040), 1_920_000, 30, Orange),
-    SpendingCategory(103, "Chăm sóc thú cưng", Icons.Filled.Pets, Color(0xFFFFE8F0), Color(0xFFE06080), 960_000, 15, Color(0xFFE06080))
-)
-
-private val mockEarningTransactions = listOf(
-    TransactionItem(101, "Giao hàng nhanh Q1", Icons.Filled.LocalShipping, Color(0xFFE0F0FF), Blue,
-        "Hôm nay, 10:00", 180_000, "Hoàn tất", Green, GreenBg),
-    TransactionItem(102, "Dọn nhà 3 tiếng", Icons.Filled.Brush, Color(0xFFFFF0E0), Color(0xFFF0A040),
-        "Hôm qua, 15:30", 350_000, "Hoàn tất", Green, GreenBg),
-    TransactionItem(103, "Dắt chó đi dạo", Icons.Filled.Pets, Color(0xFFFFE8F0), Color(0xFFE06080),
-        "20 Th10, 2023", 150_000, "Đang chờ", Color(0xFFF0A040), Color(0xFFFFF0D0))
-)
-
-private val weeklySpendData = listOf(0.4f, 0.6f, 1.0f, 0.3f)
-private val weeklyEarningData = listOf(0.5f, 0.8f, 0.7f, 1.0f)
 private val weekLabels = listOf("Tuần 1", "Tuần\n2", "Tuần 3", "Tuần\n4")
-private val activeWeek = 2
-private val activeEarningWeek = 3
 
-private fun formatVnd(amount: Long): String {
+private fun formatVnd(amount: Double): String {
     val fmt = NumberFormat.getNumberInstance(Locale("vi", "VN"))
     return "${fmt.format(kotlin.math.abs(amount))} đ"
 }
@@ -116,11 +80,22 @@ private fun formatVnd(amount: Long): String {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FinancialStatsScreen(
+    viewModel: FinanceStatsViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {},
-    onCategoryClick: (Int) -> Unit = {},
+    onCategoryClick: (Int, Boolean, Int, Int) -> Unit = { _, _, _, _ -> }, // id, isEarning, month, year
     onTransactionClick: (Int) -> Unit = {}
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    
+    val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
+    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchData(currentMonth, currentYear)
+    }
+
+    val spendingState by viewModel.spendingState.collectAsState()
+    val earningState by viewModel.earningState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -156,36 +131,46 @@ fun FinancialStatsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (selectedTab == 0) {
-                    Text("Tổng chi tiêu tháng 10", color = Gray, fontSize = 13.sp)
+                    Text("Tổng chi tiêu tháng $currentMonth", color = Gray, fontSize = 13.sp)
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        "4.200.000 đ",
+                        formatVnd(spendingState.totalAmount),
                         fontSize = 30.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFF1A1A1A)
                     )
                     Spacer(Modifier.height(6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.AutoMirrored.Filled.TrendingDown, null,
-                            tint = Green, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Thấp hơn 12% so với tháng trước", color = Green, fontSize = 12.sp)
+                        if (spendingState.trend == "DOWN") {
+                            Icon(Icons.AutoMirrored.Filled.TrendingDown, null, tint = Green, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Thấp hơn ${spendingState.percentageChange}% so với tháng trước", color = Green, fontSize = 12.sp)
+                        } else {
+                            Icon(Icons.AutoMirrored.Filled.TrendingUp, null, tint = Orange, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Cao hơn ${spendingState.percentageChange}% so với tháng trước", color = Orange, fontSize = 12.sp)
+                        }
                     }
                 } else {
-                    Text("Tổng thu nhập tháng 10", color = Gray, fontSize = 13.sp)
+                    Text("Tổng thu nhập tháng $currentMonth", color = Gray, fontSize = 13.sp)
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        "6.380.000 đ",
+                        formatVnd(earningState.totalAmount),
                         fontSize = 30.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Green
                     )
                     Spacer(Modifier.height(6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.AutoMirrored.Filled.TrendingUp, null,
-                            tint = Blue, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Cao hơn 23% so với tháng trước", color = Blue, fontSize = 12.sp)
+                        if (earningState.trend == "UP") {
+                            Icon(Icons.AutoMirrored.Filled.TrendingUp, null, tint = Blue, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Cao hơn ${earningState.percentageChange}% so với tháng trước", color = Blue, fontSize = 12.sp)
+                        } else {
+                            Icon(Icons.AutoMirrored.Filled.TrendingDown, null, tint = Orange, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Thấp hơn ${earningState.percentageChange}% so với tháng trước", color = Orange, fontSize = 12.sp)
+                        }
                     }
                 }
             }
@@ -233,15 +218,25 @@ fun FinancialStatsScreen(
             Spacer(Modifier.height(8.dp))
 
             if (selectedTab == 0) {
-                SpendingTabContent(
-                    onCategoryClick = onCategoryClick,
-                    onTransactionClick = onTransactionClick
-                )
+                if (spendingState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally).padding(20.dp), color = Orange)
+                } else {
+                    SpendingTabContent(
+                        state = spendingState,
+                        onCategoryClick = { id -> onCategoryClick(id, false, currentMonth, currentYear) },
+                        onTransactionClick = onTransactionClick
+                    )
+                }
             } else {
-                EarningTabContent(
-                    onCategoryClick = onCategoryClick,
-                    onTransactionClick = onTransactionClick
-                )
+                if (earningState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally).padding(20.dp), color = Green)
+                } else {
+                    EarningTabContent(
+                        state = earningState,
+                        onCategoryClick = { id -> onCategoryClick(id, true, currentMonth, currentYear) },
+                        onTransactionClick = onTransactionClick
+                    )
+                }
             }
 
             Spacer(Modifier.height(24.dp))
@@ -252,6 +247,7 @@ fun FinancialStatsScreen(
 // ─── Tab: Đã Chi ───────────────────────────────────────────────────────────────
 @Composable
 private fun SpendingTabContent(
+    state: FinanceOverviewUiState,
     onCategoryClick: (Int) -> Unit,
     onTransactionClick: (Int) -> Unit
 ) {
@@ -272,7 +268,7 @@ private fun SpendingTabContent(
                 }
             }
             Spacer(Modifier.height(16.dp))
-            WeeklyBarChart(weeklySpendData, weekLabels, activeWeek, "1.8tr", Orange)
+            WeeklyBarChart(state.weeklyChart.map { it.toFloat() }, weekLabels, -1, formatVnd(state.totalAmount), Orange)
         }
     }
 
@@ -287,9 +283,10 @@ private fun SpendingTabContent(
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Danh mục chi tiêu", fontWeight = FontWeight.Bold, fontSize = 15.sp)
             Spacer(Modifier.height(12.dp))
-            mockCategories.forEach { cat ->
-                CategoryRow(cat, isEarning = false, onClick = { onCategoryClick(cat.id) })
-                if (cat != mockCategories.last()) Divider(color = Color(0xFFF0F0F0))
+            if (state.categories.isEmpty()) Text("Chưa có danh mục nào.", color = Gray, fontSize = 13.sp)
+            state.categories.forEach { cat ->
+                CategoryRow(cat, isEarning = false, onClick = { onCategoryClick(cat.id.toInt()) })
+                if (cat != state.categories.last()) HorizontalDivider(color = Color(0xFFF0F0F0))
             }
         }
     }
@@ -309,9 +306,10 @@ private fun SpendingTabContent(
                 Text("Xem tất cả", color = Orange, fontSize = 13.sp, modifier = Modifier.clickable {})
             }
             Spacer(Modifier.height(12.dp))
-            mockTransactions.forEach { tx ->
-                TransactionRow(tx, isEarning = false, onClick = { onTransactionClick(tx.id) })
-                if (tx != mockTransactions.last()) Divider(color = Color(0xFFF0F0F0))
+            if (state.recentTransactions.isEmpty()) Text("Chưa có giao dịch.", color = Gray, fontSize = 13.sp)
+            state.recentTransactions.forEach { tx ->
+                TransactionRow(tx, isEarning = false, onClick = { onTransactionClick(tx.id.toInt()) })
+                if (tx != state.recentTransactions.last()) HorizontalDivider(color = Color(0xFFF0F0F0))
             }
         }
     }
@@ -320,6 +318,7 @@ private fun SpendingTabContent(
 // ─── Tab: Đã Kiếm ──────────────────────────────────────────────────────────────
 @Composable
 private fun EarningTabContent(
+    state: FinanceOverviewUiState,
     onCategoryClick: (Int) -> Unit,
     onTransactionClick: (Int) -> Unit
 ) {
@@ -340,7 +339,7 @@ private fun EarningTabContent(
                 }
             }
             Spacer(Modifier.height(16.dp))
-            WeeklyBarChart(weeklyEarningData, weekLabels, activeEarningWeek, "2.1tr", Green)
+            WeeklyBarChart(state.weeklyChart.map { it.toFloat() }, weekLabels, -1, formatVnd(state.totalAmount), Green)
         }
     }
 
@@ -355,9 +354,10 @@ private fun EarningTabContent(
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Danh mục thu nhập", fontWeight = FontWeight.Bold, fontSize = 15.sp)
             Spacer(Modifier.height(12.dp))
-            mockEarningCategories.forEach { cat ->
-                CategoryRow(cat, isEarning = true, onClick = { onCategoryClick(cat.id) })
-                if (cat != mockEarningCategories.last()) Divider(color = Color(0xFFF0F0F0))
+            if (state.categories.isEmpty()) Text("Chưa có danh mục nào.", color = Gray, fontSize = 13.sp)
+            state.categories.forEach { cat ->
+                CategoryRow(cat, isEarning = true, onClick = { onCategoryClick(cat.id.toInt()) })
+                if (cat != state.categories.last()) HorizontalDivider(color = Color(0xFFF0F0F0))
             }
         }
     }
@@ -377,9 +377,10 @@ private fun EarningTabContent(
                 Text("Xem tất cả", color = Green, fontSize = 13.sp, modifier = Modifier.clickable {})
             }
             Spacer(Modifier.height(12.dp))
-            mockEarningTransactions.forEach { tx ->
-                TransactionRow(tx, isEarning = true, onClick = { onTransactionClick(tx.id) })
-                if (tx != mockEarningTransactions.last()) Divider(color = Color(0xFFF0F0F0))
+            if (state.recentTransactions.isEmpty()) Text("Chưa có giao dịch.", color = Gray, fontSize = 13.sp)
+            state.recentTransactions.forEach { tx ->
+                TransactionRow(tx, isEarning = true, onClick = { onTransactionClick(tx.id.toInt()) })
+                if (tx != state.recentTransactions.last()) HorizontalDivider(color = Color(0xFFF0F0F0))
             }
         }
     }
@@ -395,6 +396,7 @@ private fun WeeklyBarChart(
     highlightValue: String,
     activeColor: Color = Orange
 ) {
+    if (data.isEmpty()) return
     val chartHeight = 120.dp
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -438,7 +440,8 @@ private fun WeeklyBarChart(
 }
 
 @Composable
-private fun CategoryRow(cat: SpendingCategory, isEarning: Boolean, onClick: () -> Unit) {
+private fun CategoryRow(cat: CategoryItemDTO, isEarning: Boolean, onClick: () -> Unit) {
+    val baseColor = parseColor(cat.colorCode, if(isEarning) Blue else Orange)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -447,19 +450,19 @@ private fun CategoryRow(cat: SpendingCategory, isEarning: Boolean, onClick: () -
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier.size(44.dp).background(cat.iconBg, CircleShape),
+            modifier = Modifier.size(44.dp).background(baseColor.copy(alpha = 0.2f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(cat.icon, null, tint = cat.iconTint, modifier = Modifier.size(22.dp))
+            Icon(getIconByName(cat.name), null, tint = baseColor, modifier = Modifier.size(22.dp))
         }
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(cat.name, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             Spacer(Modifier.height(4.dp))
-            LinearProgressBar(progress = cat.percent / 100f, color = cat.barColor)
+            LinearProgressBar(progress = (cat.percentage / 100).toFloat(), color = baseColor)
             Spacer(Modifier.height(2.dp))
             Text(
-                "${cat.percent}% tổng ${if (isEarning) "thu nhập" else "chi tiêu"}",
+                "${cat.percentage}% tổng ${if (isEarning) "thu nhập" else "chi tiêu"}",
                 color = Gray, fontSize = 11.sp
             )
         }
@@ -475,7 +478,7 @@ private fun CategoryRow(cat: SpendingCategory, isEarning: Boolean, onClick: () -
 
 @Composable
 private fun LinearProgressBar(progress: Float, color: Color) {
-    val animProgress by animateFloatAsState(targetValue = progress, animationSpec = tween(800))
+    val animProgress by animateFloatAsState(targetValue = progress.takeIf { it > 0f } ?: 0.01f, animationSpec = tween(800))
     Canvas(modifier = Modifier.fillMaxWidth().height(5.dp)) {
         drawRoundRect(
             color = Color(0xFFEEEEEE),
@@ -491,7 +494,8 @@ private fun LinearProgressBar(progress: Float, color: Color) {
 }
 
 @Composable
-private fun TransactionRow(tx: TransactionItem, isEarning: Boolean, onClick: () -> Unit) {
+private fun TransactionRow(tx: TransactionItemDTO, isEarning: Boolean, onClick: () -> Unit) {
+    val baseColor = parseColor(tx.colorCode, if (isEarning) Blue else Orange)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -500,16 +504,16 @@ private fun TransactionRow(tx: TransactionItem, isEarning: Boolean, onClick: () 
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier.size(44.dp).background(tx.iconBg, CircleShape),
+            modifier = Modifier.size(44.dp).background(baseColor.copy(alpha=0.2f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(tx.icon, null, tint = tx.iconTint, modifier = Modifier.size(22.dp))
+            Icon(getIconByName(tx.serviceName), null, tint = baseColor, modifier = Modifier.size(22.dp))
         }
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(tx.name, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(tx.dateTime, color = Gray, fontSize = 12.sp)
+            Text(tx.dateStr, color = Gray, fontSize = 12.sp)
         }
         Spacer(Modifier.width(8.dp))
         Column(horizontalAlignment = Alignment.End) {
@@ -520,12 +524,12 @@ private fun TransactionRow(tx: TransactionItem, isEarning: Boolean, onClick: () 
             Spacer(Modifier.height(2.dp))
             Surface(
                 shape = RoundedCornerShape(50),
-                color = tx.statusBg
+                color = if (tx.status == "COMPLETED") GreenBg else Color(0xFFFFF0D0)
             ) {
                 Text(
-                    tx.status,
+                    if (tx.status == "COMPLETED") "Hoàn tất" else "Chờ xử lý",
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                    color = tx.statusColor,
+                    color = if (tx.status == "COMPLETED") Green else Orange,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium
                 )

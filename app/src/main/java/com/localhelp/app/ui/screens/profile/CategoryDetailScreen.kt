@@ -1,5 +1,6 @@
 package com.localhelp.app.ui.screens.profile
 
+import android.graphics.Color as AndroidColor
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.LocalShipping
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.*
@@ -32,58 +34,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.localhelp.app.model.response.TransactionItemDTO
+import java.text.NumberFormat
+import java.util.Locale
 
-// ─── Mock data for category 1: Dọn dẹp nhà cửa ───────────────────────────────
-private data class SubCategory(val name: String, val amount: Long, val color: Color)
-private data class CategoryTransaction(
-    val name: String,
-    val icon: ImageVector,
-    val iconBg: Color,
-    val iconTint: Color,
-    val date: String,
-    val amount: Long
-)
-
-// Dữ liệu mock chi tiêu
-private val mockSubCategories = listOf(
-    SubCategory("Dọn nhà theo giờ", 1_050_000, Color(0xFFF0A040)),
-    SubCategory("Vệ sinh máy lạnh", 630_000, Color(0xFF4A90D9)),
-    SubCategory("Giặt rèm", 420_000, Color(0xFF9B59B6))
-)
-
-private val mockCategoryTransactions = listOf(
-    CategoryTransaction("Dọn nhà theo giờ (3h)", Icons.Filled.Brush,
-        Color(0xFFFFF0E0), Color(0xFFF0A040), "28 Th10, 14:30", 350_000),
-    CategoryTransaction("Giặt ủi đồ vest", Icons.Filled.LocalShipping,
-        Color(0xFFE0F0FF), Color(0xFF4A90D9), "25 Th10, 09:15", 120_000),
-    CategoryTransaction("Vệ sinh máy lạnh", Icons.Filled.Brush,
-        Color(0xFFFFF0E0), Color(0xFFF0A040), "20 Th10, 10:00", 630_000),
-    CategoryTransaction("Dọn nhà theo giờ (3h)", Icons.Filled.Brush,
-        Color(0xFFFFF0E0), Color(0xFFF0A040), "15 Th10, 14:00", 350_000)
-)
-
-// Dữ liệu mock thu nhập (categoryId = 101 - Giao hàng)
-private val mockEarningSubCategories = listOf(
-    SubCategory("Giao đồ ăn", 1_750_000, Color(0xFF4A90D9)),
-    SubCategory("Giao bưu kiện", 1_050_000, Color(0xFF2E9B5B)),
-    SubCategory("Chuyển đồ nặng", 700_000, Color(0xFFF0A040))
-)
-
-private val mockEarningTransactions = listOf(
-    CategoryTransaction("Giao đồ ăn nhanh Q1", Icons.Filled.LocalShipping,
-        Color(0xFFE0F0FF), Color(0xFF4A90D9), "28 Th10, 11:30", 65_000),
-    CategoryTransaction("Chuyển bưu kiện nội thành", Icons.Filled.LocalShipping,
-        Color(0xFFE0F0FF), Color(0xFF4A90D9), "28 Th10, 09:15", 45_000),
-    CategoryTransaction("Giao hàng siêu tốc", Icons.Filled.LocalShipping,
-        Color(0xFFE0F0FF), Color(0xFF4A90D9), "27 Th10, 16:00", 120_000),
-    CategoryTransaction("Chuyển đồ cồng kềnh", Icons.Filled.LocalShipping,
-        Color(0xFFE0F0FF), Color(0xFF4A90D9), "26 Th10, 14:00", 250_000)
-)
-
-
-private fun formatVndAbs(amount: Long): String {
+private fun formatVndAbs(amount: Double): String {
     val v = kotlin.math.abs(amount)
-    return "${String.format("%,d", v).replace(",", ".")} đ"
+    val fmt = NumberFormat.getNumberInstance(Locale("vi", "VN"))
+    return "${fmt.format(v)} đ"
+}
+
+private fun parseColor(hex: String?, defaultColor: Color): Color {
+    if (hex.isNullOrEmpty()) return defaultColor
+    return try { Color(AndroidColor.parseColor(hex)) } catch (e: Exception) { defaultColor }
+}
+
+private fun getIconByName(name: String?): ImageVector {
+    val low = name?.lowercase() ?: ""
+    return when {
+        low.contains("dọn") -> Icons.Filled.Brush
+        low.contains("giao") || low.contains("thuê") -> Icons.Filled.LocalShipping
+        low.contains("chó") || low.contains("chăm") -> Icons.Filled.Pets
+        else -> Icons.Filled.Info
+    }
 }
 
 // ─── Main screen ───────────────────────────────────────────────────────────────
@@ -91,20 +65,26 @@ private fun formatVndAbs(amount: Long): String {
 @Composable
 fun CategoryDetailScreen(
     categoryId: Int = 1,
+    isEarning: Boolean = false,
+    month: Int = 10,
+    year: Int = 2023,
+    viewModel: CategoryDetailViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {},
     onTransactionClick: (Int) -> Unit = {}
 ) {
-    val isEarning = categoryId > 100
+    LaunchedEffect(categoryId, isEarning, month, year) {
+        viewModel.fetchDetails(categoryId.toLong(), isEarning, month, year)
+    }
+
+    val state by viewModel.uiState.collectAsState()
+
     val accentColor = if (isEarning) Color(0xFF4A90D9) else Color(0xFFF0A040)
     val accentBgColor = if (isEarning) Color(0xFFE0F0FF) else Color(0xFFFFF0E0)
     
-    val categoryName = if (isEarning) "Giao hàng (Thu)" else "Dọn dẹp nhà cửa"
-    val categoryIcon = if (isEarning) Icons.Filled.LocalShipping else Icons.Filled.Brush
-    val totalAmount = if (isEarning) "3.500.000 đ" else "2.100.000 đ"
-    val totalLabel = if (isEarning) "Tổng thu nhập tháng 10" else "Tổng chi tiêu tháng 10"
-    
-    val subCategories = if (isEarning) mockEarningSubCategories else mockSubCategories
-    val transactions = if (isEarning) mockEarningTransactions else mockCategoryTransactions
+    val categoryName = state.data?.categoryName ?: "Tải danh mục..."
+    val categoryIcon = getIconByName(categoryName)
+    val totalAmount = state.data?.totalAmount ?: 0.0
+    val totalLabel = if (isEarning) "Tổng thu nhập tháng $month" else "Tổng chi tiêu tháng $month"
 
     Scaffold(
         topBar = {
@@ -125,145 +105,153 @@ fun CategoryDetailScreen(
         },
         containerColor = Color(0xFFF7F7F7)
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-        ) {
-            // ── Category header ───────────────────────────────────────────────
+        if (state.isLoading) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = accentColor)
+            }
+        } else if (state.data != null) {
+            val data = state.data!!
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Box(
+                // ── Category header ───────────────────────────────────────────────
+                Column(
                     modifier = Modifier
-                        .size(64.dp)
-                        .background(accentBgColor, CircleShape),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(categoryIcon, null,
-                        tint = accentColor, modifier = Modifier.size(32.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .background(accentBgColor, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(categoryIcon, null,
+                            tint = accentColor, modifier = Modifier.size(32.dp))
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Text(categoryName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(formatVndAbs(totalAmount), fontSize = 26.sp,
+                        fontWeight = FontWeight.ExtraBold, color = accentColor)
+                    Text(totalLabel, color = Color(0xFF888888), fontSize = 12.sp)
                 }
+
                 Spacer(Modifier.height(12.dp))
-                Text(categoryName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(4.dp))
-                Text(totalAmount, fontSize = 26.sp,
-                    fontWeight = FontWeight.ExtraBold, color = accentColor)
-                Text(totalLabel, color = Color(0xFF888888), fontSize = 12.sp)
-            }
 
-            Spacer(Modifier.height(12.dp))
-
-            // ── Donut chart card ──────────────────────────────────────────────
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(2.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(if (isEarning) "Phân bổ thu nhập" else "Phân bổ chi tiêu", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                    Spacer(Modifier.height(16.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier.size(150.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            DonutChart(
-                                data = subCategories.map { it.amount.toFloat() },
-                                colors = subCategories.map { it.color }
-                            )
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("Lớn nhất", color = Color(0xFF888888), fontSize = 10.sp)
-                                Text("50%", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
+                // ── Donut chart card ──────────────────────────────────────────────
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(if (isEarning) "Phân bổ thu nhập" else "Phân bổ chi tiêu", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Spacer(Modifier.height(16.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier.size(150.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                DonutChart(
+                                    data = data.subCategories.map { it.amount.toFloat() },
+                                    colors = data.subCategories.map { parseColor(it.colorCode, accentColor) }
+                                )
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("Lớn nhất", color = Color(0xFF888888), fontSize = 10.sp)
+                                    val maxPercent = data.subCategories.maxOfOrNull { it.percentage } ?: 0.0
+                                    Text("${maxPercent.toInt()}%", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
+                                }
                             }
-                        }
-                        Spacer(Modifier.width(16.dp))
-                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            subCategories.forEach { sub ->
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(10.dp)
-                                            .background(sub.color, CircleShape)
-                                    )
-                                    Spacer(Modifier.width(6.dp))
-                                    Column {
-                                        Text(sub.name, fontSize = 12.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                        Text(formatVndAbs(sub.amount),
-                                            fontSize = 12.sp, color = Color(0xFF888888))
+                            Spacer(Modifier.width(16.dp))
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                data.subCategories.forEach { sub ->
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(10.dp)
+                                                .background(parseColor(sub.colorCode, accentColor), CircleShape)
+                                        )
+                                        Spacer(Modifier.width(6.dp))
+                                        Column {
+                                            Text(sub.subName, fontSize = 12.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                            Text(formatVndAbs(sub.amount),
+                                                fontSize = 12.sp, color = Color(0xFF888888))
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(12.dp))
 
-            // ── Transaction history ───────────────────────────────────────────
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(2.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Lịch sử giao dịch", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                    Spacer(Modifier.height(12.dp))
-                    transactions.forEachIndexed { idx, tx ->
-                        CategoryTxRow(tx, isEarning)
-                        if (idx != transactions.lastIndex)
-                            Divider(color = Color(0xFFF0F0F0))
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            // ── AI insight card ───────────────────────────────────────────────
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = if (isEarning) Color(0xFFF0F8FF) else Color(0xFFFFF8F0)),
-                elevation = CardDefaults.cardElevation(0.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.Top
+                // ── Transaction history ───────────────────────────────────────────
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(2.dp)
                 ) {
-                    Icon(Icons.Filled.AutoAwesome, null,
-                        tint = accentColor, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(10.dp))
-                    Column {
-                        Text("AI Nhận xét",
-                            fontWeight = FontWeight.Bold, fontSize = 14.sp, color = accentColor)
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            if (isEarning) "Bạn có thu nhập lớn nhất từ các đơn hàng giao đồ ăn. Hãy cân nhắc mở rộng khu vực giao hàng vào giờ cao điểm để tăng thêm 20% thu nhập."
-                            else "Bạn chi nhiều nhất vào cuối tuần cho dịch vụ này. Hãy cân nhắc đặt lịch vào giữa tuần để nhận ưu đãi giảm giá 15%.",
-                            fontSize = 13.sp,
-                            color = Color(0xFF555555),
-                            lineHeight = 18.sp
-                        )
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Lịch sử giao dịch", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Spacer(Modifier.height(12.dp))
+                        if (data.transactions.isEmpty()) Text("Chưa có giao dịch.", color = Color(0xFF888888), fontSize = 13.sp)
+                        data.transactions.forEachIndexed { idx, tx ->
+                            CategoryTxRow(tx, isEarning, onClick = { onTransactionClick(tx.id.toInt()) })
+                            if (idx != data.transactions.lastIndex)
+                                HorizontalDivider(color = Color(0xFFF0F0F0))
+                        }
                     }
                 }
-            }
 
-            Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(12.dp))
+
+                // ── AI insight card ───────────────────────────────────────────────
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = if (isEarning) Color(0xFFF0F8FF) else Color(0xFFFFF8F0)),
+                    elevation = CardDefaults.cardElevation(0.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Icon(Icons.Filled.AutoAwesome, null,
+                            tint = accentColor, modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(10.dp))
+                        Column {
+                            Text("AI Nhận xét",
+                                fontWeight = FontWeight.Bold, fontSize = 14.sp, color = accentColor)
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                data.aiInsight,
+                                fontSize = 13.sp,
+                                color = Color(0xFF555555),
+                                lineHeight = 18.sp
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(24.dp))
+            }
         }
     }
 }
@@ -272,7 +260,6 @@ fun CategoryDetailScreen(
 
 @Composable
 private fun DonutChart(data: List<Float>, colors: List<Color>) {
-    // Return early if empty data to avoid crash
     if (data.isEmpty() || data.sum() == 0f) return
     
     val total = data.sum()
@@ -290,7 +277,7 @@ private fun DonutChart(data: List<Float>, colors: List<Color>) {
                 drawArc(
                     color = color,
                     startAngle = startAngle,
-                    sweepAngle = sweep - 2f,   // small gap between segments
+                    sweepAngle = sweep - 2f,
                     useCenter = false,
                     topLeft = topLeft,
                     size = Size(diameter, diameter),
@@ -303,26 +290,27 @@ private fun DonutChart(data: List<Float>, colors: List<Color>) {
 }
 
 @Composable
-private fun CategoryTxRow(tx: CategoryTransaction, isEarning: Boolean) {
+private fun CategoryTxRow(tx: TransactionItemDTO, isEarning: Boolean, onClick: () -> Unit) {
+    val txColor = parseColor(tx.colorCode, if(isEarning) Color(0xFF4A90D9) else Color(0xFFF0A040))
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { onClick() }
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .size(42.dp)
-                .background(tx.iconBg, CircleShape),
+                .background(txColor.copy(alpha=0.2f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(tx.icon, null, tint = tx.iconTint, modifier = Modifier.size(20.dp))
+            Icon(getIconByName(tx.serviceName), null, tint = txColor, modifier = Modifier.size(20.dp))
         }
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(tx.name, fontWeight = FontWeight.SemiBold, fontSize = 13.sp,
-                maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(tx.date, color = Color(0xFF888888), fontSize = 11.sp)
+            Text(tx.name, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(tx.dateStr, color = Color(0xFF888888), fontSize = 11.sp)
         }
         Spacer(Modifier.width(8.dp))
         

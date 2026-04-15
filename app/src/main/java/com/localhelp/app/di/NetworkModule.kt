@@ -7,6 +7,7 @@ import com.localhelp.app.data.remote.AuthService
 import com.localhelp.app.data.remote.CategoryService
 import com.localhelp.app.data.remote.CloudinaryService
 import com.localhelp.app.data.remote.ConversationService
+import com.localhelp.app.data.remote.FinanceService
 import com.localhelp.app.data.remote.JobService
 import com.localhelp.app.data.remote.TokenAuthenticator
 import com.localhelp.app.data.remote.TrackAsiaApiService
@@ -130,6 +131,12 @@ object NetworkModule {
     @Singleton
     fun provideConversationService(@Named("main") retrofit: Retrofit): ConversationService {
         return retrofit.create(ConversationService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFinanceService(@Named("main") retrofit: Retrofit): FinanceService {
+        return retrofit.create(FinanceService::class.java)
     }
 
     @Provides

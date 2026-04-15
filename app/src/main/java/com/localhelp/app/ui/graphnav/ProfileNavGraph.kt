@@ -48,8 +48,8 @@ fun NavGraphBuilder.profileNavGraph(navController: NavController) {
         composable(Screen.FINANCIAL_STATS) {
             FinancialStatsScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onCategoryClick = { categoryId ->
-                    navController.navigate("${Screen.CATEGORY_DETAIL}/$categoryId")
+                onCategoryClick = { categoryId, isEarning, month, year ->
+                    navController.navigate("${Screen.CATEGORY_DETAIL}/$categoryId/$isEarning/$month/$year")
                 },
                 onTransactionClick = { transactionId ->
                     navController.navigate("${Screen.TRANSACTION_DETAIL}/$transactionId")
@@ -58,12 +58,23 @@ fun NavGraphBuilder.profileNavGraph(navController: NavController) {
         }
 
         composable(
-            route = "${Screen.CATEGORY_DETAIL}/{categoryId}",
-            arguments = listOf(navArgument("categoryId") { type = NavType.IntType })
+            route = "${Screen.CATEGORY_DETAIL}/{categoryId}/{isEarning}/{month}/{year}",
+            arguments = listOf(
+                navArgument("categoryId") { type = NavType.IntType },
+                navArgument("isEarning") { type = NavType.BoolType },
+                navArgument("month") { type = NavType.IntType },
+                navArgument("year") { type = NavType.IntType }
+            )
         ) { backStackEntry ->
             val categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 1
+            val isEarning = backStackEntry.arguments?.getBoolean("isEarning") ?: false
+            val month = backStackEntry.arguments?.getInt("month") ?: 10
+            val year = backStackEntry.arguments?.getInt("year") ?: 2023
             CategoryDetailScreen(
                 categoryId = categoryId,
+                isEarning = isEarning,
+                month = month,
+                year = year,
                 onNavigateBack = { navController.popBackStack() },
                 onTransactionClick = { transactionId ->
                     navController.navigate("${Screen.TRANSACTION_DETAIL}/$transactionId")
