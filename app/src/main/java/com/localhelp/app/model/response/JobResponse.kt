@@ -10,6 +10,7 @@ data class JobResponse(
     val address: String? = "",
     val latitude: Double? = null,
     val longitude: Double? = null,
+    val displayStatus: String? = "",
     val status: JobStatus ? = JobStatus.OPEN,
     val bio: String? = "",
     val categoryId: Long? = 0L,

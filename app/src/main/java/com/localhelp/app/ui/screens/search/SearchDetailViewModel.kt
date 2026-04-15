@@ -48,7 +48,7 @@ class SearchDetailViewModel @Inject constructor(
     private val _listCategory = MutableStateFlow<List<CategoryResponse>>(emptyList())
     val listCategory: StateFlow<List<CategoryResponse>> = _listCategory.asStateFlow()
 
-    private var currentPage = 0
+    private var currentPage = 1
     private var currentKeyword = savedStateHandle.get<String>("keyword")?: ""
     private var currentDistance: Double = 10.0
     private var currentMinSalary: Double = 0.0
@@ -92,7 +92,7 @@ class SearchDetailViewModel @Inject constructor(
         currentStartTime = startTime
         currentEndTime = endTime
 
-        currentPage = 0
+        currentPage = 1
         _uiState.value = SearchDetailUiState.Loading
 
         loadJobs(isLoadMore = false)

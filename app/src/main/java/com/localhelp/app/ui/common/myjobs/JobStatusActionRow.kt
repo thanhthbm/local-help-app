@@ -56,7 +56,7 @@ fun JobStatusActionRow(
                     )
                 }
             }
-            JobStatus.IN_PROGRESS -> {
+            JobStatus.ACCEPTED -> {
                 // Đang thực hiện (Màu xanh ngọc)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(

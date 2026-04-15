@@ -42,7 +42,7 @@ class MyJobsViewModel @Inject constructor(
 
         val statusQuery = when (filter) {
             "Đang tìm người" -> JobStatus.OPEN
-            "Đang thực hiện" -> JobStatus.IN_PROGRESS
+            "Đang thực hiện" -> JobStatus.ACCEPTED
             "Đã hoàn thành" -> JobStatus.COMPLETED
             else -> null
         }
