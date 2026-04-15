@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedCard
@@ -31,8 +32,9 @@ import com.localhelp.app.ui.screens.profile.OrangeLight
 import com.localhelp.app.ui.screens.profile.OrangePrimary
 
 @Composable
-fun FinanceButton() {
+fun FinanceButton(onClick: () -> Unit = {}) {
     OutlinedCard(
+        modifier = Modifier.clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = Color.White),
         border = CardDefaults.outlinedCardBorder().copy(width = 1.dp, brush = Brush.linearGradient(listOf(OrangePrimary, OrangeLight)))

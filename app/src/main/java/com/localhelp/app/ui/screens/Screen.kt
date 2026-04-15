@@ -21,4 +21,7 @@ object Screen {
     const val MAP_DIRECTION = "map_direction"
     const val MAP_TRACKING = "map_tracking"
     const val SELECT_LOCATION = "select_location"
+    const val FINANCIAL_STATS = "financial_stats"
+    const val CATEGORY_DETAIL = "category_detail"
+    const val TRANSACTION_DETAIL = "transaction_detail"
 }

@@ -9,9 +9,12 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.localhelp.app.ui.screens.Graph
 import com.localhelp.app.ui.screens.Screen
+import com.localhelp.app.ui.screens.profile.CategoryDetailScreen
 import com.localhelp.app.ui.screens.profile.EditProfileScreen
 import com.localhelp.app.ui.screens.profile.EditProfileViewModel
+import com.localhelp.app.ui.screens.profile.FinancialStatsScreen
 import com.localhelp.app.ui.screens.profile.ProfileScreen
+import com.localhelp.app.ui.screens.profile.TransactionDetailScreen
 
 fun NavGraphBuilder.profileNavGraph(navController: NavController) {
     navigation(
@@ -20,7 +23,8 @@ fun NavGraphBuilder.profileNavGraph(navController: NavController) {
     ) {
         composable(Screen.PROFILE) {
             ProfileScreen(
-                onEditProfile = { navController.navigate(Screen.EDIT_PROFILE) }
+                onEditProfile = { navController.navigate(Screen.EDIT_PROFILE) },
+                onNavigateToStats = { navController.navigate(Screen.FINANCIAL_STATS) }
             )
         }
         composable(
@@ -28,7 +32,8 @@ fun NavGraphBuilder.profileNavGraph(navController: NavController) {
             arguments = listOf(navArgument("userId") { type = NavType.LongType })
         ) {
             ProfileScreen(
-                onEditProfile = { navController.navigate(Screen.EDIT_PROFILE) }
+                onEditProfile = { navController.navigate(Screen.EDIT_PROFILE) },
+                onNavigateToStats = { navController.navigate(Screen.FINANCIAL_STATS) }
             )
         }
         composable(Screen.EDIT_PROFILE) {
@@ -36,6 +41,45 @@ fun NavGraphBuilder.profileNavGraph(navController: NavController) {
             EditProfileScreen(
                 onNavigateBack = { navController.popBackStack() },
                 viewModel = viewModel
+            )
+        }
+
+        // ── Financial statistics screens ────────────────────────────────────
+        composable(Screen.FINANCIAL_STATS) {
+            FinancialStatsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onCategoryClick = { categoryId ->
+                    navController.navigate("${Screen.CATEGORY_DETAIL}/$categoryId")
+                },
+                onTransactionClick = { transactionId ->
+                    navController.navigate("${Screen.TRANSACTION_DETAIL}/$transactionId")
+                }
+            )
+        }
+
+        composable(
+            route = "${Screen.CATEGORY_DETAIL}/{categoryId}",
+            arguments = listOf(navArgument("categoryId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 1
+            CategoryDetailScreen(
+                categoryId = categoryId,
+                onNavigateBack = { navController.popBackStack() },
+                onTransactionClick = { transactionId ->
+                    navController.navigate("${Screen.TRANSACTION_DETAIL}/$transactionId")
+                }
+            )
+        }
+
+        composable(
+            route = "${Screen.TRANSACTION_DETAIL}/{transactionId}",
+            arguments = listOf(navArgument("transactionId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val transactionId = backStackEntry.arguments?.getInt("transactionId") ?: 1
+            TransactionDetailScreen(
+                transactionId = transactionId,
+                onNavigateBack = { navController.popBackStack() },
+                onViewProfile = { /* navigate to helper profile */ }
             )
         }
     }

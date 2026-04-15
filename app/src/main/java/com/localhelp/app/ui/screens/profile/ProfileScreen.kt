@@ -37,6 +37,7 @@ val GrayBackground = Color(0xFFF7F7F7)
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     onEditProfile: () -> Unit = {},
+    onNavigateToStats: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val scrollState = rememberScrollState()
@@ -92,7 +93,7 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
         if (isMyProfile) {
-            FinanceButton()
+            FinanceButton(onClick = onNavigateToStats)
             Spacer(modifier = Modifier.height(24.dp))
         }
 
