@@ -1,8 +1,6 @@
 package com.localhelp.app.ui.screens.map
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -42,10 +40,14 @@ fun SelectLocationScreen(
 ) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val addressName by viewModel.address.collectAsState()
     var selectedLatLng by remember { mutableStateOf(LatLng(initialLat, initialLng)) }
-    var addressName by remember { mutableStateOf("Đang xác định vị trí...") }
 
     val trackasiaMap = remember { mutableStateOf<TrackAsiaMap?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.onLocationSelected(selectedLatLng)
+    }
 
     val mapView = remember {
         TrackAsia.getInstance(context)
@@ -62,8 +64,7 @@ fun SelectLocationScreen(
 
                 map.addOnMapClickListener { point ->
                     selectedLatLng = point
-                    // In a real app, you would use reverse geocoding here
-                    addressName = "Vị trí tại ${String.format("%.4f", point.latitude)}, ${String.format("%.4f", point.longitude)}"
+                    viewModel.onLocationSelected(point)
                     true
                 }
             }

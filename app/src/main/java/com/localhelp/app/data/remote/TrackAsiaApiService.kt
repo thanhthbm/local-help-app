@@ -1,10 +1,8 @@
 package com.localhelp.app.data.remote
 
 import com.localhelp.app.model.constant.ApiConstants
-import com.mapbox.api.geocoding.v5.models.GeocodingResponse
-import com.trackasia.navigation.android.navigation.v5.models.BannerInstructions
+import com.localhelp.app.model.response.TrackAsiaGeocodingResponse
 import com.trackasia.navigation.android.navigation.v5.models.DirectionsResponse
-import com.trackasia.navigation.android.navigation.v5.models.VoiceInstructions
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -15,9 +13,12 @@ interface TrackAsiaApiService {
     suspend fun reverseGeocode(
         @Query("point.lat") latitude: Double,
         @Query("point.lon") longitude: Double,
+        @Query("new_admin") newAdmin: Boolean = true,
+        @Query("categories") categories: String = "street_address",
+        @Query("size") size: Int = 1,
         @Query("lang") language: String = "vi",
         @Query("key") apiKey: String = ApiConstants.TRACK_ASIA_KEY
-    ): Response<GeocodingResponse>
+    ): Response<TrackAsiaGeocodingResponse>
 
 //    @GET("api/v1/autocomplete")
 //    suspend fun autocomplete(

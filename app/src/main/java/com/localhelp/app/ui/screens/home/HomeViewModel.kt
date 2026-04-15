@@ -7,6 +7,7 @@ import com.localhelp.app.data.repository.CategoryRepository
 import com.localhelp.app.data.repository.ConversationRepository
 import com.localhelp.app.data.repository.JobRepository
 import com.localhelp.app.data.repository.LocationRepository
+import com.localhelp.app.data.repository.MapRepository
 import com.localhelp.app.model.response.CategoryResponse
 import com.localhelp.app.model.response.ConversationResponse
 import com.localhelp.app.model.response.JobResponse
@@ -26,7 +27,8 @@ class HomeViewModel @Inject constructor(
     private val jobRepository: JobRepository,
     private val categoryRepository: CategoryRepository,
     private val conversationRepository: ConversationRepository,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val mapRepository: MapRepository
 ): ViewModel() {
     val TAG = "HOME-VIEWMODEL"
 
@@ -127,8 +129,19 @@ class HomeViewModel @Inject constructor(
             val location = locationRepository.getCurrentLocation()
             _currentLocation.value = location
             if (location != null) {
-                _currentAddress.value = "Hà Nội (${String.format("%.4f", location.latitude)}, ${String.format("%.4f", location.longitude)})"
-                // Refresh jobs with location if they are already loaded or loading for the first time
+                // Hiển thị tọa độ tạm thời trong khi chờ Reverse Geocoding
+                _currentAddress.value = "(${String.format("%.4f", location.latitude)}, ${String.format("%.4f", location.longitude)})"
+                
+                // Gọi API Reverse Geocoding để lấy địa chỉ thực tế
+                mapRepository.reverseGeocode(location.latitude, location.longitude)
+                    .onSuccess { response ->
+                        val label = response.features.firstOrNull()?.properties?.label
+                        if (!label.isNullOrEmpty()) {
+                            _currentAddress.value = label
+                        }
+                    }
+
+                // Refresh jobs with location
                 if (currentPage == 1) {
                     _recentJobs.value = emptyList()
                     loadMoreJobs()
