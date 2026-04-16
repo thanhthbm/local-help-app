@@ -108,7 +108,7 @@ fun MessagesScreen(
                                     onNavigateToChat(
                                         conv.id,
                                         conv.partner.fullName ?: "Người dùng",
-                                        conv.partner.avatarUrl ?: "none" // Truyền chuỗi "none" nếu avatar null
+                                        conv.partner.avatarUrl ?: "none"
                                     )
                                 }
                             )

@@ -24,4 +24,8 @@ object Screen {
     const val FINANCIAL_STATS = "financial_stats"
     const val CATEGORY_DETAIL = "category_detail"
     const val TRANSACTION_DETAIL = "transaction_detail"
+    const val HELPER_JOB_DETAIL_MANAGEMENT = "helper_job_detail_management"
+    const val OWNER_JOB_DETAIL_MANAGEMENT = "owner_job_detail_management"
+
+    const val SUCCESS_SCREEN = "success_screen"
 }

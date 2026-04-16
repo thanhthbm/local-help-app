@@ -59,6 +59,20 @@ interface JobService {
     @GET("/api/jobs/{id}")
     suspend fun getJobById(@Path("id") id: Long): Response<ApiResponse<JobResponse>>
 
-    @POST("/api/jobs/{id}/accept")
-    suspend fun acceptJob(@Path("id") id: Long): Response<ApiResponse<JobResponse>>
+    @POST("/api/jobs/{id}/apply")
+    suspend fun acceptJob(@Path("id") id: Long): Response<ApiResponse<Any>>
+
+    @GET("api/jobs/my-posts")
+    suspend fun getMyPosts(
+        @Query("current") page: Int = 1,
+        @Query("pageSize") size: Int = 10
+    ): Response<ApiResponse<ResultPaginationDTO<List<JobResponse>>>>
+
+    @GET("api/jobs/my-tasks")
+    suspend fun getMyTasks(
+        @Query("current") page: Int = 1,
+        @Query("pageSize") size: Int = 10,
+        @Query("lat") lat: Double? = null,
+        @Query("lng") lng: Double? = null
+    ): Response<ApiResponse<ResultPaginationDTO<List<JobResponse>>>>
 }

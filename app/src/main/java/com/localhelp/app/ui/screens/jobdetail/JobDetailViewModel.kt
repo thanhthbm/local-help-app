@@ -19,7 +19,7 @@ import javax.inject.Inject
 class JobDetailViewModel @Inject constructor(
     private val jobRepository: JobRepository,
     private val chatRepository: ChatRepository,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
     private val _job = MutableStateFlow<JobResponse?>(null)
@@ -41,6 +41,7 @@ class JobDetailViewModel @Inject constructor(
         data class NavigateToChat(val conversationId: String, val partnerName: String, val partnerAvatar: String?) : JobDetailNavEvent()
         data class NavigateToEditJob(val jobId: Long) : JobDetailNavEvent()
         data class NavigateToUserProfile(val userId: Long) : JobDetailNavEvent()
+        object NavigateToSuccess : JobDetailNavEvent()
         object JobDeleted : JobDetailNavEvent()
     }
 
@@ -94,8 +95,7 @@ class JobDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val result = jobRepository.acceptJob(currentJob.id)
             result.onSuccess { updatedJob ->
-                _job.value = updatedJob // Cập nhật lại UI với trạng thái mới (IN_PROGRESS)
-                _acceptStatus.value = true
+                _navigationEvent.emit(JobDetailNavEvent.NavigateToSuccess)
             }.onFailure { error ->
                 _acceptStatus.value = false
                 _errorMessage.value = error.message ?: "Có lỗi xảy ra khi nhận việc."

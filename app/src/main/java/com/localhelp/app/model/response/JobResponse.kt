@@ -10,8 +10,7 @@ data class JobResponse(
     val address: String? = "",
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val displayStatus: String? = "",
-    val status: JobStatus ? = JobStatus.OPEN,
+    val status: JobStatus? = JobStatus.OPEN,
     val bio: String? = "",
     val categoryId: Long? = 0L,
     val categoryName: String? = "",
@@ -23,5 +22,9 @@ data class JobResponse(
     val images: List<String>? = emptyList(),
     val distance: Double? = null,
 
-    val createdAt: String? = ""
+    val createdAt: String? = "",
+    val helperId: Long? = null,
+    val helperName: String? = null,
+    val helperAvatar: String? = null,
+    val helperRating: Double? = null
 )

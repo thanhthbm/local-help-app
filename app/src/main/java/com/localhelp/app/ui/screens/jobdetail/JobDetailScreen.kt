@@ -55,8 +55,11 @@ fun JobDetailScreen(
     onMessageClick: (String, String, String?) -> Unit,
     onEditJob: (Long) -> Unit,
     onUserClick: (Long) -> Unit,
+    onJobSuccessCallBack: () -> Unit,
     viewModel: JobDetailViewModel = hiltViewModel()
 ) {
+
+    var showConfirmDialog by remember { mutableStateOf(false) }
     val job by viewModel.job.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
@@ -122,6 +125,9 @@ fun JobDetailScreen(
                 }
                 is JobDetailViewModel.JobDetailNavEvent.JobDeleted -> {
                     onBackClick()
+                }
+                is JobDetailViewModel.JobDetailNavEvent.NavigateToSuccess -> {
+                    onJobSuccessCallBack()
                 }
             }
         }
@@ -207,7 +213,9 @@ fun JobDetailScreen(
                             }
 
                             Button(
-                                onClick = { viewModel.acceptJob() },
+                                onClick = {
+                                    showConfirmDialog = true
+                                },
                                 enabled = job!!.status == JobStatus.OPEN && !isLoading,
                                 modifier = Modifier.weight(0.6f).height(50.dp),
                                 colors = ButtonDefaults.buttonColors(
@@ -232,6 +240,34 @@ fun JobDetailScreen(
         },
         containerColor = Color.White
     ) { paddingValues ->
+        if (showConfirmDialog) {
+            AlertDialog(
+                onDismissRequest = { showConfirmDialog = false },
+                title = {
+                    Text(text = "Xác nhận nhận việc", fontWeight = FontWeight.Bold)
+                },
+                text = {
+                    Text("Bạn có chắc chắn muốn nhận công việc này không?")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showConfirmDialog = false
+                            viewModel.acceptJob()
+                        }
+                    ) {
+                        Text("Đồng ý", color = PrimaryOrange)
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showConfirmDialog = false }
+                    ) {
+                        Text("Hủy", color = Color.Gray)
+                    }
+                }
+            )
+        }
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = PrimaryOrange)

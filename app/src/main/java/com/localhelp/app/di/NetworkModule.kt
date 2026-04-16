@@ -8,6 +8,7 @@ import com.localhelp.app.data.remote.CategoryService
 import com.localhelp.app.data.remote.CloudinaryService
 import com.localhelp.app.data.remote.ConversationService
 import com.localhelp.app.data.remote.FinanceService
+import com.localhelp.app.data.remote.JobDetailApiService
 import com.localhelp.app.data.remote.JobService
 import com.localhelp.app.data.remote.TokenAuthenticator
 import com.localhelp.app.data.remote.TrackAsiaApiService
@@ -137,6 +138,12 @@ object NetworkModule {
     @Singleton
     fun provideFinanceService(@Named("main") retrofit: Retrofit): FinanceService {
         return retrofit.create(FinanceService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideJobDetailApiService(@Named("main") retrofit: Retrofit) : JobDetailApiService {
+        return retrofit.create(JobDetailApiService::class.java)
     }
 
     @Provides

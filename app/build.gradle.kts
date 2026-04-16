@@ -73,6 +73,7 @@ dependencies {
     implementation("io.github.track-asia:libandroid-navigation:2.0.0")
 // Location Services
     implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("androidx.compose.material3:material3:1.2.1")
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))

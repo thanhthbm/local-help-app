@@ -172,7 +172,7 @@ class JobRepository @Inject constructor(
         }
     }
 
-    suspend fun acceptJob(id: Long): Result<JobResponse> {
+    suspend fun acceptJob(id: Long): Result<Any> {
         return try {
             val response = jobService.acceptJob(id)
             if (response.isSuccessful && response.body() != null) {
@@ -181,6 +181,50 @@ class JobRepository @Inject constructor(
                     Result.success(apiResponse.data)
                 } else {
                     Result.failure(Exception(apiResponse.message?.toString() ?: "Lỗi khi nhận việc"))
+                }
+            } else {
+                Result.failure(Exception("Lỗi : (${response.message()})"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getMyPosts(
+        page :Int,
+        size : Int
+    ) : Result<ResultPaginationDTO<List<JobResponse>>> {
+        return try {
+            val response = jobService.getMyPosts(page, size)
+            if (response.isSuccessful && response.body() != null) {
+                val apiResponse = response.body()!!
+                if (apiResponse.data != null) {
+                    Result.success(apiResponse.data)
+                } else {
+                    Result.failure(Exception(apiResponse.message?.toString() ?: "Lỗi khi lấy danh sách việc đã nhận"))
+                }
+            } else {
+                Result.failure(Exception("Lỗi máy chủ (${response.code()})"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getMyTasks(
+        page: Int,
+        size: Int,
+        lat: Double? = null,
+        lng: Double? = null
+    ): Result<ResultPaginationDTO<List<JobResponse>>> {
+        return try {
+            val response = jobService.getMyTasks(page, size, lat, lng)
+            if (response.isSuccessful && response.body() != null) {
+                val apiResponse = response.body()!!
+                if (apiResponse.data != null) {
+                    Result.success(apiResponse.data)
+                } else {
+                    Result.failure(Exception(apiResponse.message?.toString() ?: "Lỗi khi lấy danh sách việc đã nhận"))
                 }
             } else {
                 Result.failure(Exception("Lỗi máy chủ (${response.code()})"))

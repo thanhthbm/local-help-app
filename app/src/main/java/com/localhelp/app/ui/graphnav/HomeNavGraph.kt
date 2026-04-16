@@ -14,10 +14,19 @@ import com.localhelp.app.ui.screens.createjob.CreateJobScreen
 import com.localhelp.app.ui.screens.createjob.CreateJobViewModel
 import com.localhelp.app.ui.screens.home.HomeScreen
 import com.localhelp.app.ui.screens.jobdetail.JobDetailScreen
+import com.localhelp.app.ui.screens.jobmanagement.JobDetailHelperScreen
+import com.localhelp.app.ui.screens.jobmanagement.JobDetailHelperUiState
+import com.localhelp.app.ui.screens.jobmanagement.JobDetailHelperViewModel
+import com.localhelp.app.ui.screens.jobmanagement.JobDetailOwnerScreen
+import com.localhelp.app.ui.screens.jobmanagement.JobDetailOwnerViewModel
 import com.localhelp.app.ui.screens.messages.ChatScreen
 import com.localhelp.app.ui.screens.messages.MessagesScreen
-import com.localhelp.app.ui.screens.myjobs.MyJobsScreen
 import com.localhelp.app.ui.screens.map.SelectLocationScreen
+import com.localhelp.app.ui.screens.jobmanagement.JobManagementScreen
+import com.localhelp.app.ui.screens.jobmanagement.MyPostsViewModel
+import com.localhelp.app.ui.screens.jobmanagement.MyTasksViewModel
+import com.localhelp.app.ui.screens.myjobs.JobAcceptSuccessScreen
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.net.URLEncoder
 
 fun NavGraphBuilder.homeNavGraph(navController: NavController){
@@ -108,17 +117,75 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 },
                 onUserClick = { userId ->
                     navController.navigate("${Screen.PROFILE}/$userId")
+                },
+                onJobSuccessCallBack = { navController.navigate(Screen.SUCCESS_SCREEN) }
+            )
+        }
+
+        composable(
+            route = Screen.SUCCESS_SCREEN
+        ) {
+            JobAcceptSuccessScreen(
+                onNavigateHome = {
+                    navController.navigate(Graph.HOME){
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
 
         composable(Screen.MY_JOBS){
-            MyJobsScreen(
-                onEditJob = { jobId: Long ->
-                    navController.navigate("${Screen.POST_JOB}?jobId=$jobId")
+            JobManagementScreen(
+                myPostsViewModel = hiltViewModel<MyPostsViewModel>(),
+                myTasksViewModel = hiltViewModel<MyTasksViewModel>(),
+                navigateToHelperDetail = { id ->
+                    navController.navigate("${Screen.HELPER_JOB_DETAIL_MANAGEMENT}/$id")
                 },
-                onJobClick = { jobId ->
-                    navController.navigate("${Screen.JOB_DETAIL}/$jobId")
+                navigateToOwnerDetail = { id ->
+                    navController.navigate("${Screen.OWNER_JOB_DETAIL_MANAGEMENT}/$id")
+                }
+            )
+        }
+
+        composable(
+            route = "${Screen.HELPER_JOB_DETAIL_MANAGEMENT}/{id}",
+            arguments = listOf(
+                navArgument("id") {type = NavType.LongType}
+            )
+        ){
+            JobDetailHelperScreen(
+                viewModel = hiltViewModel<JobDetailHelperViewModel>(),
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToUserProfile = { userId ->
+                    navController.navigate("${Screen.PROFILE}/$userId")
+                },
+                onOpenGoogleMaps = { lat, lng ->
+                    navController.navigate("${Screen.MAP_TRACKING}/$lat,$lng")
+                },
+                onNavigateToChat = { conversationId: String?, partnerName: String, avatarUrl: String? ->
+                    val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
+                }
+            )
+        }
+
+        composable(
+            route = "${Screen.OWNER_JOB_DETAIL_MANAGEMENT}/{id}",
+            arguments = listOf(
+                navArgument("id") {type = NavType.LongType}
+            )
+        ){
+            JobDetailOwnerScreen(
+                viewModel = hiltViewModel<JobDetailOwnerViewModel>(),
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToUserProfile = { userId ->
+                    navController.navigate("${Screen.PROFILE}/$userId")
+                },
+                onNavigateToChat = { conversationId: String, partnerName: String, avatarUrl: String? ->
+                    val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
                 }
             )
         }

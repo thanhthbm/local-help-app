@@ -1,5 +1,6 @@
 package com.localhelp.app.data.remote
 
+import com.localhelp.app.model.response.CloudinaryResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -18,6 +19,3 @@ interface CloudinaryService {
     ): Response<CloudinaryResponse>
 }
 
-data class CloudinaryResponse(
-    val secure_url: String
-)
