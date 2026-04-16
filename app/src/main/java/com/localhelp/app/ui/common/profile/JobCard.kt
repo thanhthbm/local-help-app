@@ -33,10 +33,11 @@ import com.localhelp.app.ui.screens.profile.GrayText
 import com.localhelp.app.ui.screens.profile.OrangePrimary
 
 @Composable
-fun JobCard(title: String, subtitle: String, status: String, statusBg: Color, statusColor: Color, actionText: String, actionIsButton: Boolean = false) {
+fun JobCard(title: String, subtitle: String, status: String, statusBg: Color, statusColor: Color, actionText: String, actionIsButton: Boolean = false, onClick: () -> Unit = {}) {
     OutlinedCard(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = Color.White)
+        colors = CardDefaults.outlinedCardColors(containerColor = Color.White),
+        onClick = onClick
     ) {
         Row(modifier = Modifier.padding(12.dp).fillMaxWidth()) {
             Box(

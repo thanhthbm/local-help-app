@@ -64,7 +64,26 @@ class JobRepository @Inject constructor(
         }
     }
 
-    suspend fun getMyJobs(status: JobStatus?): Result<List<JobResponse>> {
+    suspend fun getMyPosts(current: Int, pageSize: Int, userId: Long? = null): Result<ResultPaginationDTO<List<JobResponse>>> {
+        return try {
+            val response = jobService.getMyPosts(current, pageSize, userId)
+            if (response.isSuccessful && response.body() != null) {
+                val apiResponse = response.body()!!
+                if (apiResponse.data != null) {
+                    Result.success(apiResponse.data)
+                } else {
+                    Result.failure(Exception("Dữ liệu trả về rỗng"))
+                }
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: ""
+                Result.failure(Exception("Lỗi backend (${response.code()} - $errorMsg)"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getMyJobs(status: JobStatus? = null): Result<List<JobResponse>> {
         return try {
             val response = jobService.getMyJobs(status)
             if (response.isSuccessful && response.body() != null) {

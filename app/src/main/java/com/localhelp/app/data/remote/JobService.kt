@@ -27,8 +27,17 @@ interface JobService {
     @DELETE("/api/jobs/{id}")
     suspend fun deleteJob(@Path("id") id: Long): Response<ApiResponse<Unit>>
 
+    @GET("/api/jobs/my-posts")
+    suspend fun getMyPosts(
+        @Query("current") current: Int,
+        @Query("pageSize") pageSize: Int,
+        @Query("userId") userId: Long? = null
+    ): Response<ApiResponse<ResultPaginationDTO<List<JobResponse>>>>
+
     @GET("/api/jobs/my-jobs")
-    suspend fun getMyJobs(@Query("status") status: JobStatus? = null): Response<ApiResponse<List<JobResponse>>>
+    suspend fun getMyJobs(
+        @Query("status") status: JobStatus? = null
+    ): Response<ApiResponse<List<JobResponse>>>
 
     @POST("api/jobs/search")
     suspend fun searchJobs(

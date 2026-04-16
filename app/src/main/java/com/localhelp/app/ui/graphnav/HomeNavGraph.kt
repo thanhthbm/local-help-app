@@ -140,10 +140,11 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 navArgument("partnerAvatar") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            // Các arguments đã được ViewModel tự động lấy (savedStateHandle),
-            // nên ta chỉ cần truyền onBackClick
             ChatScreen(
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onNavigateToProfile = { userId ->
+                    navController.navigate("${Screen.PROFILE}/$userId")
+                }
             )
         }
     }

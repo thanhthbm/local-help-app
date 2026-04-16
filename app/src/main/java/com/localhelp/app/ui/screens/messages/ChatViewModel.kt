@@ -8,8 +8,11 @@ import com.localhelp.app.data.local.UserManager
 import com.localhelp.app.data.repository.ChatRepository
 import com.localhelp.app.model.response.FirestoreMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
@@ -62,6 +65,26 @@ class ChatViewModel @Inject constructor(
 
     private val _isSending = MutableStateFlow(false)
     val isSending: StateFlow<Boolean> = _isSending.asStateFlow()
+
+    private val _navigationEvent = MutableSharedFlow<ChatNavEvent>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
+
+    sealed class ChatNavEvent {
+        data class NavigateToProfile(val userId: Long) : ChatNavEvent()
+    }
+
+    fun onPartnerNameClick() {
+        // Conversation ID usually is format "userId1_userId2" (sorted)
+        // We need to extract the ID that is NOT ours
+        val ids = conversationId.split("_")
+        val partnerId = ids.find { it != myUserId.toString() }?.toLongOrNull()
+        
+        partnerId?.let {
+            viewModelScope.launch {
+                _navigationEvent.emit(ChatNavEvent.NavigateToProfile(it))
+            }
+        }
+    }
 
     fun sendMessage(text: String, mediaUris: List<android.net.Uri> = emptyList()){
         if (text.isBlank() && mediaUris.isEmpty()) return

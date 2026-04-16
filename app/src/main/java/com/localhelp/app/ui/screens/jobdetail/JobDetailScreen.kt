@@ -178,10 +178,13 @@ fun JobDetailScreen(
 
                             Button(
                                 onClick = { showDeleteConfirm = true },
+                                enabled = job!!.status == JobStatus.OPEN || job!!.status == JobStatus.CANCELLED,
                                 modifier = Modifier.weight(1f).height(50.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = Color(0xFFFEE2E2),
-                                    contentColor = Color(0xFFEF4444)
+                                    contentColor = Color(0xFFEF4444),
+                                    disabledContainerColor = Color(0xFFF3F4F6),
+                                    disabledContentColor = Color.Gray
                                 ),
                                 shape = RoundedCornerShape(12.dp)
                             ) {

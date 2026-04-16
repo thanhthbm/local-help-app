@@ -71,34 +71,45 @@ class HomeViewModel @Inject constructor(
             _isLoading.value = true
             currentPage = 1
             isLastPage = false
-            _recentJobs.value = emptyList()
+            _recentJobs.value = emptyList() 
             
+            // Wait for location if possible to avoid multiple reloads
             loadCurrentLocation()
             loadCategories()
             loadFeaturedJobs()
             
-            // loadMoreJobs will be called after reset
+            // Small delay to let loadCurrentLocation start
+            kotlinx.coroutines.delay(200)
+
+            val lat = _currentLocation.value?.latitude
+            val lng = _currentLocation.value?.longitude
+            
             val result = jobRepository.getOpenJobs(
-                current = currentPage,
+                current = 1,
                 pageSize = pageSize,
                 categoryId = _selectedCategoryId.value,
-                lat = _currentLocation.value?.latitude,
-                lng = _currentLocation.value?.longitude
+                lat = lat,
+                lng = lng
             )
 
             result.onSuccess { paginationData ->
                 _recentJobs.value = paginationData.result
-                isLastPage = currentPage >= paginationData.meta.pages
-                if (!isLastPage) currentPage++
+                isLastPage = 1 >= paginationData.meta.pages
+                currentPage = if (isLastPage) 1 else 2
+                
+                _isLoading.value = false
+            }.onFailure {
+                _isLoading.value = false
             }
-            
-            _isLoading.value = false
         }
     }
 
     fun onCategorySelected(categoryId: Long?) {
-        if (_selectedCategoryId.value == categoryId) return
-        _selectedCategoryId.value = categoryId
+        if (_selectedCategoryId.value == categoryId) {
+            _selectedCategoryId.value = null // Deselect if clicking the same one
+        } else {
+            _selectedCategoryId.value = categoryId
+        }
         
         // Reset pagination and clear current jobs
         currentPage = 1
@@ -127,12 +138,14 @@ class HomeViewModel @Inject constructor(
     fun loadCurrentLocation() {
         viewModelScope.launch {
             val location = locationRepository.getCurrentLocation()
-            _currentLocation.value = location
-            if (location != null) {
-                // Hiển thị tọa độ tạm thời trong khi chờ Reverse Geocoding
+            if (location != null && (_currentLocation.value == null || 
+                location.latitude != _currentLocation.value?.latitude || 
+                location.longitude != _currentLocation.value?.longitude)) {
+                
+                _currentLocation.value = location
+                // Hiển thị tọa độ tạm thời
                 _currentAddress.value = "(${String.format("%.4f", location.latitude)}, ${String.format("%.4f", location.longitude)})"
                 
-                // Gọi API Reverse Geocoding để lấy địa chỉ thực tế
                 mapRepository.reverseGeocode(location.latitude, location.longitude)
                     .onSuccess { response ->
                         val label = response.features.firstOrNull()?.properties?.label
@@ -141,13 +154,15 @@ class HomeViewModel @Inject constructor(
                         }
                     }
 
-                // Refresh jobs with location
-                if (currentPage == 1) {
-                    _recentJobs.value = emptyList()
-                    loadMoreJobs()
+                // CHỈ load lại nếu đây là lần đầu hoặc refresh
+                if (recentJobs.value.isEmpty()) {
+                    refreshAll()
                 }
-            } else {
+            } else if (location == null) {
                 _currentAddress.value = "Hà Nội"
+                if (recentJobs.value.isEmpty()) {
+                    refreshAll()
+                }
             }
         }
     }

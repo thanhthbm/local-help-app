@@ -36,13 +36,17 @@ val GrayBackground = Color(0xFFF7F7F7)
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
+    userId: Long? = null,
     onEditProfile: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
+    onJobClick: (Long) -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val scrollState = rememberScrollState()
     val user by viewModel.user.collectAsState()
     val isMyProfile = viewModel.isMyProfile
+    val jobs by viewModel.jobs.collectAsState()
+    val isLoadingJobs by viewModel.isLoadingJobs.collectAsState()
 
 
     Column(
@@ -105,8 +109,17 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- PHẦN CÔNG VIỆC GẦN ĐÂY (Tạm thời tĩnh) ---
-        JobsSection()
+        // --- PHẦN CÔNG VIỆC GẦN ĐÂY ---
+        if (isLoadingJobs) {
+            Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = OrangePrimary)
+            }
+        } else {
+            JobsSection(
+                jobs = jobs,
+                onJobClick = onJobClick
+            )
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
     }

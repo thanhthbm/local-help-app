@@ -54,8 +54,7 @@ fun HomeScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val currentLocation by viewModel.currentLocation.collectAsState()
     val currentAddress by viewModel.currentAddress.collectAsState()
-    
-    var selectedCategoryId by remember { mutableStateOf<Long?>(null) }
+    val selectedCategoryId by viewModel.selectedCategoryId.collectAsState()
 
     val context = LocalContext.current
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -129,7 +128,7 @@ fun HomeScreen(
                 CategorySection(
                     categories = categories,
                     selectedCategoryId = selectedCategoryId,
-                    onCategoryClick = { selectedCategoryId = it }
+                    onCategoryClick = { viewModel.onCategorySelected(it) }
                 )
             }
 

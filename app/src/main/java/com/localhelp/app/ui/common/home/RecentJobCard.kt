@@ -92,7 +92,11 @@ fun RecentJobCard(job: JobResponse, onClick: () -> Unit) {
                 modifier = Modifier.padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                InfoChip(icon = Icons.Default.LocationOn, label = job.address ?: "Đang cập nhật")
+                InfoChip(
+                    icon = Icons.Default.LocationOn,
+                    label = job.address ?: "Đang cập nhật",
+                    modifier = Modifier.weight(1f, fill = false)
+                )
                 InfoChip(icon = Icons.Default.AccessTime, label = "Mới đây")
             }
 
@@ -140,10 +144,19 @@ fun RecentJobCard(job: JobResponse, onClick: () -> Unit) {
 }
 
 @Composable
-fun InfoChip(icon: ImageVector, label: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+fun InfoChip(icon: ImageVector, label: String, modifier: Modifier = Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color.Gray)
         Spacer(modifier = Modifier.width(4.dp))
-        Text(text = label, fontSize = 11.sp, color = Color.Gray)
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            color = Color.Gray,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

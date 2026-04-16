@@ -21,11 +21,20 @@ import com.localhelp.app.ui.screens.profile.GreenText
 import com.localhelp.app.ui.screens.profile.OrangeLight
 import com.localhelp.app.ui.screens.profile.OrangePrimary
 
+import com.localhelp.app.model.response.JobResponse
+import com.localhelp.app.ui.screens.profile.GrayBackground
+import com.localhelp.app.ui.screens.profile.GrayText
+import com.localhelp.app.ui.screens.profile.GreenLight
+import com.localhelp.app.ui.screens.profile.GreenText
+import com.localhelp.app.ui.screens.profile.OrangeLight
+import com.localhelp.app.ui.screens.profile.OrangePrimary
+import com.localhelp.app.model.constant.JobStatus
+
 @Composable
-fun JobsSection() {
+fun JobsSection(jobs: List<JobResponse>, onJobClick: (Long) -> Unit = {}) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "Việc đã hoàn thành",
+            text = "Việc đã đăng",
             color = OrangePrimary,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -35,11 +44,39 @@ fun JobsSection() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Job tĩnh làm mẫu
-        JobCard("Sửa vòi nước", "Hôm qua • 50.000đ", "Đã xong", GrayBackground, GrayText, actionText = "Xem chi tiết")
-        Spacer(modifier = Modifier.height(12.dp))
-        JobCard("Mua giúp thuốc", "2 giờ trước • Thương lượng", "Đang tìm", OrangeLight, OrangePrimary, actionText = "Quản lý", actionIsButton = true)
-        Spacer(modifier = Modifier.height(12.dp))
-        JobCard("Dắt chó đi", "3 ngày trước • 30.000đ", "Hoàn thành", GreenLight, GreenText, actionText = "Đánh giá lại")
+        if (jobs.isEmpty()) {
+            Text("Chưa có công việc nào", color = GrayText, modifier = Modifier.padding(16.dp))
+        } else {
+            jobs.forEach { job ->
+                val statusColor = when (job.status) {
+                    JobStatus.OPEN -> OrangePrimary
+                    JobStatus.COMPLETED -> GreenText
+                    else -> GrayText
+                }
+                val statusBg = when (job.status) {
+                    JobStatus.OPEN -> OrangeLight
+                    JobStatus.COMPLETED -> GreenLight
+                    else -> GrayBackground
+                }
+                
+                JobCard(
+                    title = job.title ?: "Không tiêu đề",
+                    subtitle = "${job.createdAt?.take(10) ?: "..."} • ${job.price?.toInt() ?: 0}đ",
+                    status = when(job.status) {
+                        JobStatus.OPEN -> "Đang tìm"
+                        JobStatus.ACCEPTED -> "Đã nhận"
+                        JobStatus.WORKING -> "Đang làm"
+                        JobStatus.COMPLETED -> "Hoàn thành"
+                        JobStatus.CANCELLED -> "Đã hủy"
+                        else -> "Không rõ"
+                    },
+                    statusBg = statusBg,
+                    statusColor = statusColor,
+                    actionText = "Xem chi tiết",
+                    onClick = { onJobClick(job.id) }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
     }
 }

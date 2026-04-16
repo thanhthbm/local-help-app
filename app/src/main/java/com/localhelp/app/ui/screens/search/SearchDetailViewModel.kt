@@ -68,10 +68,10 @@ class SearchDetailViewModel @Inject constructor(
     fun getCategory(){
         viewModelScope.launch {
             val categories = categoryRepository.getCategories()
-            categories.onSuccess {
-                _listCategory.update { it }
+            categories.onSuccess { list ->
+                _listCategory.value = list
             }.onFailure {
-                Log.d("SearchDetailViewModel", "initSearch: ${it.message}")
+                Log.d("SearchDetailViewModel", "getCategory failed: ${it.message}")
             }
         }
     }

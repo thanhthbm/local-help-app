@@ -51,6 +51,7 @@ val PrimaryOrange = Color(0xFFED7D68)
 @Composable
 fun ChatScreen(
     onBackClick: () -> Unit,
+    onNavigateToProfile: (Long) -> Unit = {},
     viewModel: ChatViewModel = hiltViewModel()
 ) {
     var messageText by remember { mutableStateOf("") }
@@ -58,6 +59,14 @@ fun ChatScreen(
     var previewImageUrl by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is ChatViewModel.ChatNavEvent.NavigateToProfile -> onNavigateToProfile(event.userId)
+            }
+        }
+    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -96,7 +105,10 @@ fun ChatScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { viewModel.onPartnerNameClick() }
+                    ) {
                         if (!decodedAvatar.isNullOrBlank() && decodedAvatar != "none") {
                             AsyncImage(
                                 model = decodedAvatar,
