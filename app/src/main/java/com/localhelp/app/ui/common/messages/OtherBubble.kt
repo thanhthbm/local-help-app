@@ -2,6 +2,7 @@ package com.localhelp.app.ui.common.messages
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +32,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 
 @Composable
-fun OtherBubble(text: String, time: String, avatarUrl: String, mediaUrls: List<String> = emptyList()) {
+fun OtherBubble(
+    text: String,
+    time: String,
+    avatarUrl: String,
+    mediaUrls: List<String> = emptyList(),
+    onImageClick: (String) -> Unit = {}
+) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Bottom) {
         if (!avatarUrl.isNullOrBlank() && avatarUrl != "none") {
             AsyncImage(
@@ -57,7 +64,7 @@ fun OtherBubble(text: String, time: String, avatarUrl: String, mediaUrls: List<S
                         AsyncImage(
                             model = url,
                             contentDescription = null,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().clickable { onImageClick(url) },
                             contentScale = ContentScale.Crop
                         )
                     }

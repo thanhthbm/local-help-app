@@ -1,8 +1,14 @@
 package com.localhelp.app.ui.screens.messages
 
+import android.app.DownloadManager
+import android.content.Context
+import android.net.Uri
+import android.os.Environment
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,9 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.localhelp.app.ui.common.messages.ChatBottomInput
@@ -45,6 +55,9 @@ fun ChatScreen(
 ) {
     var messageText by remember { mutableStateOf("") }
     var selectedMediaUris by remember { mutableStateOf<List<android.net.Uri>>(emptyList()) }
+    var previewImageUrl by remember { mutableStateOf<String?>(null) }
+
+    val context = LocalContext.current
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -154,7 +167,7 @@ fun ChatScreen(
                         messageText = ""
                         selectedMediaUris = emptyList()
                     },
-                    onAddMedia = { launcher.launch("*/*") } // Hỗ trợ cả image và video
+                    onAddMedia = { launcher.launch("image/*") }
                 )
             }
         },
@@ -193,9 +206,20 @@ fun ChatScreen(
                         }
 
                         if (isMe) {
-                            MyBubble(text = msg.text, time = timeString, mediaUrls = msg.mediaUrls)
+                            MyBubble(
+                                text = msg.text,
+                                time = timeString,
+                                mediaUrls = msg.mediaUrls,
+                                onImageClick = { previewImageUrl = it }
+                            )
                         } else {
-                            OtherBubble(text = msg.text, time = timeString, avatarUrl = decodedAvatar, mediaUrls = msg.mediaUrls)
+                            OtherBubble(
+                                text = msg.text,
+                                time = timeString,
+                                avatarUrl = decodedAvatar,
+                                mediaUrls = msg.mediaUrls,
+                                onImageClick = { previewImageUrl = it }
+                            )
                         }
                     }
                 }
@@ -209,6 +233,70 @@ fun ChatScreen(
                     CircularProgressIndicator(color = PrimaryOrange)
                 }
             }
+
+            if (previewImageUrl != null) {
+                Dialog(
+                    onDismissRequest = { previewImageUrl = null },
+                    properties = DialogProperties(usePlatformDefaultWidth = false)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black)
+                    ) {
+                        AsyncImage(
+                            model = previewImageUrl,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable { previewImageUrl = null },
+                            contentScale = ContentScale.Fit
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                                .align(Alignment.TopEnd),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    downloadImage(context, previewImageUrl!!)
+                                },
+                                modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                            ) {
+                                Icon(Icons.Default.Download, contentDescription = "Download", tint = Color.White)
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            IconButton(
+                                onClick = { previewImageUrl = null },
+                                modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                            ) {
+                                Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                            }
+                        }
+                    }
+                }
+            }
         }
+    }
+}
+
+fun downloadImage(context: Context, url: String) {
+    try {
+        val request = DownloadManager.Request(Uri.parse(url))
+            .setTitle("Image Download")
+            .setDescription("Downloading image from Local Help")
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "LocalHelp_${System.currentTimeMillis()}.jpg")
+            .setAllowedOverMetered(true)
+            .setAllowedOverRoaming(true)
+
+        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager.enqueue(request)
+        Toast.makeText(context, "Bắt đầu tải ảnh...", Toast.LENGTH_SHORT).show()
+    } catch (e: Exception) {
+        Toast.makeText(context, "Lỗi tải ảnh: ${e.message}", Toast.LENGTH_SHORT).show()
     }
 }

@@ -1,5 +1,6 @@
 package com.localhelp.app.ui.common.messages
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,7 +26,12 @@ import androidx.compose.ui.unit.sp
 import com.localhelp.app.ui.screens.messages.PrimaryOrange
 
 @Composable
-fun MyBubble(text: String, time: String, mediaUrls: List<String> = emptyList()) {
+fun MyBubble(
+    text: String,
+    time: String,
+    mediaUrls: List<String> = emptyList(),
+    onImageClick: (String) -> Unit = {}
+) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Bottom) {
         Column(horizontalAlignment = Alignment.End) {
             if (mediaUrls.isNotEmpty()) {
@@ -37,7 +43,7 @@ fun MyBubble(text: String, time: String, mediaUrls: List<String> = emptyList()) 
                         coil.compose.AsyncImage(
                             model = url,
                             contentDescription = null,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().clickable { onImageClick(url) },
                             contentScale = androidx.compose.ui.layout.ContentScale.Crop
                         )
                     }

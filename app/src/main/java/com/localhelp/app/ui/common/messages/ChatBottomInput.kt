@@ -58,7 +58,7 @@ fun ChatBottomInput(
             )
             Spacer(modifier = Modifier.width(12.dp))
             Box(
-                modifier = Modifier.size(44.dp).background(PrimaryOrange, CircleShape).clickable { if (value.isNotBlank()) onSend() },
+                modifier = Modifier.size(44.dp).background(PrimaryOrange, CircleShape).clickable { if (value.isNotBlank() || true /* Có thể gửi media khi text trống */) onSend() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.AutoMirrored.Filled.Send, null, tint = Color.White, modifier = Modifier.size(20.dp))
