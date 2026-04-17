@@ -237,7 +237,7 @@ fun CategoryDetailScreen(
                             tint = accentColor, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(10.dp))
                         Column {
-                            Text("AI Nhận xét",
+                            Text("Nhận xét",
                                 fontWeight = FontWeight.Bold, fontSize = 14.sp, color = accentColor)
                             Spacer(Modifier.height(4.dp))
                             Text(
