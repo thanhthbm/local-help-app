@@ -51,8 +51,8 @@ fun NavGraphBuilder.profileNavGraph(navController: NavController) {
                 onCategoryClick = { categoryId, isEarning, month, year ->
                     navController.navigate("${Screen.CATEGORY_DETAIL}/$categoryId/$isEarning/$month/$year")
                 },
-                onTransactionClick = { transactionId ->
-                    navController.navigate("${Screen.TRANSACTION_DETAIL}/$transactionId")
+                onTransactionClick = { transactionId, isEarning ->
+                    navController.navigate("${Screen.TRANSACTION_DETAIL}/$transactionId/$isEarning")
                 }
             )
         }
@@ -77,20 +77,26 @@ fun NavGraphBuilder.profileNavGraph(navController: NavController) {
                 year = year,
                 onNavigateBack = { navController.popBackStack() },
                 onTransactionClick = { transactionId ->
-                    navController.navigate("${Screen.TRANSACTION_DETAIL}/$transactionId")
+                    navController.navigate("${Screen.TRANSACTION_DETAIL}/$transactionId/$isEarning")
                 }
             )
         }
 
         composable(
-            route = "${Screen.TRANSACTION_DETAIL}/{transactionId}",
-            arguments = listOf(navArgument("transactionId") { type = NavType.IntType })
+            route = "${Screen.TRANSACTION_DETAIL}/{transactionId}/{isEarning}",
+            arguments = listOf(
+                navArgument("transactionId") { type = NavType.IntType },
+                navArgument("isEarning") { type = NavType.BoolType }
+            )
         ) { backStackEntry ->
             val transactionId = backStackEntry.arguments?.getInt("transactionId") ?: 1
+            val isEarning = backStackEntry.arguments?.getBoolean("isEarning") ?: false
             TransactionDetailScreen(
                 transactionId = transactionId,
+                isEarning = isEarning,
                 onNavigateBack = { navController.popBackStack() },
-                onViewProfile = { /* navigate to helper profile */ }
+                onViewProfile = { userId -> navController.navigate("${Screen.PROFILE}/$userId") },
+                onViewMap = { lat, lng -> navController.navigate("${Screen.MAP_DIRECTION}/$lat,$lng") }
             )
         }
     }

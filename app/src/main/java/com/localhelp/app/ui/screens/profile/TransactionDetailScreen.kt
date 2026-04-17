@@ -11,8 +11,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.hilt.navigation.compose.hiltViewModel
+import java.text.NumberFormat
+import java.util.Locale
+import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+import com.localhelp.app.model.response.JobResponse
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -31,21 +37,42 @@ private val TxGrayBg = Color(0xFFF7F7F7)
 @Composable
 fun TransactionDetailScreen(
     transactionId: Int = 3,
+    isEarning: Boolean = false,
+    viewModel: TransactionDetailViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {},
-    onViewProfile: () -> Unit = {}
+    onViewProfile: (Long) -> Unit = {},
+    onViewMap: (Double, Double) -> Unit = { _, _ -> }
 ) {
-    val isEarning = transactionId > 100
+    LaunchedEffect(transactionId) {
+        viewModel.fetchTransactionDetail(transactionId.toLong())
+    }
+
+    val uiState by viewModel.uiState.collectAsState()
+    
+    val jobData = uiState.data?.jobInfo
+
     val accentColor = if (isEarning) TxGreen else TxOrange
     
-    val jobName = if (isEarning) "Giao hàng siêu tốc" else "Dắt chó đi dạo"
-    val jobIcon = if (isEarning) Icons.Filled.LocalShipping else Icons.Filled.Pets
+    val jobName = jobData?.title ?: (if (isEarning) "Dịch vụ" else "Dịch vụ thực hiện")
+    
+    // Convert Job category to Icon
+    val categoryNameLower = jobData?.categoryName?.lowercase() ?: ""
+    val jobIcon = when {
+        categoryNameLower.contains("dọn") -> Icons.Filled.Brush
+        categoryNameLower.contains("giao") || categoryNameLower.contains("thuê") -> Icons.Filled.LocalShipping
+        categoryNameLower.contains("chó") || categoryNameLower.contains("chăm") -> Icons.Filled.Pets
+        else -> Icons.Filled.Info
+    }
+    
     val jobIconColor = if (isEarning) Color(0xFF4A90D9) else Color(0xFFE06080)
     val jobIconBg = if (isEarning) Color(0xFFE0F0FF) else Color(0xFFFFE8F0)
     
-    val amount = if (isEarning) "+180.000 đ" else "180.000 đ"
+    val fmt = NumberFormat.getNumberInstance(Locale("vi", "VN"))
+    val formattedPrice = "${fmt.format(jobData?.price ?: 0.0)} đ"
+    val amount = if (isEarning) "+$formattedPrice" else "-$formattedPrice"
     val amountColor = if (isEarning) TxGreen else Color(0xFF1A1A1A)
-    val paymentStatus = if (isEarning) "Đã nhận qua Ví điện tử" else "Đã thanh toán qua Ví điện tử"
-    val partnerRole = if (isEarning) "NGƯỜI THUÊ" else "NGƯỜI THỰC HIỆN"
+    val paymentStatus = if (isEarning) "Đã nhận " else "Đã thanh toán "
+    val partnerRole = if (isEarning) "NGƯỜI THUÊ" else "NGƯỜI LÀM"
 
     Scaffold(
         topBar = {
@@ -66,6 +93,15 @@ fun TransactionDetailScreen(
         },
         containerColor = TxGrayBg
     ) { innerPadding ->
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = accentColor)
+            }
+        } else if (uiState.error != null) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                Text(uiState.error ?: "", color = Color.Red)
+            }
+        } else if (jobData != null) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -124,15 +160,19 @@ fun TransactionDetailScreen(
                             Icon(Icons.Filled.Tag, null,
                                 modifier = Modifier.size(14.dp), tint = TxGray)
                             Spacer(Modifier.width(4.dp))
-                            Text("Mã giao dịch: #TX882910", color = TxGray, fontSize = 12.sp)
+                            Text("Mã giao dịch: #TX$transactionId", color = TxGray, fontSize = 12.sp)
                         }
                         Spacer(Modifier.height(2.dp))
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            InfoChip(Icons.Filled.CalendarToday, "14/10/2023")
-                            InfoChip(Icons.Filled.Schedule, "07:30 - 08:30")
+                            val formatterDate = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                            val formatterTime = DateTimeFormatter.ofPattern("HH:mm")
+                            val dateStr = jobData.createdAt?.format(formatterDate) ?: "--/--/----"
+                            val timeStr = jobData.createdAt?.format(formatterTime) ?: "--:--"
+                            InfoChip(Icons.Filled.CalendarToday, dateStr)
+                            InfoChip(Icons.Filled.Schedule, timeStr)
                         }
                     }
                 }
@@ -159,18 +199,21 @@ fun TransactionDetailScreen(
                     }
                     Spacer(Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Nguyễn Văn A",
+                        val partnerName = if (isEarning) jobData.creatorName else jobData.helperName
+                        val partnerRating = if (isEarning) jobData.creatorRating else jobData.helperRating
+                        val partnerId = if (isEarning) jobData.creatorId else jobData.helperId
+                        Text(partnerName ?: "Người dùng",
                             fontWeight = FontWeight.Bold, fontSize = 15.sp)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Filled.Star, null,
                                 tint = Color(0xFFF0A040), modifier = Modifier.size(14.dp))
                             Spacer(Modifier.width(2.dp))
-                            Text("4.8", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
-                            Text(" (120 đánh giá)", color = TxGray, fontSize = 12.sp)
+                            Text("${partnerRating ?: "5.0"}", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
                         }
                     }
+                    val partnerId = if (isEarning) jobData.creatorId else jobData.helperId
                     OutlinedButton(
-                        onClick = onViewProfile,
+                        onClick = { partnerId?.let { onViewProfile(it) } },
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = accentColor),
                         border = ButtonDefaults.outlinedButtonBorder.copy(
@@ -195,9 +238,7 @@ fun TransactionDetailScreen(
                         tint = accentColor, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
                     Column {
-                        Text("Công viên Cầu Giấy", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                        Text("Đường Thành Thái, Dịch Vọng, Cầu Giấy, Hà Nội",
-                            color = TxGray, fontSize = 12.sp, lineHeight = 16.sp)
+                        Text(jobData.address ?: "Vị trí không xác định", color = TxGray, fontSize = 13.sp, lineHeight = 18.sp)
                     }
                 }
                 Spacer(Modifier.height(12.dp))
@@ -207,7 +248,14 @@ fun TransactionDetailScreen(
                         .fillMaxWidth()
                         .height(130.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFDEE8D5)),
+                        .background(Color(0xFFDEE8D5))
+                        .clickable {
+                            val lat = jobData?.latitude
+                            val lng = jobData?.longitude
+                            if (lat != null && lng != null) {
+                                onViewMap(lat, lng)
+                            }
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -229,16 +277,14 @@ fun TransactionDetailScreen(
                     color = TxGray, letterSpacing = 0.8.sp)
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    if (isEarning) "Nhờ bạn giao nhanh gói quà nhỏ gọn đến địa chỉ này trước 9rồi nhé. Cẩn thận tránh va đập."
-                    else "Cần người dắt cho Corgi của mình đi dạo quanh công viên khoảng 1 tiếng. Bé ngoan, đã tiêm phòng đầy đủ. Yêu cầu người yêu động vật, có kinh nghiệm dắt chó.",
+                    jobData.description ?: "Không có mô tả thêm.",
                     fontSize = 13.sp,
                     color = Color(0xFF333333),
                     lineHeight = 19.sp
                 )
                 Spacer(Modifier.height(12.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TagChip(if (isEarning) "Giao cẩn thận" else "Cẩn thận trọng")
-                    TagChip(if (isEarning) "Đúng giờ" else "Mang nước uống")
+                    TagChip(jobData.categoryName ?: "Dịch vụ")
                 }
             }
 
@@ -260,6 +306,7 @@ fun TransactionDetailScreen(
             }
 
             Spacer(Modifier.height(24.dp))
+        }
         }
     }
 }

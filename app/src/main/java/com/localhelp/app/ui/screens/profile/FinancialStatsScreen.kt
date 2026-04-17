@@ -83,7 +83,7 @@ fun FinancialStatsScreen(
     viewModel: FinanceStatsViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {},
     onCategoryClick: (Int, Boolean, Int, Int) -> Unit = { _, _, _, _ -> }, // id, isEarning, month, year
-    onTransactionClick: (Int) -> Unit = {}
+    onTransactionClick: (Int, Boolean) -> Unit = { _, _ -> }
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     
@@ -224,7 +224,7 @@ fun FinancialStatsScreen(
                     SpendingTabContent(
                         state = spendingState,
                         onCategoryClick = { id -> onCategoryClick(id, false, currentMonth, currentYear) },
-                        onTransactionClick = onTransactionClick
+                        onTransactionClick = { txId -> onTransactionClick(txId, false) }
                     )
                 }
             } else {
@@ -234,7 +234,7 @@ fun FinancialStatsScreen(
                     EarningTabContent(
                         state = earningState,
                         onCategoryClick = { id -> onCategoryClick(id, true, currentMonth, currentYear) },
-                        onTransactionClick = onTransactionClick
+                        onTransactionClick = { txId -> onTransactionClick(txId, true) }
                     )
                 }
             }
