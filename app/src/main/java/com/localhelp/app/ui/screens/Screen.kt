@@ -1,6 +1,7 @@
 package com.localhelp.app.ui.screens
 
 object Screen {
+    const val SPLASH = "splash"
     const val LOGIN = "login"
     const val SETUP_PROFILE = "setup_profile"
     const val HOME = "home"

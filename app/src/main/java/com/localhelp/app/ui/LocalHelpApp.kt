@@ -35,6 +35,7 @@ import com.localhelp.app.ui.screens.Graph
 import com.localhelp.app.ui.screens.Screen
 import com.localhelp.app.ui.screens.profile.SetupProfileScreen
 import com.localhelp.app.ui.screens.profile.SetupProfileViewModel
+import com.localhelp.app.ui.screens.splash.SplashScreen
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -55,9 +56,7 @@ fun LocalHelpApp(
     }
 
     if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
+        SplashScreen()
         return
     }
 

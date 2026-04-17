@@ -52,7 +52,7 @@ val TextGray = Color(0xFF757575)
 @Composable
 fun JobDetailScreen(
     onBackClick: () -> Unit,
-    onMessageClick: (String, String, String?) -> Unit,
+    onMessageClick: (String, String, String?, Long) -> Unit,
     onEditJob: (Long) -> Unit,
     onUserClick: (Long) -> Unit,
     onJobSuccessCallBack: () -> Unit,
@@ -115,7 +115,7 @@ fun JobDetailScreen(
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is JobDetailViewModel.JobDetailNavEvent.NavigateToChat -> {
-                    onMessageClick(event.conversationId, event.partnerName, event.partnerAvatar)
+                    onMessageClick(event.conversationId, event.partnerName, event.partnerAvatar, event.partnerId)
                 }
                 is JobDetailViewModel.JobDetailNavEvent.NavigateToEditJob -> {
                     onEditJob(event.jobId)

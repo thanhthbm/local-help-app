@@ -51,5 +51,26 @@ fun NavGraphBuilder.searchNavGraph(navController: NavController) {
             )
         }
 
+        composable (
+            route = "${Screen.JOB_DETAIL}/{id}",
+            arguments = listOf(
+                navArgument("id") {type = NavType.LongType}
+            )
+        ) {
+            JobDetailScreen(
+                onBackClick = { navController.popBackStack() },
+                onMessageClick = { conversationId, partnerName, avatarUrl, partnerId ->
+                    val encodedUrl = if (avatarUrl.isNullOrEmpty()) "none" else URLEncoder.encode(avatarUrl, "UTF-8")
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl/$partnerId")
+                },
+                onEditJob = { jobId ->
+                    navController.navigate("${Screen.POST_JOB}?jobId=$jobId")
+                },
+                onUserClick = { userId ->
+                    navController.navigate("${Screen.PROFILE}/$userId")
+                },
+                onJobSuccessCallBack = { navController.navigate(Screen.SUCCESS_SCREEN) }
+            )
+        }
     }
 }
