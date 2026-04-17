@@ -44,10 +44,13 @@ class JobDetailRepository @Inject constructor(private val apiService: JobDetailA
         if (!response.isSuccessful) throw Exception(response.message())
     }
 
-    suspend fun submitEvidence(jobId: Long, imageParts: List<MultipartBody.Part>): Result<Unit> = runCatching {
-        val response = apiService.submitEvidence(jobId, imageParts)
-        if (!response.isSuccessful) throw Exception(response.message())
+    suspend fun submitEvidence(jobId: Long, imageUrls: List<String>): Result<Unit> {
+        return runCatching {
+            val response = apiService.submitJobEvidence(jobId, imageUrls)
+            if (!response.isSuccessful) throw Exception("Lỗi: ${response.message()}")
+        }
     }
+
 
     suspend fun confirmPayment(jobId: Long): Result<Unit> = runCatching {
         val response = apiService.confirmPayment(jobId)

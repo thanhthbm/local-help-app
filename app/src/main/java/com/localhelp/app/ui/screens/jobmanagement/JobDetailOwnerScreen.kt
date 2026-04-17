@@ -33,9 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.localhelp.app.model.response.ApplicationResponse
 import com.localhelp.app.model.response.ReviewResponse
 import com.localhelp.app.ui.common.myjobs.ActionLoadingOverlay
@@ -51,7 +53,8 @@ fun JobDetailOwnerScreen(
     viewModel: JobDetailOwnerViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToUserProfile: (Long) -> Unit,
-    onNavigateToChat: (String, String, String?) -> Unit
+    onNavigateToChat: (String, String, String?) -> Unit,
+    onNavigateToJobDetail: (Long) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -87,8 +90,7 @@ fun JobDetailOwnerScreen(
                 is JobDetailOwnerUiState.Success -> {
                     val status = state.jobInfo.status?.name ?: "OPEN"
                     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        item { JobInfoHeader(state.jobInfo) }
-                        if(status != "OPEN"){
+                        if(status != "OPEN" && status != "CANCELLED"){
                             item {
                                 PartnerCard(
                                     roleTitle = "Người thực hiện",
@@ -99,17 +101,22 @@ fun JobDetailOwnerScreen(
                                         state.conversationId?.let{
                                             onNavigateToChat(it, state.jobInfo.helperName ?: "Người giúp", state.jobInfo.helperAvatar)
                                         }
-                                    }
+                                    },
+                                    avatarUrl = state.jobInfo.helperAvatar
                                 )
                             }
                         }
-                        item { TimelineSection(state.progresses, status) }
+                        item { JobInfoHeader(state.jobInfo, onNavigateToJobDetail) }
+                        item { TimelineSection(state.progresses, status, isHost = true) }
 
-                        if (status == "OPEN" && state.applications.isNotEmpty()) {
-                            item { Text("Danh sách ứng viên (${state.applications.size})", fontWeight = FontWeight.Bold) }
-                            items(state.applications) { app -> ApplicationCard(app) { viewModel.acceptApplication(app.applicationId) } }
-                        } else {
-                            item { Text("Chưa có ứng viên nào", fontWeight = FontWeight.Bold) }
+                        if (status == "OPEN") {
+                            if(state.applications.isNotEmpty()){
+                                item { Text("Danh sách ứng viên (${state.applications.size})", fontWeight = FontWeight.Bold) }
+                                items(state.applications) { app -> ApplicationCard(app, onNavigateHelperProfile = onNavigateToUserProfile, onAccept = { viewModel.acceptApplication(app.applicationId) })}
+                            } else {
+                                item { Text("Chưa có ứng viên nào", fontWeight = FontWeight.Bold, modifier = Modifier.align(
+                                    Alignment.Center)) }
+                            }
                         }
 
                         if (state.evidenceImages.isNotEmpty()) item { RemoteEvidenceSection(state.evidenceImages) }
@@ -123,10 +130,38 @@ fun JobDetailOwnerScreen(
 }
 
 @Composable
-fun ApplicationCard(app: ApplicationResponse, onAccept: () -> Unit) {
+fun ApplicationCard(app: ApplicationResponse, onAccept: () -> Unit, onNavigateHelperProfile: (Long) -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(Color.LightGray))
+            if (!app.helperAvatar.isNullOrEmpty()) {
+                AsyncImage(
+                    model = app.helperAvatar,
+                    contentDescription = "Avatar",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray)
+                        .clickable { onNavigateHelperProfile(app.helperId) }
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE0E7FF))
+                        .clickable { onNavigateHelperProfile(app.helperId) } ,
+                    contentAlignment = Alignment.Center
+                ) {
+                    val initial = app.helperName.takeIf { it.isNotBlank() }?.substring(0, 1)?.uppercase() ?: "?"
+                    Text(
+                        text = initial,
+                        color = Color(0xFF4338CA),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+                }
+            }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(app.helperName, fontWeight = FontWeight.Bold, fontSize = 14.sp)

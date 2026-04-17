@@ -1,9 +1,12 @@
 package com.localhelp.app.ui.screens.jobmanagement
 
+import android.content.Context
 import android.net.Uri
+import android.widget.Toast
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.localhelp.app.data.remote.CloudinaryService
 import com.localhelp.app.data.repository.ConversationRepository
 import com.localhelp.app.data.repository.JobDetailRepository
 import com.localhelp.app.model.response.JobImageResponse
@@ -13,13 +16,18 @@ import com.localhelp.app.model.response.ReviewResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
 sealed class JobDetailHelperUiState {
@@ -40,7 +48,8 @@ sealed class JobDetailHelperUiState {
 class JobDetailHelperViewModel @Inject constructor(
     private val repository: JobDetailRepository,
     private val savedStateHandle: SavedStateHandle,
-    private  val conversationRepository: ConversationRepository
+    private  val conversationRepository: ConversationRepository,
+    private val cloudinaryService: CloudinaryService
 ) : ViewModel() {
 
     private val jobId: Long = savedStateHandle.get<Long>("id") ?: 0L
@@ -119,8 +128,54 @@ class JobDetailHelperViewModel @Inject constructor(
 
     fun updateStatusArrived() = executeAction { repository.updateStatusArrived(jobId) }
 
-    fun submitEvidence(parts: List<MultipartBody.Part>) = executeAction {
-        repository.submitEvidence(jobId, parts).onSuccess { clearLocalImages() }
+    fun submitEvidence(context: Context) {
+        val currentState = _uiState.value
+        if (currentState !is JobDetailHelperUiState.Success) return
+
+        viewModelScope.launch {
+            _uiState.update { currentState.copy(isActionLoading = true) }
+
+            try {
+                val uploadedUrls = coroutineScope {
+                    currentState.selectedLocalImages.map { uri ->
+                        async {
+                            val stream = context.contentResolver.openInputStream(uri)
+                            val bytes = stream?.readBytes() ?: throw Exception("Cannot read file")
+                            stream.close()
+
+                            val filePart = MultipartBody.Part.createFormData(
+                                name = "file", filename = "evidence.jpg",
+                                body = bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                            )
+                            val presetPart = "localhelp_preset".toRequestBody("text/plain".toMediaTypeOrNull())
+
+                            val response = cloudinaryService.uploadImage(
+                                cloudName = "dwtpcdjhe",
+                                uploadPreset = presetPart,
+                                file = filePart
+                            )
+
+                            if (response.isSuccessful) {
+                                response.body()?.secure_url ?: throw Exception("URL is null")
+                            } else {
+                                throw Exception("Upload failed: ${response.code()}")
+                            }
+                        }
+                    }.awaitAll()
+                }
+
+                repository.submitEvidence(jobId, uploadedUrls)
+                    .onSuccess {
+                        _uiState.update { currentState.copy(isActionLoading = false, selectedLocalImages = emptyList()) }
+                        fetchDetail(false)
+                    }
+                    .onFailure { throw it }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _uiState.update { currentState.copy(isActionLoading = false) }
+            }
+        }
     }
 
     private fun executeAction(action: suspend () -> Result<Unit>) {

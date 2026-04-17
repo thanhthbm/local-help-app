@@ -47,6 +47,8 @@ import com.localhelp.app.model.response.JobImageResponse
 import com.localhelp.app.model.response.ProgressResponse
 import com.localhelp.app.model.response.ReviewResponse
 import java.text.DecimalFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun TaskStatusBadge(status: String) {
@@ -126,12 +128,15 @@ fun TaskActionButton(status: String, onClick: () -> Unit) {
 
 
 @Composable
-fun JobInfoHeader(job: JobResponse) {
-    Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(12.dp)) {
+fun JobInfoHeader(
+    job: JobResponse,
+    onClick: (Long) -> Unit
+    ) {
+    Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(12.dp), modifier = Modifier.clickable{onClick(job.id)}) {
         Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Text(job.title ?: "", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.weight(1f))
-                TaskStatusBadge(job.status?.name ?: "OPEN") // Dùng lại badge đã viết ở file trước
+                TaskStatusBadge(job.status?.name ?: "OPEN")
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text("${DecimalFormat("#,###").format(job.price ?: 0)} đ", color = Color(0xFFE04F43), fontWeight = FontWeight.Bold, fontSize = 20.sp)
@@ -150,57 +155,183 @@ fun PartnerCard(
     roleTitle: String,
     partnerName: String,
     partnerId: Long?,
+    avatarUrl: String?,
     onNavigate: (Long) -> Unit,
     onChat: () -> Unit
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth().clickable { partnerId?.let { onNavigate(it) } }
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { partnerId?.let { onNavigate(it) } }
     ) {
-        Row(modifier = Modifier.padding(16.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(Color.LightGray))
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (!avatarUrl.isNullOrEmpty()) {
+                AsyncImage(
+                    model = avatarUrl,
+                    contentDescription = "Avatar của $partnerName",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE0E7FF)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val initial = partnerName.takeIf { it.isNotBlank() }?.substring(0, 1)?.uppercase() ?: "?"
+                    Text(
+                        text = initial,
+                        color = Color(0xFF4338CA),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.width(12.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(roleTitle, color = Color.Gray, fontSize = 12.sp)
                 Text(partnerName, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
-            IconButton(onClick = {
-                onChat()
-            }, modifier = Modifier.background(Color(0xFFE0E7FF), CircleShape)) {
+
+            IconButton(
+                onClick = onChat,
+                modifier = Modifier.background(Color(0xFFE0E7FF), CircleShape)
+            ) {
                 Icon(Icons.Filled.Message, contentDescription = "Message", tint = Color(0xFF4338CA))
             }
         }
     }
 }
+fun getStepDisplayName(step: String, isHost: Boolean): String {
+    return when (step) {
+        "OPEN" -> "Tạo công việc"
+        "APPLIED" -> if (isHost) "Có người ứng tuyển" else "Đã gửi yêu cầu nhận việc"
+        "ACCEPTED" -> "Đã chốt thợ"
+        "ON_THE_WAY" -> "Đang di chuyển"
+        "WORKING" -> "Đang làm việc"
+        "PENDING_PAYMENT" -> "Chờ thanh toán"
+        "COMPLETED" -> "Hoàn thành"
+        "CANCELLED" -> "Đã hủy"
+        "REJECTED" -> "Bị từ chối"
+        else -> step
+    }
+}
+
+fun formatTime(timeString: String?): String {
+    if (timeString.isNullOrEmpty()) return ""
+    return try {
+        val parsed = LocalDateTime.parse(timeString)
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+        parsed.format(formatter)
+    } catch (e: Exception) {
+        timeString
+    }
+}
+
 @Composable
-fun TimelineSection(progresses: List<ProgressResponse>, jobStatus: String) {
-    Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
+fun TimelineSection(progresses: List<ProgressResponse>, jobStatus: String, isHost: Boolean) {
+
+    val baseSteps = if (isHost) {
+        listOf("OPEN", "ACCEPTED", "ON_THE_WAY", "WORKING", "PENDING_PAYMENT", "COMPLETED")
+    } else {
+        listOf("APPLIED", "ACCEPTED", "ON_THE_WAY", "WORKING", "PENDING_PAYMENT", "COMPLETED")
+    }
+
+    val timelineSteps = if (jobStatus == "CANCELLED" || jobStatus == "REJECTED") {
+        progresses.map { it.stepName }
+    } else {
+        baseSteps
+    }
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Tiến độ công việc", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             Spacer(modifier = Modifier.height(16.dp))
-            progresses.forEachIndexed { index, progress ->
-                val isLastItem = index == progresses.size - 1
-                val isSuccessPhase = jobStatus == "COMPLETED"
+
+            timelineSteps.forEachIndexed { index, stepName ->
+                val isLastItem = index == timelineSteps.size - 1
+
+                val matchedProgress = progresses.find { it.stepName == stepName }
+
+                val isJobCompleted = jobStatus == "COMPLETED"
+                val isCompleted = matchedProgress?.isCompleted == true || (isJobCompleted && matchedProgress != null)
+                val isCurrent = matchedProgress?.isCurrent == true || (jobStatus == stepName && matchedProgress != null)
+
                 val nodeColor = when {
-                    isSuccessPhase || progress.isCompleted -> Color(0xFF059669)
-                    progress.isCurrent -> Color(0xFFE04F43)
+                    isCompleted -> Color(0xFF059669)
+                    isCurrent -> Color(0xFFE04F43)
                     else -> Color.LightGray
                 }
+
+                val isNextStepStarted = if (!isLastItem) progresses.any { it.stepName == timelineSteps[index + 1] } else false
+                val lineColor = if (isCompleted && isNextStepStarted) Color(0xFF059669) else Color.LightGray
+
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(24.dp)) {
-                        Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(nodeColor).border(2.dp, nodeColor.copy(alpha = 0.3f), CircleShape))
-                        if (!isLastItem) Box(modifier = Modifier.width(2.dp).height(40.dp).background(if (progress.isCompleted || isSuccessPhase) Color(0xFF059669) else Color.LightGray))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.width(24.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .clip(CircleShape)
+                                .background(nodeColor)
+                                .border(2.dp, nodeColor.copy(alpha = 0.3f), CircleShape)
+                        )
+                        if (!isLastItem) {
+                            Box(
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .heightIn(min = 40.dp)
+                                    .weight(1f, fill = false)
+                                    .background(lineColor)
+                            )
+                        }
                     }
+
                     Spacer(modifier = Modifier.width(12.dp))
+
                     Column(modifier = Modifier.padding(bottom = if (!isLastItem) 16.dp else 0.dp)) {
                         Text(
-                            text = progress.stepName, // Đã map ở Backend hoặc dùng hàm getProgressLabel()
-                            fontWeight = if (progress.isCurrent || progress.isCompleted) FontWeight.Bold else FontWeight.Normal,
-                            color = if (progress.isCurrent) Color(0xFFE04F43) else Color.Black,
+                            text = getStepDisplayName(stepName, isHost),
+                            fontWeight = if (isCurrent || isCompleted) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isCurrent) Color(0xFFE04F43) else if(isCompleted) Color.Black else Color.Gray,
                             fontSize = 14.sp
                         )
-                        if (!progress.description.isNullOrEmpty()) Text(progress.description, color = Color.Gray, fontSize = 12.sp)
+
+                        if (matchedProgress != null && !matchedProgress.description.isNullOrEmpty()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = matchedProgress.description,
+                                color = Color.Gray,
+                                fontSize = 12.sp
+                            )
+                        }
+
+                        if (matchedProgress != null && !matchedProgress.time.isNullOrEmpty()) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = formatTime(matchedProgress.time),
+                                color = Color.Gray,
+                                fontSize = 11.sp
+                            )
+                        }
                     }
                 }
             }

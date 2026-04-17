@@ -35,6 +35,15 @@ fun MyPostsScreen(
         }
     }
 
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                viewModel.loadMyPosts(isLoadMore = false)
+            }
+        })
+    }
+
     LaunchedEffect(isAtBottom) {
         if (isAtBottom && !uiState.isLastPage) {
             viewModel.loadMyPosts(isLoadMore = true)

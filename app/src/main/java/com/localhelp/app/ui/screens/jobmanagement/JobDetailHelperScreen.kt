@@ -63,7 +63,8 @@ fun JobDetailHelperScreen(
     onNavigateBack: () -> Unit,
     onNavigateToUserProfile: (Long) -> Unit,
     onOpenGoogleMaps: (Double, Double) -> Unit,
-    onNavigateToChat: (String, String, String?) -> Unit
+    onNavigateToChat: (String, String, String?) -> Unit,
+    onNavigateToJobDetail: (Long) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -77,7 +78,8 @@ fun JobDetailHelperScreen(
         },
         bottomBar = {
             if (uiState is JobDetailHelperUiState.Success) {
-                HelperBottomBar(uiState as JobDetailHelperUiState.Success, viewModel, onOpenGoogleMaps)
+                val state = uiState as JobDetailHelperUiState.Success
+                HelperBottomBar(state, viewModel, onOpenGoogleMaps)
             }
         }
     ) { paddingValues ->
@@ -88,7 +90,6 @@ fun JobDetailHelperScreen(
                 is JobDetailHelperUiState.Success -> {
                     val status = state.jobInfo.status?.name ?: "APPLIED"
                     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        item { JobInfoHeader(state.jobInfo) }
                         item {
                             PartnerCard(
                                 roleTitle = "Người thuê",
@@ -99,10 +100,12 @@ fun JobDetailHelperScreen(
                                     state.conversationId?.let{
                                         onNavigateToChat(it, state.jobInfo.creatorName ?: "Khách Hàng", state.jobInfo.creatorAvatar)
                                     }
-                                }
+                                },
+                                avatarUrl = state.jobInfo.creatorAvatar
                             )
                         }
-                        item { TimelineSection(state.progresses, status) }
+                        item { JobInfoHeader(state.jobInfo, onNavigateToJobDetail) }
+                        item { TimelineSection(state.progresses, status, isHost = false) }
 
                         if (status == "WORKING") item { LocalEvidenceSection(state.selectedLocalImages, viewModel) }
                         if (state.evidenceImages.isNotEmpty()) item { RemoteEvidenceSection(state.evidenceImages) }
@@ -125,7 +128,7 @@ fun LocalEvidenceSection(images: List<Uri>, viewModel: JobDetailHelperViewModel)
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris -> viewModel.addLocalImages(uris) }
     Column {
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-            Text("Ảnh bằng chứng (Tạm)", fontWeight = FontWeight.Bold)
+            Text("Ảnh bằng chứng", fontWeight = FontWeight.Bold)
             Icon(Icons.Filled.CameraAlt, contentDescription = "Add", modifier = Modifier.clickable { launcher.launch("image/*") })
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -153,18 +156,17 @@ fun HelperBottomBar(state: JobDetailHelperUiState.Success, viewModel: JobDetailH
             when (status) {
                 "APPLIED" -> Button(onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth()) { Text("Đã gửi yêu cầu - Chờ duyệt") }
                 "ACCEPTED" -> {
-                    OutlinedButton(onClick = { onMap(0.0, 0.0) }, modifier = Modifier.weight(1f)) { Icon(Icons.Filled.Directions, null); Spacer(Modifier.width(4.dp)); Text("Chỉ đường") }
+                    OutlinedButton(onClick = { onMap(state.jobInfo.latitude ?: 0.0, state.jobInfo.longitude ?: 0.0) }, modifier = Modifier.weight(1f)) { Icon(Icons.Filled.Directions, null); Spacer(Modifier.width(4.dp)); Text("Chỉ đường") }
                     Button(onClick = { viewModel.updateStatusMoving() }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE04F43))) { Text("Bắt đầu đi") }
                 }
                 "ON_THE_WAY" -> {
-                    OutlinedButton(onClick = { onMap(0.0, 0.0) }, modifier = Modifier.weight(1f)) { Icon(Icons.Filled.Directions, null); Spacer(Modifier.width(4.dp)); Text("Chỉ đường") }
+                    OutlinedButton(onClick = {onMap(state.jobInfo.latitude ?: 0.0, state.jobInfo.longitude ?: 0.0) }, modifier = Modifier.weight(1f)) { Icon(Icons.Filled.Directions, null); Spacer(Modifier.width(4.dp)); Text("Chỉ đường") }
                     Button(onClick = { viewModel.updateStatusArrived() }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669))) { Text("Đã đến nơi") }
                 }
                 "WORKING" -> {
                     Button(
                         onClick = {
-                            val parts = prepareEvidenceParts(context, state.selectedLocalImages)
-                            viewModel.submitEvidence(parts)
+                            viewModel.submitEvidence(context)
                         },
                         enabled = state.selectedLocalImages.isNotEmpty(), modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669))
                     ) { Text("Gửi bằng chứng & Hoàn thành") }
@@ -173,24 +175,4 @@ fun HelperBottomBar(state: JobDetailHelperUiState.Success, viewModel: JobDetailH
             }
         }
     }
-}
-
-fun prepareEvidenceParts(context: Context, uris: List<Uri>): List<MultipartBody.Part> {
-    val parts = mutableListOf<MultipartBody.Part>()
-
-    uris.forEachIndexed { index, uri ->
-        val file = File(context.cacheDir, "evidence_${System.currentTimeMillis()}_$index.jpg")
-
-        context.contentResolver.openInputStream(uri)?.use { inputStream ->
-            FileOutputStream(file).use { outputStream ->
-                inputStream.copyTo(outputStream)
-            }
-        }
-        val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-
-        val body = MultipartBody.Part.createFormData("images", file.name, requestFile)
-        parts.add(body)
-    }
-
-    return parts
 }

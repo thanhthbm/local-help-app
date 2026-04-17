@@ -32,12 +32,11 @@ interface JobDetailApiService {
     @POST("api/jobs/{jobId}/status/arrived")
     suspend fun updateStatusArrived(@Path("jobId") jobId: Long): Response<ApiResponse<Any>>
 
-    @Multipart
     @POST("api/jobs/{jobId}/submit-evidence")
-    suspend fun submitEvidence(
+    suspend fun submitJobEvidence(
         @Path("jobId") jobId: Long,
-        @Part images: List<MultipartBody.Part>
-    ): Response<ApiResponse<Any>>
+        @Body imageUrls: List<String>
+    ): Response<ApiResponse<Unit>>
 
     @POST("api/jobs/{jobId}/confirm-payment")
     suspend fun confirmPayment(@Path("jobId") jobId: Long): Response<ApiResponse<Any>>

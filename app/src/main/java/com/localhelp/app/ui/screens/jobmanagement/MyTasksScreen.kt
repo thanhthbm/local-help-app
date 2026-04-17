@@ -37,6 +37,15 @@ fun MyTasksScreen(
         }
     }
 
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                viewModel.loadMyTasks(isLoadMore = false)
+            }
+        })
+    }
+
     LaunchedEffect(isAtBottom) {
         if (isAtBottom && !uiState.isLastPage) {
             viewModel.loadMyTasks(isLoadMore = true)

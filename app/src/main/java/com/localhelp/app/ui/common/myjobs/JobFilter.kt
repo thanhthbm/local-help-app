@@ -75,10 +75,10 @@ fun JobFilterSheet(
                 icon = Icons.Default.Navigation,
                 value = distance,
                 valueText = "${String.format("%.1f", distance)} km",
-                valueRange = 0f..10f,
+                valueRange = 0f..100f,
                 onValueChange = { distance = it },
                 minLabel = "0km",
-                maxLabel = "10km"
+                maxLabel = "100km"
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
