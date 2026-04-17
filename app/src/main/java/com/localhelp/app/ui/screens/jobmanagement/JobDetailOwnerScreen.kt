@@ -53,7 +53,7 @@ fun JobDetailOwnerScreen(
     viewModel: JobDetailOwnerViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToUserProfile: (Long) -> Unit,
-    onNavigateToChat: (String, String, String?) -> Unit,
+    onNavigateToChat: (String, String, String?, Long) -> Unit,
     onNavigateToJobDetail: (Long) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -98,8 +98,10 @@ fun JobDetailOwnerScreen(
                                     partnerId = state.jobInfo.helperId,
                                     onNavigate = onNavigateToUserProfile,
                                     onChat = {
-                                        state.conversationId?.let{
-                                            onNavigateToChat(it, state.jobInfo.helperName ?: "Người giúp", state.jobInfo.helperAvatar)
+                                        state.jobInfo.helperId?.let{ partnerId ->
+                                            state.conversationId?.let{
+                                                onNavigateToChat(it, state.jobInfo.helperName ?: "Người giúp", state.jobInfo.helperAvatar, partnerId)
+                                            }
                                         }
                                     },
                                     avatarUrl = state.jobInfo.helperAvatar

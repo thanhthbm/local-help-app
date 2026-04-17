@@ -164,9 +164,9 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 onOpenGoogleMaps = { lat, lng ->
                     navController.navigate("${Screen.MAP_DIRECTION}/$lat,$lng")
                 },
-                onNavigateToChat = { conversationId: String?, partnerName: String, avatarUrl: String? ->
+                onNavigateToChat = { conversationId: String?, partnerName: String, avatarUrl: String?, partnerId: Long ->
                     val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
-                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl/$partnerId")
                 },
                 onNavigateToJobDetail = { jobId ->
                     navController.navigate("${Screen.JOB_DETAIL}/$jobId")
@@ -186,8 +186,9 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 onNavigateToUserProfile = { userId ->
                     navController.navigate("${Screen.PROFILE}/$userId")
                 },
-                onNavigateToChat = { conversationId: String, partnerName: String, avatarUrl: String? ->
+                onNavigateToChat = { conversationId: String, partnerName: String, avatarUrl: String?, partnerId: Long ->
                     val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl/$partnerId")
                     navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
                 },
                 onNavigateToJobDetail = { jobId ->
