@@ -24,7 +24,12 @@ import com.localhelp.app.ui.screens.profile.GrayText
 import com.localhelp.app.ui.screens.profile.OrangePrimary
 
 @Composable
-fun ReviewsSection(averageRating: Double, totalReviews: Int) {
+fun ReviewsSection(
+    averageRating: Double,
+    totalReviews: Int,
+    reviews: List<com.localhelp.app.model.response.ReviewResponse> = emptyList(),
+    isLoading: Boolean = false
+) {
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -38,7 +43,7 @@ fun ReviewsSection(averageRating: Double, totalReviews: Int) {
         Spacer(modifier = Modifier.height(12.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(averageRating.toString(), fontSize = 32.sp, fontWeight = FontWeight.Bold)
+            Text(String.format("%.1f", averageRating), fontSize = 32.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.width(8.dp))
             Column {
                 Row {
@@ -54,9 +59,15 @@ fun ReviewsSection(averageRating: Double, totalReviews: Int) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Review tĩnh làm mẫu
-        ReviewItem("Minh Tuấn", "Cô Lan rất nhiệt tình, sửa vòi nước xong còn dọn dẹp sạch sẽ giúp mình nữa. Rất cảm ơn cô!")
-        Spacer(modifier = Modifier.height(12.dp))
-        ReviewItem("Chị Hạnh", "Giao thuốc rất nhanh, đúng loại mình cần. Người hàng xóm tuyệt vời.")
+        if (isLoading) {
+            // Hiển thị loading nhỏ nếu cần
+        } else if (reviews.isEmpty()) {
+            Text("Chưa có đánh giá nào", color = GrayText, fontSize = 14.sp)
+        } else {
+            reviews.forEach { review ->
+                ReviewItem(name = review.reviewerName, comment = review.comment)
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
     }
 }

@@ -56,11 +56,25 @@ fun RecentJobCard(job: JobResponse, onClick: () -> Unit) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Job Image Thumbnail
+                val imageUrl = job.images?.firstOrNull()
+                if (imageUrl != null) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                }
+
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = job.title?: "Không có tiêu đề",
+                        text = job.title ?: "Không có tiêu đề",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
@@ -74,13 +88,14 @@ fun RecentJobCard(job: JobResponse, onClick: () -> Unit) {
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+                
                 Surface(
                     shape = CircleShape,
                     color = Color(0xFFE8F5E9),
                     modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.CleaningServices, //fixed icon
+                        imageVector = Icons.Default.CleaningServices, // fixed icon
                         contentDescription = null,
                         tint = Color(0xFF4CAF50),
                         modifier = Modifier.padding(8.dp)
@@ -130,13 +145,13 @@ fun RecentJobCard(job: JobResponse, onClick: () -> Unit) {
                 )
 
                 Button(
-                    onClick = { /* Xử lý nhận việc */ },
+                    onClick = { /* Xử lý nhận việc thông qua onJobClick */ },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED7D68)),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                     modifier = Modifier.height(32.dp)
                 ) {
-                    Text("Nhận việc", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("Xem", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

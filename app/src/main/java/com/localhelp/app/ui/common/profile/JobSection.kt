@@ -72,6 +72,7 @@ fun JobsSection(jobs: List<JobResponse>, onJobClick: (Long) -> Unit = {}) {
                     },
                     statusBg = statusBg,
                     statusColor = statusColor,
+                    imageUrl = job.images?.firstOrNull(),
                     actionText = "Xem chi tiết",
                     onClick = { onJobClick(job.id) }
                 )

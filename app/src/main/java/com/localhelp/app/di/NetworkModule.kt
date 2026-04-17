@@ -10,6 +10,7 @@ import com.localhelp.app.data.remote.ConversationService
 import com.localhelp.app.data.remote.FinanceService
 import com.localhelp.app.data.remote.JobDetailApiService
 import com.localhelp.app.data.remote.JobService
+import com.localhelp.app.data.remote.ReviewService
 import com.localhelp.app.data.remote.TokenAuthenticator
 import com.localhelp.app.data.remote.TrackAsiaApiService
 import com.localhelp.app.data.remote.UserService
@@ -124,9 +125,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideReviewService(@Named("main") retrofit: Retrofit): ReviewService {
+        return retrofit.create(ReviewService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideCategoryService(@Named("main") retrofit: Retrofit): CategoryService{
         return retrofit.create(CategoryService::class.java)
     }
+
 
     @Provides
     @Singleton

@@ -23,26 +23,18 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.localhelp.app.model.constant.JobStatus
-import androidx.compose.foundation.clickable
 import com.localhelp.app.data.local.LocalUser
 import com.localhelp.app.utils.FormatterUtils
-import java.text.DecimalFormat
-
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.TrendingFlat
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Pets
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import com.localhelp.app.ui.screens.Screen
-import java.net.URLEncoder
+
+import androidx.compose.foundation.BorderStroke
 
 val PrimaryOrange = Color(0xFFED7D68)
 val BackgroundGray = Color(0xFFFDFDFD)
@@ -62,6 +54,7 @@ fun JobDetailScreen(
     var showConfirmDialog by remember { mutableStateOf(false) }
     val job by viewModel.job.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isApplied by viewModel.isApplied.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val acceptStatus by viewModel.acceptStatus.collectAsState()
     
@@ -216,7 +209,7 @@ fun JobDetailScreen(
                                 onClick = {
                                     showConfirmDialog = true
                                 },
-                                enabled = job!!.status == JobStatus.OPEN && !isLoading,
+                                enabled = job!!.status == JobStatus.OPEN && !isApplied,
                                 modifier = Modifier.weight(0.6f).height(50.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = PrimaryOrange,
@@ -225,7 +218,11 @@ fun JobDetailScreen(
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(
-                                    text = if (job!!.status == JobStatus.OPEN) "Nhận việc" else "Đã có người nhận",
+                                    text = when {
+                                        isApplied -> "Đã nhận việc"
+                                        job!!.status == JobStatus.OPEN -> "Nhận việc"
+                                        else -> "Đã có người nhận"
+                                    },
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp
@@ -281,6 +278,18 @@ fun JobDetailScreen(
                     .verticalScroll(rememberScrollState())
                     .background(BackgroundGray)
             ) {
+                // Job Image Header
+                if (!currentJob.images.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = currentJob.images.first(),
+                        contentDescription = "Job Image",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(220.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
                 Column(modifier = Modifier.padding(20.dp)) {
                     // Title and Price Pill
                     Row(

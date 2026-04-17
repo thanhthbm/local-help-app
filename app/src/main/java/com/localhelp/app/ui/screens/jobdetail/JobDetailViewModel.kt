@@ -3,15 +3,22 @@ package com.localhelp.app.ui.screens.jobdetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestore
+import com.localhelp.app.data.local.JobPreferences
+import com.localhelp.app.data.local.UserManager
 import com.localhelp.app.data.repository.ChatRepository
 import com.localhelp.app.data.repository.JobRepository
+import com.localhelp.app.model.constant.JobStatus
 import com.localhelp.app.model.response.JobResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,7 +26,9 @@ import javax.inject.Inject
 class JobDetailViewModel @Inject constructor(
     private val jobRepository: JobRepository,
     private val chatRepository: ChatRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val userManager: UserManager,
+    private val jobPreferences: JobPreferences,
+    savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
     private val _job = MutableStateFlow<JobResponse?>(null)
@@ -27,6 +36,9 @@ class JobDetailViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading = _isLoading.asStateFlow()
+
+    private val _isApplied = MutableStateFlow(false)
+    val isApplied = _isApplied.asStateFlow()
 
     private val _acceptStatus = MutableStateFlow<Boolean?>(null)
     val acceptStatus = _acceptStatus.asStateFlow()
@@ -48,9 +60,52 @@ class JobDetailViewModel @Inject constructor(
     init {
         // Tự động lấy ID từ NavGraph và fetch data
         val jobId = savedStateHandle.get<Long>("id")
+        val userId = userManager.currentUser.value?.id
+        
         if (jobId != null) {
+            if (userId != null) {
+                _isApplied.value = jobPreferences.isJobApplied(jobId, userId)
+            }
             fetchJob(jobId)
+            observeJobStatus(jobId)
         }
+    }
+
+    private fun observeJobStatus(jobId: Long) {
+        viewModelScope.launch {
+            listenToJobUpdates(jobId).collectLatest { statusStr ->
+                // Khi có update từ Firestore, fetch lại data từ API để đồng bộ hoàn toàn
+                // Hoặc chỉ cập nhật status cục bộ nếu muốn tối ưu
+                val currentJob = _job.value
+                if (currentJob != null && statusStr != null) {
+                    try {
+                        val newStatus = JobStatus.valueOf(statusStr)
+                        if (currentJob.status != newStatus) {
+                            fetchJob(jobId)
+                        }
+                    } catch (_: Exception) {
+                        // Ignore invalid status
+                    }
+                }
+            }
+        }
+    }
+
+    private fun listenToJobUpdates(jobId: Long): Flow<String?> = callbackFlow {
+        val db = FirebaseFirestore.getInstance()
+        val docRef = db.collection("job_updates").document(jobId.toString())
+        
+        val registration = docRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
+            if (snapshot != null && snapshot.exists()) {
+                val status = snapshot.getString("status")
+                trySend(status)
+            }
+        }
+        awaitClose { registration.remove() }
     }
 
     private fun fetchJob(id: Long){
@@ -89,13 +144,18 @@ class JobDetailViewModel @Inject constructor(
 
     fun acceptJob() {
         val currentJob = _job.value ?: return
+        val userId = userManager.currentUser.value?.id
 
         _isLoading.value = true
         _errorMessage.value = null
 
         viewModelScope.launch {
             val result = jobRepository.acceptJob(currentJob.id)
-            result.onSuccess { updatedJob ->
+            result.onSuccess { _ ->
+                if (userId != null) {
+                    jobPreferences.setJobApplied(currentJob.id, userId)
+                    _isApplied.value = true
+                }
                 _navigationEvent.emit(JobDetailNavEvent.NavigateToSuccess)
             }.onFailure { error ->
                 _acceptStatus.value = false

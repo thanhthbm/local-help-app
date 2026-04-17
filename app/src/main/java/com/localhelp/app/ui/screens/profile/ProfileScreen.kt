@@ -9,6 +9,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,81 +48,107 @@ fun ProfileScreen(
     val user by viewModel.user.collectAsState()
     val isMyProfile = viewModel.isMyProfile
     val jobs by viewModel.jobs.collectAsState()
+    val reviews by viewModel.reviews.collectAsState()
     val isLoadingJobs by viewModel.isLoadingJobs.collectAsState()
+    val isLoadingReviews by viewModel.isLoadingReviews.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val refreshState = rememberPullToRefreshState()
 
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(horizontal = 16.dp)
-            .verticalScroll(scrollState)
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.refresh() },
+        state = refreshState,
+        modifier = modifier.fillMaxSize()
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // --- TIÊU ĐỀ & NÚT ĐĂNG XUẤT ---
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(horizontal = 16.dp)
+                .verticalScroll(scrollState)
         ) {
-            Text(if (isMyProfile) "Hồ sơ cá nhân" else "Hồ sơ người dùng", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            if (isMyProfile) {
-                Row {
-                    IconButton(onClick = onEditProfile) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Chỉnh sửa hồ sơ", tint = Color(0xFFF06A50))
-                    }
-                    IconButton(onClick = { viewModel.logout() }) {
-                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Đăng xuất", tint = Color.Red)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // --- TIÊU ĐỀ & NÚT ĐĂNG XUẤT ---
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    if (isMyProfile) "Hồ sơ cá nhân" else "Hồ sơ người dùng",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                if (isMyProfile) {
+                    Row {
+                        IconButton(onClick = onEditProfile) {
+                            Icon(
+                                Icons.Filled.Edit,
+                                contentDescription = "Chỉnh sửa hồ sơ",
+                                tint = Color(0xFFF06A50)
+                            )
+                        }
+                        IconButton(onClick = { viewModel.logout() }) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = "Đăng xuất",
+                                tint = Color.Red
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // --- THẺ THÔNG TIN CÁ NHÂN ---
-        ProfileCard(
-            fullName = user?.fullName ?: "Người dùng",
-            bio = user?.bio ?: "Chưa có thông tin giới thiệu",
-            avatarUrl = user?.avatarUrl
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // --- THỐNG KÊ ---
-        val ratePercent = ((user?.responseRate ?: 0.0) * 100).toInt()
-        StatsSection(
-            completedJobs = user?.completedJobs?.toString() ?: "0",
-            responseRate = "$ratePercent%"
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-        if (isMyProfile) {
-            FinanceButton(onClick = onNavigateToStats)
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        // --- PHẦN ĐÁNH GIÁ ---
-        ReviewsSection(
-            averageRating = user?.averageRating ?: 0.0,
-            totalReviews = user?.totalReviews ?: 0
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // --- PHẦN CÔNG VIỆC GẦN ĐÂY ---
-        if (isLoadingJobs) {
-            Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = OrangePrimary)
-            }
-        } else {
-            JobsSection(
-                jobs = jobs,
-                onJobClick = onJobClick
+            // --- THẺ THÔNG TIN CÁ NHÂN ---
+            ProfileCard(
+                fullName = user?.fullName ?: "Người dùng",
+                bio = user?.bio ?: "Chưa có thông tin giới thiệu",
+                avatarUrl = user?.avatarUrl
             )
-        }
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // --- THỐNG KÊ ---
+            StatsSection(
+                completedJobs = user?.completedJobs?.toString() ?: "0"
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            if (isMyProfile) {
+                FinanceButton(onClick = onNavigateToStats)
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            // --- PHẦN ĐÁNH GIÁ ---
+            ReviewsSection(
+                averageRating = user?.averageRating ?: 0.0,
+                totalReviews = user?.totalReviews ?: 0,
+                reviews = reviews,
+                isLoading = isLoadingReviews
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // --- PHẦN CÔNG VIỆC GẦN ĐÂY ---
+            if (isLoadingJobs) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp), contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = OrangePrimary)
+                }
+            } else {
+                JobsSection(
+                    jobs = jobs,
+                    onJobClick = onJobClick
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+        }
     }
 }

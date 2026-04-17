@@ -12,9 +12,8 @@ import androidx.compose.ui.unit.dp
 import com.localhelp.app.ui.screens.profile.OrangePrimary
 
 @Composable
-fun StatsSection(completedJobs: String, responseRate: String) {
+fun StatsSection(completedJobs: String) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         StatCard(modifier = Modifier.weight(1f), icon = Icons.Outlined.CheckCircle, iconTint = OrangePrimary, value = completedJobs, label = "Việc đã xong")
-        StatCard(modifier = Modifier.weight(1f), icon = Icons.Outlined.ChatBubbleOutline, iconTint = Color(0xFF4A90E2), value = responseRate, label = "Tỉ lệ phản hồi")
     }
 }

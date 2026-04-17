@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -69,55 +70,63 @@ fun MessagesScreen(
         },
         containerColor = Color.White
     ) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .shadow(elevation = 6.dp, shape = RoundedCornerShape(24.dp))
-                    .background(Color.White, RoundedCornerShape(24.dp))
-            ){
-                TextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = { Text("Tìm kiếm tin nhắn", color = Color.Gray, fontSize = 15.sp) },
-                    leadingIcon = { Icon(Icons.Default.Search, null, tint = Color(0xFFED7D68)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    singleLine = true
-                )
-            }
+        PullToRefreshBox(
+            isRefreshing = isLoading,
+            onRefresh = { viewModel.fetchConversations() },
+            modifier = Modifier.fillMaxSize().padding(paddingValues)
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .shadow(elevation = 6.dp, shape = RoundedCornerShape(24.dp))
+                        .background(Color.White, RoundedCornerShape(24.dp))
+                ){
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text("Tìm kiếm tin nhắn", color = Color.Gray, fontSize = 15.sp) },
+                        leadingIcon = { Icon(Icons.Default.Search, null, tint = Color(0xFFED7D68)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        singleLine = true
+                    )
+                }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (isLoading) {
-                    CircularProgressIndicator(color = Color(0xFFED7D68), modifier = Modifier.align(Alignment.Center))
-                } else if (filteredConversations.isEmpty()) {
-                    Text("Chưa có tin nhắn nào", color = Color.Gray, modifier = Modifier.align(Alignment.Center))
-                } else {
-                    LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
-                        items(filteredConversations) { conv ->
-                            ConversationRow(
-                                conversation = conv,
-                                onClick = {
-                                    // Truyền thông tin sang màn hình chi tiết
-                                    onNavigateToChat(
-                                        conv.id,
-                                        conv.partner.fullName ?: "Người dùng",
-                                        conv.partner.avatarUrl ?: "none", // Truyền chuỗi "none" nếu avatar null
-                                        conv.partner.id
-                                    )
-                                }
-                            )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (isLoading && filteredConversations.isEmpty()) {
+                        CircularProgressIndicator(color = Color(0xFFED7D68), modifier = Modifier.align(Alignment.Center))
+                    } else if (filteredConversations.isEmpty()) {
+                        Text("Chưa có tin nhắn nào", color = Color.Gray, modifier = Modifier.align(Alignment.Center))
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 80.dp)
+                        ) {
+                            items(filteredConversations) { conv ->
+                                ConversationRow(
+                                    conversation = conv,
+                                    onClick = {
+                                        // Truyền thông tin sang màn hình chi tiết
+                                        onNavigateToChat(
+                                            conv.id,
+                                            conv.partner.fullName ?: "Người dùng",
+                                            conv.partner.avatarUrl ?: "none", // Truyền chuỗi "none" nếu avatar null
+                                            conv.partner.id
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
         }
-
     }
 }

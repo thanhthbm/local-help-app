@@ -7,16 +7,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.localhelp.app.model.response.JobResponse
-import com.localhelp.app.ui.common.myjobs.TaskStatusBadge
 import com.localhelp.app.ui.common.myjobs.TaskActionButton
+import com.localhelp.app.ui.common.myjobs.TaskStatusBadge
 
 @Composable
 fun MyPostsScreen(
@@ -50,7 +54,11 @@ fun MyPostsScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF9FAFB))) {
+    PullToRefreshBox(
+        isRefreshing = uiState.isLoading && !uiState.isPaginating,
+        onRefresh = { viewModel.loadMyPosts(isLoadMore = false) },
+        modifier = Modifier.fillMaxSize().background(Color(0xFFF9FAFB))
+    ) {
         if (uiState.isLoading && uiState.jobs.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -72,7 +80,7 @@ fun MyPostsScreen(
                     }
                 }
 
-                items(uiState.jobs, key = { it.id ?: 0 }) { job ->
+                items(uiState.jobs, key = { it.id }) { job ->
                     MyPostCompactCard(job = job, onClickAction = { onNavigateToDetail(job.id) })
                 }
 
@@ -96,24 +104,61 @@ fun MyPostCompactCard(job: JobResponse, onClickAction: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                    Text(text = job.title ?: "", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = job.address ?: "Đang cập nhật địa chỉ", color = Color.Gray, fontSize = 13.sp)
+        Row(modifier = Modifier.padding(16.dp)) {
+            val imageUrl = job.images?.firstOrNull()
+            if (imageUrl != null) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(70.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(70.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFFF3F4F6)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No Image", fontSize = 10.sp, color = Color.Gray)
                 }
-
-                TaskStatusBadge(status = job.status?.name ?: "OPEN")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
-            TaskActionButton(status = job.status?.name ?: "OPEN", onClick = onClickAction)
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                        Text(
+                            text = job.title ?: "",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            maxLines = 1
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = job.address ?: "Đang cập nhật địa chỉ",
+                            color = Color.Gray,
+                            fontSize = 12.sp,
+                            maxLines = 1
+                        )
+                    }
+
+                    TaskStatusBadge(status = job.status?.name ?: "OPEN")
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TaskActionButton(status = job.status?.name ?: "OPEN", onClick = onClickAction)
+            }
         }
     }
 }

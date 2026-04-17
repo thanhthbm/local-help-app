@@ -20,6 +20,7 @@ class ProfileViewModel @Inject constructor(
     private val userManager: UserManager,
     private val userRepository: UserRepository,
     private val jobRepository: JobRepository,
+    private val reviewRepository: com.localhelp.app.data.repository.ReviewRepository,
     savedStateHandle: SavedStateHandle
 ): ViewModel(){
     private val userId: Long? = savedStateHandle.get<Long>("userId")
@@ -34,14 +35,22 @@ class ProfileViewModel @Inject constructor(
     private val _jobs = MutableStateFlow<List<JobResponse>>(emptyList())
     val jobs: StateFlow<List<JobResponse>> = _jobs.asStateFlow()
 
+    private val _reviews = MutableStateFlow<List<com.localhelp.app.model.response.ReviewResponse>>(emptyList())
+    val reviews: StateFlow<List<com.localhelp.app.model.response.ReviewResponse>> = _reviews.asStateFlow()
+
     private val _isLoadingJobs = MutableStateFlow(false)
     val isLoadingJobs: StateFlow<Boolean> = _isLoadingJobs.asStateFlow()
+
+    private val _isLoadingReviews = MutableStateFlow(false)
+    val isLoadingReviews: StateFlow<Boolean> = _isLoadingReviews.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     init {
         val targetId = userId ?: userManager.currentUser.value?.id
         if (targetId != null) {
-            loadUserProfile(targetId)
-            loadUserJobs(targetId)
+            refresh()
         }
         
         // Nếu là profile của mình, lắng nghe sự thay đổi từ UserManager
@@ -56,6 +65,17 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun refresh() {
+        val targetId = userId ?: userManager.currentUser.value?.id ?: return
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            loadUserProfile(targetId)
+            loadUserJobs(targetId)
+            loadUserReviews(targetId)
+            _isRefreshing.value = false
+        }
+    }
+
     private fun loadUserProfile(id: Long) {
         viewModelScope.launch {
             userRepository.getUserById(id).onSuccess {
@@ -67,11 +87,20 @@ class ProfileViewModel @Inject constructor(
     private fun loadUserJobs(id: Long) {
         viewModelScope.launch {
             _isLoadingJobs.value = true
-            // Sử dụng getMyPosts với userId của người khác
             jobRepository.getMyPosts(1, 20, id).onSuccess {
                 _jobs.value = it.result
             }
             _isLoadingJobs.value = false
+        }
+    }
+
+    private fun loadUserReviews(id: Long) {
+        viewModelScope.launch {
+            _isLoadingReviews.value = true
+            reviewRepository.getReviewsByUser(id, 1, 5).onSuccess {
+                _reviews.value = it.result
+            }
+            _isLoadingReviews.value = false
         }
     }
 

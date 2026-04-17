@@ -29,20 +29,48 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import com.localhelp.app.ui.screens.profile.GrayText
 import com.localhelp.app.ui.screens.profile.OrangePrimary
 
 @Composable
-fun JobCard(title: String, subtitle: String, status: String, statusBg: Color, statusColor: Color, actionText: String, actionIsButton: Boolean = false, onClick: () -> Unit = {}) {
+fun JobCard(
+    title: String,
+    subtitle: String,
+    status: String,
+    statusBg: Color,
+    statusColor: Color,
+    imageUrl: String? = null,
+    actionText: String,
+    actionIsButton: Boolean = false,
+    onClick: () -> Unit = {}
+) {
     OutlinedCard(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = Color.White),
         onClick = onClick
     ) {
-        Row(modifier = Modifier.padding(12.dp).fillMaxWidth()) {
-            Box(
-                modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp)).background(Color.LightGray)
-            )
+        Row(modifier = Modifier
+            .padding(12.dp)
+            .fillMaxWidth()) {
+            if (imageUrl != null) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = title,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.LightGray)
+                )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
