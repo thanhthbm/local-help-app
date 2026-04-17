@@ -38,7 +38,7 @@ class JobDetailViewModel @Inject constructor(
     val navigationEvent = _navigationEvent.asSharedFlow()
 
     sealed class JobDetailNavEvent {
-        data class NavigateToChat(val conversationId: String, val partnerName: String, val partnerAvatar: String?) : JobDetailNavEvent()
+        data class NavigateToChat(val conversationId: String, val partnerName: String, val partnerAvatar: String?, val partnerId: Long) : JobDetailNavEvent()
         data class NavigateToEditJob(val jobId: Long) : JobDetailNavEvent()
         data class NavigateToUserProfile(val userId: Long) : JobDetailNavEvent()
         object NavigateToSuccess : JobDetailNavEvent()
@@ -76,7 +76,8 @@ class JobDetailViewModel @Inject constructor(
                     JobDetailNavEvent.NavigateToChat(
                         conversationId = conversation.id,
                         partnerName = currentJob.creatorName ?: "Người dùng",
-                        partnerAvatar = currentJob.creatorAvatar
+                        partnerAvatar = currentJob.creatorAvatar,
+                        partnerId = currentJob.creatorId
                     )
                 )
             }.onFailure { error ->

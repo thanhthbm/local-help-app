@@ -42,9 +42,9 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 onDirection = { destination ->
                     navController.navigate("${Screen.MAP_DIRECTION}/${destination.latitude},${destination.longitude}")
                 },
-                onNavigateToChat = { conversationId, partnerName, avatarUrl ->
+                onNavigateToChat = { conversationId, partnerName, avatarUrl, partnerId ->
                     val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
-                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl/$partnerId")
                 },
                 onJobClick = { jobId ->
                     navController.navigate("${Screen.JOB_DETAIL}/$jobId")
@@ -108,9 +108,9 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
         ) {
             JobDetailScreen(
                 onBackClick = { navController.popBackStack() },
-                onMessageClick = { conversationId: String, partnerName: String, avatarUrl: String? ->
+                onMessageClick = { conversationId: String, partnerName: String, avatarUrl: String?, partnerId: Long ->
                     val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
-                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl/$partnerId")
                 },
                 onEditJob = { jobId ->
                     navController.navigate("${Screen.POST_JOB}?jobId=$jobId")
@@ -164,9 +164,9 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 onOpenGoogleMaps = { lat, lng ->
                     navController.navigate("${Screen.MAP_TRACKING}/$lat,$lng")
                 },
-                onNavigateToChat = { conversationId: String?, partnerName: String, avatarUrl: String? ->
+                onNavigateToChat = { conversationId: String?, partnerName: String, avatarUrl: String?, partnerId: Long ->
                     val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
-                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl/$partnerId")
                 }
             )
         }
@@ -183,28 +183,29 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 onNavigateToUserProfile = { userId ->
                     navController.navigate("${Screen.PROFILE}/$userId")
                 },
-                onNavigateToChat = { conversationId: String, partnerName: String, avatarUrl: String? ->
+                onNavigateToChat = { conversationId: String, partnerName: String, avatarUrl: String?, partnerId: Long ->
                     val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
-                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl/$partnerId")
                 }
             )
         }
 
         composable(Screen.MESSAGES){
             MessagesScreen(
-                onNavigateToChat = { conversationId: String, partnerName: String, avatarUrl: String? ->
+                onNavigateToChat = { conversationId: String, partnerName: String, avatarUrl: String?, partnerId: Long ->
                     val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
-                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
+                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl/$partnerId")
                 }
             )
         }
 
         composable(
-            route = "chat/{conversationId}/{partnerName}/{partnerAvatar}",
+            route = "chat/{conversationId}/{partnerName}/{partnerAvatar}/{partnerId}",
             arguments = listOf(
                 navArgument("conversationId") { type = NavType.StringType },
                 navArgument("partnerName") { type = NavType.StringType },
-                navArgument("partnerAvatar") { type = NavType.StringType }
+                navArgument("partnerAvatar") { type = NavType.StringType },
+                navArgument("partnerId") { type = NavType.LongType }
             )
         ) { backStackEntry ->
             ChatScreen(

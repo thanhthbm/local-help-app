@@ -63,7 +63,7 @@ fun JobDetailHelperScreen(
     onNavigateBack: () -> Unit,
     onNavigateToUserProfile: (Long) -> Unit,
     onOpenGoogleMaps: (Double, Double) -> Unit,
-    onNavigateToChat: (String, String, String?) -> Unit
+    onNavigateToChat: (String, String, String?, Long) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -97,7 +97,7 @@ fun JobDetailHelperScreen(
                                 onNavigate = onNavigateToUserProfile,
                                 onChat = {
                                     state.conversationId?.let{
-                                        onNavigateToChat(it, state.jobInfo.creatorName ?: "Khách Hàng", state.jobInfo.creatorAvatar)
+                                        onNavigateToChat(it, state.jobInfo.creatorName ?: "Khách Hàng", state.jobInfo.creatorAvatar, state.jobInfo.creatorId)
                                     }
                                 }
                             )

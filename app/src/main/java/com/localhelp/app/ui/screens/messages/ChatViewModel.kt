@@ -28,6 +28,7 @@ class ChatViewModel @Inject constructor(
     val conversationId: String = checkNotNull(savedStateHandle["conversationId"])
     val partnerName: String = checkNotNull(savedStateHandle["partnerName"])
     val partnerAvatar: String = savedStateHandle["partnerAvatar"] ?: ""
+    val partnerId: Long = checkNotNull(savedStateHandle["partnerId"])
 
     // Lấy ID người dùng hiện tại một cách an toàn và phản hồi khi nó thay đổi
     val myUserId: Long

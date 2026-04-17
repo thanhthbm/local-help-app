@@ -43,7 +43,7 @@ import com.trackasia.android.geometry.LatLng
 fun HomeScreen(
     onDirection : (destination :LatLng) -> Unit,
     onSearchClick : () -> Unit,
-    onNavigateToChat: (String, String, String?) -> Unit,
+    onNavigateToChat: (String, String, String?, Long) -> Unit,
     onJobClick: (Long) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -83,7 +83,8 @@ fun HomeScreen(
             onNavigateToChat(
                 conversation.id,
                 conversation.partner.fullName ?: "User",
-                conversation.partner.avatarUrl
+                conversation.partner.avatarUrl,
+                conversation.partner.id
             )
         }
     }

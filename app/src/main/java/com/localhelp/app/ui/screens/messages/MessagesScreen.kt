@@ -43,7 +43,7 @@ import com.localhelp.app.ui.common.messages.ConversationRow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesScreen(
-    onNavigateToChat: (String, String, String?) -> Unit,
+    onNavigateToChat: (String, String, String?, Long) -> Unit,
     viewModel: MessagesViewModel = hiltViewModel()
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -108,7 +108,8 @@ fun MessagesScreen(
                                     onNavigateToChat(
                                         conv.id,
                                         conv.partner.fullName ?: "Người dùng",
-                                        conv.partner.avatarUrl ?: "none"
+                                        conv.partner.avatarUrl ?: "none", // Truyền chuỗi "none" nếu avatar null
+                                        conv.partner.id
                                     )
                                 }
                             )

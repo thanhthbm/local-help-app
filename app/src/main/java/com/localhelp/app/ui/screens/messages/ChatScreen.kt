@@ -60,13 +60,7 @@ fun ChatScreen(
 
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { event ->
-            when (event) {
-                is ChatViewModel.ChatNavEvent.NavigateToProfile -> onNavigateToProfile(event.userId)
-            }
-        }
-    }
+    val partnerId = viewModel.partnerId
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -107,7 +101,7 @@ fun ChatScreen(
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { viewModel.onPartnerNameClick() }
+                        modifier = Modifier.clickable { onNavigateToProfile(partnerId) }
                     ) {
                         if (!decodedAvatar.isNullOrBlank() && decodedAvatar != "none") {
                             AsyncImage(
@@ -127,7 +121,6 @@ fun ChatScreen(
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(viewModel.partnerName, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                            Text("Đang trực tuyến", color = Color(0xFF4CAF50), fontSize = 12.sp, fontWeight = FontWeight.Medium)
                         }
                     }
                 },
@@ -135,9 +128,6 @@ fun ChatScreen(
                     IconButton(onClick = onBackClick) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                 },
                 actions = {
-                    TextButton(onClick = { /* TODO: Xử lý nút hoàn thành nếu cần */ }) {
-                        Text("Hoàn thành", color = PrimaryOrange, fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
