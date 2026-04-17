@@ -1,5 +1,6 @@
 package com.localhelp.app.ui.screens.jobmanagement
 
+import android.app.DownloadManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.filled.CameraAlt
@@ -23,6 +24,8 @@ import com.localhelp.app.ui.common.myjobs.ReviewDisplayCard
 import okhttp3.MultipartBody
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,13 +43,20 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.localhelp.app.ui.common.myjobs.ActionLoadingOverlay
+import com.localhelp.app.ui.common.myjobs.FullscreenImageDialog
 import com.localhelp.app.ui.common.myjobs.JobInfoHeader
 import com.localhelp.app.ui.common.myjobs.PartnerCard
 import com.localhelp.app.ui.common.myjobs.RemoteEvidenceSection
@@ -83,7 +93,10 @@ fun JobDetailHelperScreen(
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues).background(Color(0xFFF9FAFB))) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .background(Color(0xFFF9FAFB))) {
             when (val state = uiState) {
                 is JobDetailHelperUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 is JobDetailHelperUiState.Error -> Text(state.message, color = Color.Red, modifier = Modifier.align(Alignment.Center))
@@ -125,21 +138,52 @@ fun JobDetailHelperScreen(
 
 @Composable
 fun LocalEvidenceSection(images: List<Uri>, viewModel: JobDetailHelperViewModel) {
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris -> viewModel.addLocalImages(uris) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+        viewModel.addLocalImages(uris)
+    }
+    var previewUri by remember { mutableStateOf<Uri?>(null) }
+
+    if (previewUri != null) {
+        FullscreenImageDialog(
+            imageModel = previewUri!!,
+            onDismiss = { previewUri = null },
+            showDownload = false
+        )
+    }
+
     Column {
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             Text("Ảnh bằng chứng", fontWeight = FontWeight.Bold)
-            Icon(Icons.Filled.CameraAlt, contentDescription = "Add", modifier = Modifier.clickable { launcher.launch("image/*") })
+            Icon(
+                Icons.Filled.CameraAlt,
+                contentDescription = "Add",
+                modifier = Modifier.clickable { launcher.launch("image/*") }
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(images) { uri ->
-                Box(modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp))) {
-                    AsyncImage(model = uri, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { previewUri = uri }
+                ) {
+                    AsyncImage(
+                        model = uri,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
                     IconButton(
                         onClick = { viewModel.removeLocalImage(uri) },
-                        modifier = Modifier.align(Alignment.TopEnd).size(24.dp).background(Color.Black.copy(0.5f), CircleShape)
-                    ) { Icon(Icons.Filled.Close, null, tint = Color.White, modifier = Modifier.size(16.dp)) }
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .size(24.dp)
+                            .background(Color.Black.copy(0.5f), CircleShape)
+                    ) {
+                        Icon(Icons.Filled.Close, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                    }
                 }
             }
         }
@@ -152,7 +196,9 @@ fun HelperBottomBar(state: JobDetailHelperUiState.Success, viewModel: JobDetailH
     val context = LocalContext.current
 
     Surface(shadowElevation = 8.dp, color = Color.White) {
-        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             when (status) {
                 "APPLIED" -> Button(onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth()) { Text("Đã gửi yêu cầu - Chờ duyệt") }
                 "ACCEPTED" -> {

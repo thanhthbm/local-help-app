@@ -1,5 +1,7 @@
 package com.localhelp.app.ui.common.myjobs
 
+import android.app.DownloadManager
+import android.content.Context
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,22 +28,33 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.localhelp.app.model.response.JobResponse
 import android.net.Uri
+import android.os.Environment
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.getSystemService
 import coil.compose.AsyncImage
 import com.localhelp.app.model.response.JobImageResponse
 import com.localhelp.app.model.response.ProgressResponse
@@ -100,11 +113,7 @@ fun TaskBottomInfo(job: JobResponse) {
 
 @Composable
 fun TaskActionButton(status: String, onClick: () -> Unit) {
-    val buttonText = when (status) {
-        "ACCEPTED", "ON_THE_WAY" -> "Chỉ đường"
-        "WORKING" -> "Cập nhật"
-        else -> "Chi tiết"
-    }
+    val buttonText = "Xem chi tiết"
 
     val btnColor = if (status == "REJECTED") Color(0xFFF87171) else Color(0xFFE04F43)
 
@@ -119,7 +128,9 @@ fun TaskActionButton(status: String, onClick: () -> Unit) {
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
     ) {
         if (buttonText == "Chỉ đường") {
-            Icon(Icons.Filled.Directions, contentDescription = null, modifier = Modifier.size(16.dp).padding(end = 4.dp))
+            Icon(Icons.Filled.Directions, contentDescription = null, modifier = Modifier
+                .size(16.dp)
+                .padding(end = 4.dp))
         }
         Text(buttonText, fontWeight = FontWeight.Medium, fontSize = 13.sp)
     }
@@ -133,7 +144,9 @@ fun JobInfoHeader(
     onClick: (Long) -> Unit
     ) {
     Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(12.dp), modifier = Modifier.clickable{onClick(job.id)}) {
-        Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+        Column(modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()) {
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Text(job.title ?: "", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.weight(1f))
                 TaskStatusBadge(job.status?.name ?: "OPEN")
@@ -167,7 +180,9 @@ fun PartnerCard(
             .clickable { partnerId?.let { onNavigate(it) } }
     ) {
         Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (!avatarUrl.isNullOrEmpty()) {
@@ -242,7 +257,6 @@ fun formatTime(timeString: String?): String {
 
 @Composable
 fun TimelineSection(progresses: List<ProgressResponse>, jobStatus: String, isHost: Boolean) {
-
     val baseSteps = if (isHost) {
         listOf("OPEN", "ACCEPTED", "ON_THE_WAY", "WORKING", "PENDING_PAYMENT", "COMPLETED")
     } else {
@@ -253,6 +267,11 @@ fun TimelineSection(progresses: List<ProgressResponse>, jobStatus: String, isHos
         progresses.map { it.stepName }
     } else {
         baseSteps
+    }
+
+    // Tìm index của bước xa nhất đã hoàn thành hoặc đang thực hiện dựa trên progresses
+    val lastCompletedIndex = timelineSteps.indexOfLast { step ->
+        progresses.any { it.stepName == step }
     }
 
     Card(
@@ -266,29 +285,35 @@ fun TimelineSection(progresses: List<ProgressResponse>, jobStatus: String, isHos
 
             timelineSteps.forEachIndexed { index, stepName ->
                 val isLastItem = index == timelineSteps.size - 1
-
                 val matchedProgress = progresses.find { it.stepName == stepName }
-
+                
                 val isJobCompleted = jobStatus == "COMPLETED"
-                val isCompleted = matchedProgress?.isCompleted == true || (isJobCompleted && matchedProgress != null)
-                val isCurrent = matchedProgress?.isCurrent == true || (jobStatus == stepName && matchedProgress != null)
-
+                
+                // Logic màu sắc mới:
+                // 1. Nếu job đã xong -> Tất cả xanh
+                // 2. Nếu bước này nằm trong quá khứ (index <= lastCompletedIndex) -> Xanh
+                // 3. Nếu bước này là bước kế tiếp ngay sau bước cuối cùng đã xong -> Cam (đang chờ/làm)
+                // 4. Còn lại -> Xám
+                
                 val nodeColor = when {
-                    isCompleted -> Color(0xFF059669)
-                    isCurrent -> Color(0xFFE04F43)
-                    else -> Color.LightGray
+                    isJobCompleted || index <= lastCompletedIndex -> Color(0xFF059669) // Đã xong
+                    index == lastCompletedIndex + 1 -> Color(0xFFE04F43) // Bước hiện tại/kế tiếp
+                    else -> Color.LightGray // Chưa tới
                 }
 
-                val isNextStepStarted = if (!isLastItem) progresses.any { it.stepName == timelineSteps[index + 1] } else false
-                val lineColor = if (isCompleted && isNextStepStarted) Color(0xFF059669) else Color.LightGray
+                // Sửa: Dùng <= để tô màu cả đoạn nối từ node đã xong tới node đang thực hiện
+                val lineColor = if (isJobCompleted || index <= lastCompletedIndex) Color(0xFF059669) else Color.LightGray
 
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min)) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.width(24.dp)
                     ) {
                         Box(
                             modifier = Modifier
+                                .padding(top = 2.dp)
                                 .size(16.dp)
                                 .clip(CircleShape)
                                 .background(nodeColor)
@@ -298,8 +323,7 @@ fun TimelineSection(progresses: List<ProgressResponse>, jobStatus: String, isHos
                             Box(
                                 modifier = Modifier
                                     .width(2.dp)
-                                    .heightIn(min = 40.dp)
-                                    .weight(1f, fill = false)
+                                    .fillMaxHeight()
                                     .background(lineColor)
                             )
                         }
@@ -308,21 +332,13 @@ fun TimelineSection(progresses: List<ProgressResponse>, jobStatus: String, isHos
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Column(modifier = Modifier.padding(bottom = if (!isLastItem) 16.dp else 0.dp)) {
+                        val isHighlight = isJobCompleted || index <= lastCompletedIndex || index == lastCompletedIndex + 1
                         Text(
                             text = getStepDisplayName(stepName, isHost),
-                            fontWeight = if (isCurrent || isCompleted) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isCurrent) Color(0xFFE04F43) else if(isCompleted) Color.Black else Color.Gray,
+                            fontWeight = if (isHighlight) FontWeight.Bold else FontWeight.Normal,
+                            color = if (index == lastCompletedIndex + 1 && !isJobCompleted) Color(0xFFE04F43) else if(index <= lastCompletedIndex || isJobCompleted) Color.Black else Color.Gray,
                             fontSize = 14.sp
                         )
-
-                        if (matchedProgress != null && !matchedProgress.description.isNullOrEmpty()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = matchedProgress.description,
-                                color = Color.Gray,
-                                fontSize = 12.sp
-                            )
-                        }
 
                         if (matchedProgress != null && !matchedProgress.time.isNullOrEmpty()) {
                             Spacer(modifier = Modifier.height(2.dp))
@@ -341,14 +357,29 @@ fun TimelineSection(progresses: List<ProgressResponse>, jobStatus: String, isHos
 
 @Composable
 fun RemoteEvidenceSection(images: List<JobImageResponse>) {
+    var initialIndex by remember { mutableStateOf<Int?>(null) }
+    
+    if (initialIndex != null) {
+        FullscreenImagePagerDialog(
+            images = images.map { it.imageUrl },
+            initialPage = initialIndex!!,
+            onDismiss = { initialIndex = null },
+            showDownload = true
+        )
+    }
     Column {
         Text("Ảnh bằng chứng", fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(images) { img ->
+            items(images.size) { index ->
+                val img = images[index]
                 AsyncImage(
                     model = img.imageUrl, contentDescription = null, contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp)).background(Color.LightGray)
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.LightGray)
+                        .clickable { initialIndex = index }
                 )
             }
         }
@@ -356,9 +387,164 @@ fun RemoteEvidenceSection(images: List<JobImageResponse>) {
 }
 
 @Composable
+fun FullscreenImagePagerDialog(
+    images: List<String>,
+    initialPage: Int = 0,
+    onDismiss: () -> Unit,
+    showDownload: Boolean = true
+) {
+    val context = LocalContext.current
+    val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { images.size })
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                AsyncImage(
+                    model = images[page],
+                    contentDescription = "Full Screen Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+            }
+
+            // Top controls
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .align(Alignment.TopCenter)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Page Indicator Text
+                Surface(
+                    color = Color.Black.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Text(
+                        text = "${pagerState.currentPage + 1} / ${images.size}",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                }
+            }
+
+            if (showDownload) {
+                IconButton(
+                    onClick = {
+                        downloadImage(context, images[pagerState.currentPage])
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .navigationBarsPadding()
+                        .padding(bottom = 24.dp, end = 16.dp)
+                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(Icons.Default.Download, contentDescription = "Download", tint = Color.White)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun FullscreenImageDialog(
+    imageModel: Any,
+    onDismiss: () -> Unit,
+    showDownload: Boolean = true
+) {
+    val context = LocalContext.current
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .clickable { onDismiss() },
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(
+                model = imageModel,
+                contentDescription = "Full Screen Image",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit
+            )
+
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 40.dp, end = 16.dp)
+                    .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+            ) {
+                Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+            }
+
+            if (showDownload && imageModel is String) {
+                IconButton(
+                    onClick = {
+                        downloadImage(context, imageModel)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 40.dp, end = 16.dp)
+                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(Icons.Default.Download, contentDescription = "Download", tint = Color.White)
+                }
+            }
+        }
+    }
+}
+
+fun downloadImage(context: Context, url: String) {
+    try {
+        val request = DownloadManager.Request(Uri.parse(url))
+            .setTitle("Image Download")
+            .setDescription("Downloading image from Local Help")
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "LocalHelp_${System.currentTimeMillis()}.jpg")
+            .setAllowedOverMetered(true)
+            .setAllowedOverRoaming(true)
+
+        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager.enqueue(request)
+        Toast.makeText(context, "Bắt đầu tải ảnh...", Toast.LENGTH_SHORT).show()
+    } catch (e: Exception) {
+        Toast.makeText(context, "Lỗi tải ảnh: ${e.message}", Toast.LENGTH_SHORT).show()
+    }
+}
+
+@Composable
 fun ReviewDisplayCard(review: ReviewResponse, isHost: Boolean) {
     Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFFEF3C7)), shape = RoundedCornerShape(12.dp)) {
-        Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+        Column(modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()) {
             Text("Đánh giá từ ${if (isHost) "bạn" else "chủ nhà"}", fontWeight = FontWeight.Bold, color = Color(0xFF92400E))
             Spacer(modifier = Modifier.height(4.dp))
             Row { repeat(5) { i -> Icon(Icons.Filled.Star, null, tint = if (i < review.rating) Color(0xFFF59E0B) else Color.LightGray, modifier = Modifier.size(16.dp)) } }
@@ -371,7 +557,10 @@ fun ReviewDisplayCard(review: ReviewResponse, isHost: Boolean) {
 @Composable
 fun ActionLoadingOverlay() {
     Box(
-        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)).clickable(enabled = false) {},
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.3f))
+            .clickable(enabled = false) {},
         contentAlignment = Alignment.Center
     ) { CircularProgressIndicator(color = Color.White) }
 }

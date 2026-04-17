@@ -34,6 +34,8 @@ class JobDetailViewModel @Inject constructor(
     private val _job = MutableStateFlow<JobResponse?>(null)
     val job = _job.asStateFlow()
 
+    val currentUser = userManager.currentUser
+
     private val _isLoading = MutableStateFlow(true)
     val isLoading = _isLoading.asStateFlow()
 
@@ -59,7 +61,8 @@ class JobDetailViewModel @Inject constructor(
 
     init {
         // Tự động lấy ID từ NavGraph và fetch data
-        val jobId = savedStateHandle.get<Long>("id")
+        // Thử lấy Long, nếu null thử lấy String rồi convert (đề phòng NavType mismatch)
+        val jobId: Long? = savedStateHandle.get<Long>("id") ?: savedStateHandle.get<String>("id")?.toLongOrNull()
         val userId = userManager.currentUser.value?.id
         
         if (jobId != null) {
@@ -68,44 +71,52 @@ class JobDetailViewModel @Inject constructor(
             }
             fetchJob(jobId)
             observeJobStatus(jobId)
+        } else {
+            _isLoading.value = false
+            _errorMessage.value = "Mã công việc không hợp lệ."
         }
     }
 
     private fun observeJobStatus(jobId: Long) {
         viewModelScope.launch {
-            listenToJobUpdates(jobId).collectLatest { statusStr ->
-                // Khi có update từ Firestore, fetch lại data từ API để đồng bộ hoàn toàn
-                // Hoặc chỉ cập nhật status cục bộ nếu muốn tối ưu
-                val currentJob = _job.value
-                if (currentJob != null && statusStr != null) {
-                    try {
-                        val newStatus = JobStatus.valueOf(statusStr)
-                        if (currentJob.status != newStatus) {
-                            fetchJob(jobId)
-                        }
-                    } catch (_: Exception) {
-                        // Ignore invalid status
+            try {
+                listenToJobUpdates(jobId).collectLatest { statusStr ->
+                    val currentJob = _job.value
+                    if (currentJob != null && statusStr != null) {
+                        try {
+                            val newStatus = JobStatus.valueOf(statusStr)
+                            if (currentJob.status != newStatus) {
+                                fetchJob(jobId)
+                            }
+                        } catch (_: Exception) {}
                     }
                 }
+            } catch (e: Exception) {
+                android.util.Log.e("JobDetailVM", "Firestore error ignored: ${e.message}")
             }
         }
     }
 
     private fun listenToJobUpdates(jobId: Long): Flow<String?> = callbackFlow {
-        val db = FirebaseFirestore.getInstance()
-        val docRef = db.collection("job_updates").document(jobId.toString())
-        
-        val registration = docRef.addSnapshotListener { snapshot, error ->
-            if (error != null) {
-                close(error)
-                return@addSnapshotListener
+        try {
+            val db = FirebaseFirestore.getInstance()
+            val docRef = db.collection("job_updates").document(jobId.toString())
+            
+            val registration = docRef.addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null && snapshot.exists()) {
+                    val status = snapshot.getString("status")
+                    trySend(status)
+                }
             }
-            if (snapshot != null && snapshot.exists()) {
-                val status = snapshot.getString("status")
-                trySend(status)
-            }
+            awaitClose { registration.remove() }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            close(e)
         }
-        awaitClose { registration.remove() }
     }
 
     private fun fetchJob(id: Long){

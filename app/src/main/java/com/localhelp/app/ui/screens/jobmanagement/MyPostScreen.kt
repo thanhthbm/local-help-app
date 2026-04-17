@@ -157,7 +157,9 @@ fun MyPostCompactCard(job: JobResponse, onClickAction: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                TaskActionButton(status = job.status?.name ?: "OPEN", onClick = onClickAction)
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                    TaskActionButton(status = job.status?.name ?: "OPEN", onClick = onClickAction)
+                }
             }
         }
     }

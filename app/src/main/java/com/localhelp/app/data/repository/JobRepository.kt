@@ -175,15 +175,24 @@ class JobRepository @Inject constructor(
     suspend fun acceptJob(id: Long): Result<Any> {
         return try {
             val response = jobService.acceptJob(id)
-            if (response.isSuccessful && response.body() != null) {
-                val apiResponse = response.body()!!
-                if (apiResponse.data != null) {
-                    Result.success(apiResponse.data)
-                } else {
-                    Result.failure(Exception(apiResponse.message?.toString() ?: "Lỗi khi nhận việc"))
-                }
+            val body = response.body()
+            
+            if (response.isSuccessful) {
+                Result.success(body?.data ?: true)
             } else {
-                Result.failure(Exception("Lỗi : (${response.message()})"))
+                val errorBody = response.errorBody()?.string()
+                val gson = com.google.gson.Gson()
+                val errorResponse = try {
+                    gson.fromJson(errorBody, com.localhelp.app.model.response.ApiResponse::class.java)
+                } catch (e: Exception) { null }
+
+                val message = errorResponse?.message?.toString() ?: ""
+
+                if (response.code() == 400 && message.contains("đã ứng tuyển", ignoreCase = true)) {
+                    Result.success(true)
+                } else {
+                    Result.failure(Exception(if (message.isNotEmpty()) message else "Lỗi: ${response.code()}"))
+                }
             }
         } catch (e: Exception) {
             Result.failure(e)

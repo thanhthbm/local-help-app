@@ -28,8 +28,8 @@ fun JobFilterSheet(
     onCloseClick: () -> Unit,
     onApplyClick: (distance: Float, minSalary: Float, categories: Set<Long>, timeFilter: String) -> Unit
 ) {
-    var distance by remember { mutableFloatStateOf(5.0f) }
-    var minSalary by remember { mutableFloatStateOf(150f) }
+    var distance by remember { mutableFloatStateOf(100f) }
+    var minSalary by remember { mutableFloatStateOf(0f) }
     var selectedCategories by remember { mutableStateOf(setOf<Long>()) }
     var selectedTime by remember { mutableStateOf("ALL") }
 
@@ -54,7 +54,7 @@ fun JobFilterSheet(
                 fontSize = 18.sp
             )
             TextButton(onClick = {
-                distance = 10f
+                distance = 100f
                 minSalary = 0f
                 selectedCategories = emptySet()
                 selectedTime = "ALL"

@@ -2,6 +2,7 @@ package com.localhelp.app.ui.screens.jobmanagement
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -30,7 +31,82 @@ fun MyTasksScreen(
     viewModel: MyTasksViewModel,
     onNavigateToDetail: (Long) -> Unit
 ) {
-    // ... (rest of the screen logic)
+    val uiState by viewModel.uiState.collectAsState()
+    val listState = rememberLazyListState()
+
+    val isAtBottom by remember {
+        derivedStateOf {
+            val layoutInfo = listState.layoutInfo
+            val totalItems = layoutInfo.totalItemsCount
+            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            lastVisibleItem >= totalItems - 1 && totalItems > 0
+        }
+    }
+
+    LaunchedEffect(isAtBottom) {
+        if (isAtBottom && !uiState.isLastPage) {
+            viewModel.loadMyTasks(isLoadMore = true)
+        }
+    }
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                viewModel.loadMyTasks(isLoadMore = false)
+            }
+        })
+    }
+
+    PullToRefreshBox(
+        isRefreshing = uiState.isLoading && !uiState.isPaginating,
+        onRefresh = { viewModel.loadMyTasks(isLoadMore = false) },
+        modifier = Modifier.fillMaxSize().background(Color(0xFFF9FAFB))
+    ) {
+        if (uiState.isLoading && uiState.jobs.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF9FAFB))) {
+                if (uiState.isLoading && uiState.jobs.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    LazyColumn(
+                        state = listState,
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(text = "Hiển thị ${uiState.jobs.size} công việc", color = Color.Gray, fontSize = 14.sp)
+                                Text(text = "Mới nhất ≡", color = Color.Gray, fontSize = 14.sp)
+                            }
+                        }
+
+                        items(uiState.jobs, key = { it.id ?: 0 }) { job ->
+                            MyTaskJobCard(job = job, onClickAction = { onNavigateToDetail(job.id) })
+                        }
+
+                        if (uiState.isPaginating) {
+                            item {
+                                Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
 }
 
 @Composable
@@ -106,10 +182,10 @@ fun MyTaskJobCard(job: JobResponse, onClickAction: () -> Unit) {
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TaskBottomInfo(job = job)
+//                    TaskBottomInfo(job = job)
                     TaskActionButton(status = job.status?.name ?: "APPLIED", onClick = onClickAction)
                 }
             }

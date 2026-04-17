@@ -98,9 +98,9 @@ fun JobDetailOwnerScreen(
                                     partnerId = state.jobInfo.helperId,
                                     onNavigate = onNavigateToUserProfile,
                                     onChat = {
-                                        state.jobInfo.helperId?.let{ partnerId ->
+                                        state.jobInfo.helperId?.let{ id ->
                                             state.conversationId?.let{
-                                                onNavigateToChat(it, state.jobInfo.helperName ?: "Người giúp", state.jobInfo.helperAvatar, partnerId)
+                                                onNavigateToChat(it, state.jobInfo.helperName ?: "Người giúp", state.jobInfo.helperAvatar, id)
                                             }
                                         }
                                     },
@@ -133,7 +133,12 @@ fun JobDetailOwnerScreen(
 
 @Composable
 fun ApplicationCard(app: ApplicationResponse, onAccept: () -> Unit, onNavigateHelperProfile: (Long) -> Unit) {
-    Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+    Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(8.dp)
+        , modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+            .clickable { onNavigateHelperProfile(app.helperId) }
+    ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             if (!app.helperAvatar.isNullOrEmpty()) {
                 AsyncImage(
@@ -144,15 +149,14 @@ fun ApplicationCard(app: ApplicationResponse, onAccept: () -> Unit, onNavigateHe
                         .size(48.dp)
                         .clip(CircleShape)
                         .background(Color.LightGray)
-                        .clickable { onNavigateHelperProfile(app.helperId) }
+
                 )
             } else {
                 Box(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE0E7FF))
-                        .clickable { onNavigateHelperProfile(app.helperId) } ,
+                        .background(Color(0xFFE0E7FF)),
                     contentAlignment = Alignment.Center
                 ) {
                     val initial = app.helperName.takeIf { it.isNotBlank() }?.substring(0, 1)?.uppercase() ?: "?"

@@ -14,6 +14,7 @@ import com.localhelp.app.ui.screens.search.SearchDetailRoute
 import com.localhelp.app.ui.screens.search.SearchDetailViewModel
 import com.localhelp.app.ui.screens.search.SearchRoute
 import com.localhelp.app.ui.screens.search.SearchViewModel
+import com.localhelp.app.ui.screens.myjobs.JobAcceptSuccessScreen
 import java.net.URLEncoder
 
 fun NavGraphBuilder.searchNavGraph(navController: NavController) {
@@ -69,7 +70,19 @@ fun NavGraphBuilder.searchNavGraph(navController: NavController) {
                 onUserClick = { userId ->
                     navController.navigate("${Screen.PROFILE}/$userId")
                 },
-                onJobSuccessCallBack = { navController.navigate(Screen.SUCCESS_SCREEN) }
+                onJobSuccessCallBack = { 
+                    navController.navigate(Screen.SUCCESS_SCREEN) 
+                }
+            )
+        }
+
+        composable(Screen.SUCCESS_SCREEN) {
+            JobAcceptSuccessScreen(
+                onNavigateHome = {
+                    navController.navigate(Graph.HOME) {
+                        popUpTo(Graph.SEARCH) { inclusive = true }
+                    }
+                }
             )
         }
     }

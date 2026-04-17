@@ -102,39 +102,39 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
             )
         }
 
-        composable(
-            route = "${Screen.JOB_DETAIL}/{id}",
-            arguments = listOf(navArgument("id") { type = NavType.LongType })
-        ) {
-            JobDetailScreen(
-                onBackClick = { navController.popBackStack() },
-                onMessageClick = { conversationId: String, partnerName: String, avatarUrl: String?, partnerId: Long ->
-                    val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
-                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl/$partnerId")
-                },
-                onEditJob = { jobId ->
-                    navController.navigate("${Screen.POST_JOB}?jobId=$jobId")
-                },
-                onUserClick = { userId ->
-                    navController.navigate("${Screen.PROFILE}/$userId")
-                },
-                onJobSuccessCallBack = { navController.navigate(Screen.SUCCESS_SCREEN) }
-            )
-        }
-
-        composable(
-            route = Screen.SUCCESS_SCREEN
-        ) {
-            JobAcceptSuccessScreen(
-                onNavigateHome = {
-                    navController.navigate(Graph.HOME){
-                        popUpTo(navController.graph.id) {
-                            inclusive = true
-                        }
-                    }
-                }
-            )
-        }
+//        composable(
+//            route = "${Screen.JOB_DETAIL}/{id}",
+//            arguments = listOf(navArgument("id") { type = NavType.LongType })
+//        ) {
+//            JobDetailScreen(
+//                onBackClick = { navController.popBackStack() },
+//                onMessageClick = { conversationId: String, partnerName: String, avatarUrl: String?, partnerId: Long ->
+//                    val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
+//                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl/$partnerId")
+//                },
+//                onEditJob = { jobId ->
+//                    navController.navigate("${Screen.POST_JOB}?jobId=$jobId")
+//                },
+//                onUserClick = { userId ->
+//                    navController.navigate("${Screen.PROFILE}/$userId")
+//                },
+//                onJobSuccessCallBack = { navController.navigate(Screen.SUCCESS_SCREEN) }
+//            )
+//        }
+//
+//        composable(
+//            route = Screen.SUCCESS_SCREEN
+//        ) {
+//            JobAcceptSuccessScreen(
+//                onNavigateHome = {
+//                    navController.navigate(Graph.HOME){
+//                        popUpTo(navController.graph.id) {
+//                            inclusive = true
+//                        }
+//                    }
+//                }
+//            )
+//        }
 
         composable(Screen.MY_JOBS){
             JobManagementScreen(
@@ -189,7 +189,6 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 onNavigateToChat = { conversationId: String, partnerName: String, avatarUrl: String?, partnerId: Long ->
                     val encodedUrl = if (avatarUrl != null) URLEncoder.encode(avatarUrl, "UTF-8") else "none"
                     navController.navigate("chat/$conversationId/$partnerName/$encodedUrl/$partnerId")
-                    navController.navigate("chat/$conversationId/$partnerName/$encodedUrl")
                 },
                 onNavigateToJobDetail = { jobId ->
                     navController.navigate("${Screen.JOB_DETAIL}/$jobId")
