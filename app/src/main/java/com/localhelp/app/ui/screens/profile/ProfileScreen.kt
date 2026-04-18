@@ -133,20 +133,20 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // --- PHẦN CÔNG VIỆC GẦN ĐÂY ---
-            if (isLoadingJobs) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp), contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = OrangePrimary)
-                }
-            } else {
-                JobsSection(
-                    jobs = jobs,
-                    onJobClick = onJobClick
-                )
-            }
+//            if (isLoadingJobs) {
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(100.dp), contentAlignment = Alignment.Center
+//                ) {
+//                    CircularProgressIndicator(color = OrangePrimary)
+//                }
+//            } else {
+//                JobsSection(
+//                    jobs = jobs,
+//                    onJobClick = onJobClick
+//                )
+//            }
 
             Spacer(modifier = Modifier.height(32.dp))
         }
