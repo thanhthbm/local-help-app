@@ -31,6 +31,7 @@ import com.localhelp.app.ui.common.login.CustomLoginTextField
 
 @SuppressLint("ContextCastToActivity")
 @Composable
+// Bước 1 của use case đổi mật khẩu: nhập email và yêu cầu backend gửi mã OTP.
 fun ResetPasswordScreen(
     viewModel: ForgotPasswordViewModel,
     onOtpSent: () -> Unit,
@@ -61,6 +62,7 @@ fun ResetPasswordScreen(
                 )
             }
 
+            // Gửi OTP đến email; nếu thành công thì chuyển sang màn xác thực mã.
             Button(
                 onClick = {
                     viewModel.sendOtp { success ->

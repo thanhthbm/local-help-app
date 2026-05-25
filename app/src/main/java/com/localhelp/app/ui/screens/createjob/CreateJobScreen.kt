@@ -37,6 +37,8 @@ val LightBlueAI = Color(0xFFD3E3FD)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+// Màn hình dùng chung cho 2 use case: đăng công việc mới và cập nhật công việc.
+// Khi có jobId trong ViewModel thì chuyển sang chế độ chỉnh sửa, ngược lại là tạo mới.
 fun CreateJobScreen(
     onBackClick: () -> Unit,
     onJobCreated: () -> Unit,
@@ -70,6 +72,7 @@ fun CreateJobScreen(
         }
     )
 
+    // Sau khi tạo/cập nhật công việc thành công, điều hướng về màn hình danh sách hoặc chi tiết.
     LaunchedEffect(createSuccess) {
         if (createSuccess) onJobCreated()
     }
@@ -255,6 +258,7 @@ fun CreateJobScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // --- NÚT ĐĂNG YÊU CẦU ---
+            // Nút submit gọi ViewModel để validate form, upload ảnh và gọi API tạo/cập nhật công việc.
             Button(
                 onClick = { viewModel.createJob() },
                 modifier = Modifier.fillMaxWidth().height(56.dp),

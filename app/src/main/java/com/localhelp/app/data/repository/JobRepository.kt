@@ -11,6 +11,7 @@ class JobRepository @Inject constructor(
     private val jobService: JobService
 
 ) {
+    // Use case đăng công việc: gửi request tạo bài đăng và chuẩn hóa response thành Result cho ViewModel.
     suspend fun createJob(request: CreateJobRequest): Result<JobResponse> {
         return try {
             val response = jobService.createJob(request)
@@ -31,6 +32,7 @@ class JobRepository @Inject constructor(
         }
     }
 
+    // Use case cập nhật công việc: gửi dữ liệu form đã chỉnh sửa lên backend theo id công việc.
     suspend fun updateJob(id: Long, request: CreateJobRequest): Result<JobResponse> {
         return try {
             val response = jobService.updateJob(id, request)
@@ -50,6 +52,7 @@ class JobRepository @Inject constructor(
         }
     }
 
+    // Use case hủy công việc: gọi API xóa/hủy bài đăng và chỉ trả về trạng thái thành công/thất bại.
     suspend fun deleteJob(id: Long): Result<Unit> {
         return try {
             val response = jobService.deleteJob(id)
@@ -151,6 +154,7 @@ class JobRepository @Inject constructor(
         }
     }
 
+    // Lấy chi tiết công việc để hiển thị, đồng thời phục vụ form cập nhật và thao tác hủy.
     suspend fun getJobById(id: Long): Result<JobResponse> {
         return try {
             val response = jobService.getJobById(id)

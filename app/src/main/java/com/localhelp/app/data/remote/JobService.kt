@@ -18,12 +18,15 @@ import retrofit2.http.PATCH
 import retrofit2.http.PUT
 
 interface JobService {
+    // API đăng công việc mới.
     @POST("/api/jobs")
     suspend fun createJob(@Body request: CreateJobRequest): Response<ApiResponse<JobResponse>>
 
+    // API cập nhật thông tin công việc theo id.
     @PUT("/api/jobs/{id}")
     suspend fun updateJob(@Path("id") id: Long, @Body request: CreateJobRequest): Response<ApiResponse<JobResponse>>
 
+    // API hủy/xóa công việc theo id.
     @DELETE("/api/jobs/{id}")
     suspend fun deleteJob(@Path("id") id: Long): Response<ApiResponse<Unit>>
 
@@ -56,6 +59,7 @@ interface JobService {
     @GET("/api/jobs/featured")
     suspend fun getFeaturedJobs(): Response<ApiResponse<List<JobResponse>>>
 
+    // API lấy chi tiết công việc, dùng khi xem chi tiết hoặc mở form cập nhật.
     @GET("/api/jobs/{id}")
     suspend fun getJobById(@Path("id") id: Long): Response<ApiResponse<JobResponse>>
 

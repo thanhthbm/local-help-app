@@ -119,6 +119,7 @@ class JobDetailViewModel @Inject constructor(
         }
     }
 
+    // Tải chi tiết công việc để hiển thị và làm nguồn dữ liệu cho thao tác sửa/hủy.
     private fun fetchJob(id: Long){
         _isLoading.value = true
         viewModelScope.launch {
@@ -176,6 +177,7 @@ class JobDetailViewModel @Inject constructor(
         }
     }
 
+    // Use case cập nhật công việc: điều hướng sang màn CreateJob ở chế độ chỉnh sửa.
     fun onEditClick() {
         _job.value?.let {
             viewModelScope.launch {
@@ -184,6 +186,7 @@ class JobDetailViewModel @Inject constructor(
         }
     }
 
+    // Use case hủy công việc: gọi API xóa/hủy bài đăng rồi phát sự kiện quay lại màn trước.
     fun deleteJob() {
         val jobId = _job.value?.id ?: return
         _isLoading.value = true

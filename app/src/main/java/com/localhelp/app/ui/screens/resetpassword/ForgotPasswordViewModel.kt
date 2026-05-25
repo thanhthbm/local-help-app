@@ -23,10 +23,12 @@ class ForgotPasswordViewModel @Inject constructor(
 
     private var resetToken: String? = null
 
+    // Lưu token reset nếu luồng đổi mật khẩu được mở từ deep link/email.
     fun setOobCode(code: String) {
         resetToken = code
     }
 
+    // Bước 1 đổi mật khẩu: validate email và gọi repository gửi OTP.
     fun sendOtp(onResult: (Boolean) -> Unit) {
         if (email.isBlank()) {
             errorMsg = "Vui lòng nhập email"
@@ -47,6 +49,7 @@ class ForgotPasswordViewModel @Inject constructor(
         }
     }
 
+    // Bước 2 đổi mật khẩu: xác thực OTP và lưu resetToken để dùng ở bước đặt mật khẩu mới.
     fun verifyOtp(onResult: (Boolean) -> Unit) {
         if (otp.length < 6) {
             errorMsg = "Vui lòng nhập mã OTP"
@@ -68,6 +71,7 @@ class ForgotPasswordViewModel @Inject constructor(
         }
     }
 
+    // Bước 3 đổi mật khẩu: kiểm tra token, kiểm tra nhập lại mật khẩu và gọi API reset.
     fun resetPassword(onSuccess: () -> Unit) {
         val token = resetToken
         if (token == null) {

@@ -60,24 +60,29 @@ class CreateJobViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    // Lưu danh sách ảnh mới người dùng chọn khi đăng hoặc cập nhật công việc.
     fun updateImages(uris: List<Uri>) {
         selectedImageUris.value = uris
     }
 
+    // Xóa ảnh đã có trên server khỏi danh sách gửi lại khi cập nhật công việc.
     fun removeExistingImage(url: String) {
         existingImageUrls.value = existingImageUrls.value.filter { it != url }
     }
 
+    // Xóa ảnh mới chọn trên thiết bị trước khi submit form.
     fun removeSelectedImage(uri: Uri) {
         selectedImageUris.value = selectedImageUris.value.filter { it != uri }
     }
 
+    // Nhận tọa độ/địa chỉ từ màn chọn vị trí để đưa vào request đăng/cập nhật việc.
     fun setLocation(lat: Double, lng: Double, addr: String) {
         latitude.value = lat
         longitude.value = lng
         address.value = addr
     }
 
+    // Chuẩn hóa tiền công khi nhập để hiển thị có định dạng nhưng vẫn gửi số sạch lên API.
     fun updatePrice(newPrice: String) {
         val clean = FormatterUtils.cleanPrice(newPrice)
         if (clean.isEmpty()) {
@@ -94,6 +99,7 @@ class CreateJobViewModel @Inject constructor(
         }
     }
 
+    // Use case cập nhật công việc: tải dữ liệu cũ để đổ vào form chỉnh sửa.
     private fun fetchJobDetails() {
         jobId?.let { id ->
             viewModelScope.launch {
@@ -124,6 +130,7 @@ class CreateJobViewModel @Inject constructor(
         }
     }
 
+    // Tải danh mục công việc để người dùng chọn khi tạo hoặc cập nhật bài đăng.
     private fun fetchCategories(){
         viewModelScope.launch {
             val result = categoryRepository.getCategories()
@@ -142,6 +149,8 @@ class CreateJobViewModel @Inject constructor(
         }
     }
 
+    // Xử lý submit form cho cả đăng công việc và cập nhật công việc.
+    // Hàm validate dữ liệu, upload ảnh mới, ghép ảnh cũ và gọi API tương ứng theo isEditMode.
     fun createJob() {
         if (title.value.isBlank() || description.value.isBlank() || price.value.isBlank() || address.value.isBlank()) {
             _errorMessage.value = "Vui lòng nhập đầy đủ thông tin"
