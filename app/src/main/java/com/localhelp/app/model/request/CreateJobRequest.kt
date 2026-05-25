@@ -1,5 +1,6 @@
 package com.localhelp.app.model.request
 
+// Payload dùng chung cho API đăng công việc mới và cập nhật công việc.
 data class CreateJobRequest(
     val title: String,
     val description: String? = null,

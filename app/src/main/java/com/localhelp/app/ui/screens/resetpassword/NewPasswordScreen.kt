@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.localhelp.app.ui.common.login.CustomLoginTextField
 
 @Composable
+// Bước 3 của use case đổi mật khẩu: nhập mật khẩu mới và xác nhận để hoàn tất reset.
 fun NewPasswordScreen(
     viewModel: ForgotPasswordViewModel,
     onSuccess: () -> Unit
@@ -74,6 +75,7 @@ fun NewPasswordScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // Gửi mật khẩu mới kèm resetToken đã xác thực ở bước OTP.
             Button(
                 onClick = {
                     viewModel.resetPassword {

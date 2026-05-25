@@ -96,6 +96,7 @@ class AuthRepository @Inject constructor(
             }
     }
 
+    // Use case đổi mật khẩu - bước gửi OTP: gọi backend để gửi mã xác thực đến email.
     suspend fun sendOtp(email: String): Result<Unit> {
         return try {
             val response = authService.sendOtp(email)
@@ -106,6 +107,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    // Use case đổi mật khẩu - bước xác thực OTP: nhận resetToken nếu mã hợp lệ.
     suspend fun verifyOtp(email: String, otp: String): Result<String> {
         return try {
             val response = authService.verifyOtp(email, otp)
@@ -119,6 +121,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    // Use case đổi mật khẩu - bước đặt mật khẩu mới: gửi email, token và mật khẩu mới lên backend.
     suspend fun resetPassword(email: String, resetToken: String, newPassword: String): Result<Unit> {
         return try {
             val response = authService.resetPassword(email, resetToken, newPassword)
