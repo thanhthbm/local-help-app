@@ -12,7 +12,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+/**
+ * Màn hình quản lý công việc với 2 tab: 'Việc đã đăng' và 'Việc đã nhận'.
+ *
+ * @param myPostsViewModel       ViewModel cho tab Việc đã đăng.
+ * @param myTasksViewModel       ViewModel cho tab Việc đã nhận.
+ * @param navigateToHelperDetail Lambda điều hướng đến trang chi tiết (vai trò Helper).
+ * @param navigateToOwnerDetail  Lambda điều hướng đến trang chi tiết (vai trò Owner).
+ *
+ * selectedTabIndex dùng rememberSaveable thay vì remember để giữ tab được chọn
+ * khi xoay màn hình (configuration change) mà không cần re-fetch dữ liệu.
+ *
+ * TabRow màu chủ đạo #E04F43 (đỏ LocalHelp), indicator underline 2dp.
+ */
 @Composable
 fun JobManagementScreen(
     myPostsViewModel: MyPostsViewModel,
