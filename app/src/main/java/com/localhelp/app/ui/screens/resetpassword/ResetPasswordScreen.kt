@@ -29,9 +29,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.localhelp.app.ui.common.login.CustomLoginTextField
 
+/**
+ * Màn hình bước 1 của luồng khôi phục mật khẩu.
+ *
+ * Người dùng nhập email để yêu cầu backend gửi mã OTP.
+ *
+ * @param viewModel ViewModel quản lý state khôi phục mật khẩu.
+ * @param onOtpSent Callback điều hướng sang màn nhập OTP khi gửi thành công.
+ * @param onBack Callback quay lại màn trước.
+ */
 @SuppressLint("ContextCastToActivity")
 @Composable
-// Bước 1 của use case đổi mật khẩu: nhập email và yêu cầu backend gửi mã OTP.
 fun ResetPasswordScreen(
     viewModel: ForgotPasswordViewModel,
     onOtpSent: () -> Unit,

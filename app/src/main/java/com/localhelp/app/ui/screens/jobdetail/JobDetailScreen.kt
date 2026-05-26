@@ -40,6 +40,19 @@ val PrimaryOrange = Color(0xFFED7D68)
 val BackgroundGray = Color(0xFFFDFDFD)
 val TextGray = Color(0xFF757575)
 
+/**
+ * Màn hình hiển thị chi tiết công việc.
+ *
+ * Nếu người dùng hiện tại là chủ việc, màn hình hiển thị nút sửa và hủy việc.
+ * Nếu không phải chủ việc, màn hình hiển thị thao tác chat hoặc nhận việc.
+ *
+ * @param onBackClick Callback quay lại màn trước.
+ * @param onMessageClick Callback điều hướng sang màn chat.
+ * @param onEditJob Callback mở form cập nhật công việc.
+ * @param onUserClick Callback mở hồ sơ người đăng.
+ * @param onJobSuccessCallBack Callback sau khi nhận việc thành công.
+ * @param viewModel ViewModel quản lý state chi tiết công việc.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobDetailScreen(

@@ -30,6 +30,11 @@ import com.localhelp.app.model.response.JobResponse
 import com.localhelp.app.utils.FormatterUtils
 import java.text.DecimalFormat
 
+/**
+ * Hiển thị trạng thái và hành động nhanh tương ứng với một công việc.
+ *
+ * @param job Công việc cần hiển thị trạng thái.
+ */
 @Composable
 fun JobStatusActionRow(
     job: JobResponse

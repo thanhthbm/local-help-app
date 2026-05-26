@@ -11,6 +11,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Bọc một nhóm input trong form bằng tiêu đề và khoảng cách thống nhất.
+ *
+ * @param title Tiêu đề của nhóm input.
+ * @param content Nội dung composable của nhóm input.
+ */
 @Composable
 fun InputSection(title: String, content: @Composable () -> Unit) {
     Column {
