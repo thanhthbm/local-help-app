@@ -203,6 +203,12 @@ class JobRepository @Inject constructor(
         }
     }
 
+    /**
+     * Gửi yêu cầu nhận việc từ phía người giúp.
+     *
+     * @param id ID công việc muốn nhận.
+     * @return Result chứa dữ liệu backend trả về hoặc lỗi tương ứng.
+     */
     suspend fun acceptJob(id: Long): Result<Any> {
         return try {
             val response = jobService.acceptJob(id)
@@ -230,6 +236,13 @@ class JobRepository @Inject constructor(
         }
     }
 
+    /**
+     * Lấy danh sách công việc người dùng hiện tại đã đăng.
+     *
+     * @param page Trang hiện tại.
+     * @param size Số phần tử mỗi trang.
+     * @return Result chứa dữ liệu phân trang danh sách job đã đăng.
+     */
     suspend fun getMyPosts(
         page :Int,
         size : Int
@@ -251,6 +264,15 @@ class JobRepository @Inject constructor(
         }
     }
 
+    /**
+     * Lấy danh sách công việc người dùng hiện tại đã nhận với vai trò helper.
+     *
+     * @param page Trang hiện tại.
+     * @param size Số phần tử mỗi trang.
+     * @param lat Vĩ độ hiện tại nếu muốn tính khoảng cách.
+     * @param lng Kinh độ hiện tại nếu muốn tính khoảng cách.
+     * @return Result chứa dữ liệu phân trang danh sách job đã nhận.
+     */
     suspend fun getMyTasks(
         page: Int,
         size: Int,

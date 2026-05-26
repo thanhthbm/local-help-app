@@ -90,15 +90,37 @@ interface JobService {
     @GET("/api/jobs/{id}")
     suspend fun getJobById(@Path("id") id: Long): Response<ApiResponse<JobResponse>>
 
+    /**
+     * Gửi yêu cầu để người giúp nhận việc hoặc ứng tuyển nhận việc.
+     *
+     * @param id ID công việc muốn nhận.
+     * @return Response chứa kết quả xử lý của backend.
+     */
     @POST("/api/jobs/{id}/apply")
     suspend fun acceptJob(@Path("id") id: Long): Response<ApiResponse<Any>>
 
+    /**
+     * Lấy danh sách các công việc mà người dùng hiện tại đã đăng.
+     *
+     * @param page Trang hiện tại.
+     * @param size Số phần tử mỗi trang.
+     * @return Response chứa dữ liệu phân trang các job đã đăng.
+     */
     @GET("api/jobs/my-posts")
     suspend fun getMyPosts(
         @Query("current") page: Int = 1,
         @Query("pageSize") size: Int = 10
     ): Response<ApiResponse<ResultPaginationDTO<List<JobResponse>>>>
 
+    /**
+     * Lấy danh sách các công việc mà người dùng hiện tại đã được chấp nhận làm helper.
+     *
+     * @param page Trang hiện tại.
+     * @param size Số phần tử mỗi trang.
+     * @param lat Vĩ độ hiện tại nếu muốn tính khoảng cách.
+     * @param lng Kinh độ hiện tại nếu muốn tính khoảng cách.
+     * @return Response chứa dữ liệu phân trang các job đã nhận.
+     */
     @GET("api/jobs/my-tasks")
     suspend fun getMyTasks(
         @Query("current") page: Int = 1,

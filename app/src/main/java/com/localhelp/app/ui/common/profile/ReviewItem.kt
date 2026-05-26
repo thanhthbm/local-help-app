@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.localhelp.app.ui.screens.profile.GrayBackground
 
 @Composable
-fun ReviewItem(name: String, comment: String) {
+fun ReviewItem(name: String, comment: String, star : Int) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = GrayBackground),
@@ -34,7 +34,14 @@ fun ReviewItem(name: String, comment: String) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(name, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Row {
-                    repeat(5) { Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFB400), modifier = Modifier.size(14.dp)) }
+                    repeat(5) { index ->
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            tint = if (index < star) Color(0xFFFFB400) else Color.LightGray,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))

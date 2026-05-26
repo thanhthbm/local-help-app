@@ -65,7 +65,7 @@ fun ReviewsSection(
             Text("Chưa có đánh giá nào", color = GrayText, fontSize = 14.sp)
         } else {
             reviews.forEach { review ->
-                ReviewItem(name = review.reviewerName, comment = review.comment)
+                ReviewItem(name = review.reviewerName, comment = review.comment, star = review.rating)
                 Spacer(modifier = Modifier.height(12.dp))
             }
         }

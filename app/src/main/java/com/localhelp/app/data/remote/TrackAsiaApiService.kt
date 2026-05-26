@@ -8,7 +8,17 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
+/**
+ * Retrofit service khai báo các API ngoài của TrackAsia dùng cho chức năng chỉ đường.
+ *
+ * Hai luồng chính:
+ * - reverse geocoding: đổi tọa độ thành địa chỉ;
+ * - directions: lấy lộ trình di chuyển giữa các điểm.
+ */
 interface TrackAsiaApiService {
+    /**
+     * Gọi API reverse geocoding để đổi tọa độ thành địa chỉ dễ đọc.
+     */
     @GET("api/v1/reverse")
     suspend fun reverseGeocode(
         @Query("point.lat") latitude: Double,
@@ -29,6 +39,9 @@ interface TrackAsiaApiService {
 //        @Query("key") apiKey: String = ApiConstants.PUBLIC_KEY
 //    ): Response<AutocompleteResponse>
 
+    /**
+     * Gọi API directions để lấy tuyến đường và các bước điều hướng.
+     */
     @GET("route/v1/{vehicle}/{coordinates}.json")
     suspend fun getDirections(
         @Path("vehicle") vehicles: String = "car",
