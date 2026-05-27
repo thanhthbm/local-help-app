@@ -160,6 +160,11 @@ object NetworkModule {
         return retrofit.create(TrackAsiaApiService::class.java)
     }
 
+    /**
+     * Retrofit client riêng cho Cloudinary.
+     *
+     * Cloudinary là API ngoài, không dùng baseUrl/backend chính và không cần AuthInterceptor.
+     */
     @Provides
     @Singleton
     fun provideCloudinaryService(): CloudinaryService {

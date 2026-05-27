@@ -16,6 +16,12 @@ data class TransactionDetailUiState(
     val error: String? = null
 )
 
+/**
+ * ViewModel cho màn chi tiết giao dịch.
+ *
+ * Giao dịch trong thống kê được biểu diễn bằng Job đã hoàn thành, nên ViewModel
+ * gọi API chi tiết job để lấy đủ dữ liệu người thuê/người làm/địa điểm.
+ */
 @HiltViewModel
 class TransactionDetailViewModel @Inject constructor(
     private val jobDetailApiService: JobDetailApiService
@@ -23,6 +29,7 @@ class TransactionDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(TransactionDetailUiState())
     val uiState: StateFlow<TransactionDetailUiState> = _uiState
 
+    /** Tải chi tiết job theo id giao dịch. */
     fun fetchTransactionDetail(jobId: Long) {
         viewModelScope.launch {
             _uiState.value = TransactionDetailUiState(isLoading = true)

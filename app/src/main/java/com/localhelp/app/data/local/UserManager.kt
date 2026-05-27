@@ -16,6 +16,9 @@ class UserManager @Inject constructor(
     private val _currentUser = MutableStateFlow<UserResponse?>(null)
     val currentUser: StateFlow<UserResponse?> = _currentUser.asStateFlow()
 
+    /**
+     * Lưu token đăng nhập và user hiện tại sau khi login thành công.
+     */
     fun saveSession(user: UserResponse, token: String) {
         Log.d("DEBUG_USER", "===> Gọi hàm saveSession!")
         Log.d("DEBUG_USER", "Token nhận được: $token")
@@ -27,11 +30,17 @@ class UserManager @Inject constructor(
         Log.d("DEBUG_USER", "Đã gán xong _currentUser. Object: ${_currentUser.value}")
     }
 
+    /**
+     * Cập nhật user hiện tại sau khi chỉnh sửa hồ sơ thành công.
+     */
     fun updateProfile(user: UserResponse) {
         Log.d("DEBUG_USER", "===> Gọi hàm updateProfile! Name=${user.fullName}, isNew=${user.isNew}")
         _currentUser.value = user
     }
 
+    /**
+     * Xóa token, xóa state user và đăng xuất Firebase.
+     */
     fun logout(){
         Log.d("DEBUG_USER", "===> Đã gọi hàm LOGOUT, xóa toàn bộ data!")
         FirebaseAuth.getInstance().signOut()

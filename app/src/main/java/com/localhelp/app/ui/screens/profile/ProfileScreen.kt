@@ -35,6 +35,12 @@ val GreenText = Color(0xFF2E9B5B)
 val GrayText = Color(0xFF888888)
 val GrayBackground = Color(0xFFF7F7F7)
 
+/**
+ * Màn hồ sơ người dùng.
+ *
+ * Màn này hiển thị thông tin cá nhân, số việc đã hoàn thành, đánh giá và nút
+ * điều hướng sang thống kê thu/chi khi đang xem hồ sơ của chính mình.
+ */
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,

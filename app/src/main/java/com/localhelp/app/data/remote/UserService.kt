@@ -11,9 +11,15 @@ import retrofit2.http.PUT
 import retrofit2.http.Part
 
 interface UserService {
+    /**
+     * Lấy hồ sơ của user đang đăng nhập dựa trên Firebase token trong Authorization header.
+     */
     @GET("/api/users/me")
     suspend fun getProfile(): Response<ApiResponse<UserResponse>>
 
+    /**
+     * Lấy hồ sơ công khai của một user theo id.
+     */
     @GET("/api/users/{id}")
     suspend fun getUserById(@retrofit2.http.Path("id") id: Long): Response<ApiResponse<UserResponse>>
 

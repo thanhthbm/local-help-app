@@ -17,6 +17,9 @@ import retrofit2.http.Path
 
 interface JobDetailApiService {
 
+    /**
+     * Lấy chi tiết job/giao dịch để hiển thị trong TransactionDetailScreen.
+     */
     @GET("api/jobs/{id}/detail")
     suspend fun getJobDetail(@Path("id") jobId: Long): Response<ApiResponse<JobDetailResponse>>
 

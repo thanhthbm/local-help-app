@@ -17,6 +17,9 @@ data class CategoryDetailUiState(
     val data: CategoryDetailResponse? = null
 )
 
+/**
+ * ViewModel cho màn xem thống kê chi tiết theo danh mục.
+ */
 @HiltViewModel
 class CategoryDetailViewModel @Inject constructor(
     private val financeRepository: FinanceRepository
@@ -25,6 +28,11 @@ class CategoryDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(CategoryDetailUiState())
     val uiState: StateFlow<CategoryDetailUiState> = _uiState.asStateFlow()
 
+    /**
+     * Tải chi tiết danh mục theo loại thống kê.
+     *
+     * isEarning = true -> type "earning"; false -> type "spending".
+     */
     fun fetchDetails(categoryId: Long, isEarning: Boolean, month: Int, year: Int) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)

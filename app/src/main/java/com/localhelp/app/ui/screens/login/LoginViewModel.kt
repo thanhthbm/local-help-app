@@ -12,6 +12,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel cho màn đăng nhập mobile.
+ *
+ * Luồng đăng nhập gồm 2 bước: xác thực email/password với Firebase, sau đó
+ * gửi Firebase token lên backend để sync User và lấy dữ liệu hồ sơ.
+ */
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository
@@ -22,6 +28,9 @@ class LoginViewModel @Inject constructor(
     var isLoading by mutableStateOf(false)
     var loginError by mutableStateOf<String?>(null)
 
+    /**
+     * Xử lý bấm nút đăng nhập và trả về user + token khi cả Firebase và backend đều thành công.
+     */
     fun onLoginClick(onSuccess: (UserResponse, String) -> Unit) {
         if (email.isEmpty() || password.isEmpty()){
             loginError = "Vui lòng nhập đầy đủ thông tin đăng nhập."

@@ -34,6 +34,11 @@ import com.localhelp.app.model.response.UserResponse
 import com.localhelp.app.ui.common.login.CustomLoginTextField
 
 
+/**
+ * Màn đăng nhập mobile.
+ *
+ * UI nhận email/password, gọi LoginViewModel, và điều hướng sang đăng ký hoặc quên mật khẩu.
+ */
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,

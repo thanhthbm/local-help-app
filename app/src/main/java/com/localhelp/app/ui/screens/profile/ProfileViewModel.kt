@@ -23,6 +23,7 @@ class ProfileViewModel @Inject constructor(
     private val reviewRepository: com.localhelp.app.data.repository.ReviewRepository,
     savedStateHandle: SavedStateHandle
 ): ViewModel(){
+    /** userId null nghĩa là đang xem hồ sơ của chính user hiện tại. */
     private val userId: Long? = savedStateHandle.get<Long>("userId")
     
     private val _user = MutableStateFlow<UserResponse?>(null)
@@ -65,6 +66,9 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Tải lại toàn bộ dữ liệu cần cho màn hồ sơ: thông tin user, job và review.
+     */
     fun refresh() {
         val targetId = userId ?: userManager.currentUser.value?.id ?: return
         viewModelScope.launch {
@@ -76,6 +80,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /** Lấy thông tin hồ sơ và các chỉ số thống kê đã được backend tính sẵn. */
     private fun loadUserProfile(id: Long) {
         viewModelScope.launch {
             userRepository.getUserById(id).onSuccess {
@@ -84,6 +89,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /** Lấy danh sách job do user tạo để hiển thị ở hồ sơ nếu UI bật phần này. */
     private fun loadUserJobs(id: Long) {
         viewModelScope.launch {
             _isLoadingJobs.value = true
@@ -94,6 +100,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /** Lấy các đánh giá user nhận được để hiển thị trong ReviewSection. */
     private fun loadUserReviews(id: Long) {
         viewModelScope.launch {
             _isLoadingReviews.value = true
@@ -104,6 +111,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /** Đăng xuất khỏi phiên hiện tại. */
     fun logout(){
         userManager.logout()
     }

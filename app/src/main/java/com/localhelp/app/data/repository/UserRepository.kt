@@ -9,6 +9,9 @@ import javax.inject.Inject
 class UserRepository @Inject constructor(
     private val userService: UserService
 ) {
+    /**
+     * Gọi API lấy hồ sơ của user đang đăng nhập và bóc lớp ApiResponse.
+     */
     suspend fun getProfile(): Result<UserResponse> {
         return try {
             val response = userService.getProfile()
@@ -27,6 +30,9 @@ class UserRepository @Inject constructor(
         }
     }
 
+    /**
+     * Gọi API lấy hồ sơ theo id, dùng cho cả hồ sơ của mình và hồ sơ người khác.
+     */
     suspend fun getUserById(userId: Long): Result<UserResponse> {
         return try {
             val response = userService.getUserById(userId)
@@ -48,6 +54,12 @@ class UserRepository @Inject constructor(
     /**
      * Gửi một request duy nhất PUT /api/users/me (multipart/form-data).
      * Cả [data] (JSON text fields) và [avatarPart] (file ảnh) đều là tuỳ chọn.
+     */
+    /**
+     * Gửi request PUT /api/users/me dạng multipart/form-data.
+     *
+     * [data] chứa JSON các trường text và avatarUrl; [avatarPart] chỉ dùng khi
+     * client muốn gửi trực tiếp file ảnh lên backend.
      */
     suspend fun updateProfile(
         data: RequestBody?,

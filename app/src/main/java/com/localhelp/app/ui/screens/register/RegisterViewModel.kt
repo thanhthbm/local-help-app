@@ -9,6 +9,11 @@ import com.localhelp.app.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+/**
+ * ViewModel cho màn đăng ký tài khoản.
+ *
+ * Đăng ký chỉ tạo tài khoản Firebase; backend sẽ sync User khi người dùng đăng nhập.
+ */
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val authRepository: AuthRepository
@@ -19,6 +24,9 @@ class RegisterViewModel @Inject constructor(
     var isLoading by mutableStateOf(false)
     var errorMsg by mutableStateOf<String?>(null)
 
+    /**
+     * Kiểm tra dữ liệu form và tạo tài khoản Firebase.
+     */
     fun onRegisterClick(onSuccess: () -> Unit) {
         if (password != confirmPassword) {
             errorMsg = "Mật khẩu không khớp"

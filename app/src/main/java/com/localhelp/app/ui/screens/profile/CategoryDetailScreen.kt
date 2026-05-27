@@ -61,6 +61,11 @@ private fun getIconByName(name: String?): ImageVector {
 }
 
 // ─── Main screen ───────────────────────────────────────────────────────────────
+/**
+ * Màn chi tiết danh mục trong thống kê thu/chi.
+ *
+ * Hiển thị tổng tiền, donut chart nhóm phụ, lịch sử giao dịch và nhận xét.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDetailScreen(
@@ -258,6 +263,7 @@ fun CategoryDetailScreen(
 
 // ─── Sub-composables ───────────────────────────────────────────────────────────
 
+/** Donut chart phân bổ số tiền theo nhóm phụ của danh mục. */
 @Composable
 private fun DonutChart(data: List<Float>, colors: List<Color>) {
     if (data.isEmpty() || data.sum() == 0f) return
@@ -289,6 +295,7 @@ private fun DonutChart(data: List<Float>, colors: List<Color>) {
     }
 }
 
+/** Một dòng giao dịch trong màn chi tiết danh mục. */
 @Composable
 private fun CategoryTxRow(tx: TransactionItemDTO, isEarning: Boolean, onClick: () -> Unit) {
     val txColor = parseColor(tx.colorCode, if(isEarning) Color(0xFF4A90D9) else Color(0xFFF0A040))

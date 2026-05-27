@@ -25,6 +25,11 @@ data class FinanceOverviewUiState(
     val recentTransactions: List<TransactionItemDTO> = emptyList()
 )
 
+/**
+ * ViewModel cho màn thống kê thu/chi.
+ *
+ * Duy trì hai state độc lập: spending và earning, vì màn hình có hai tab.
+ */
 @HiltViewModel
 class FinanceStatsViewModel @Inject constructor(
     private val financeRepository: FinanceRepository
@@ -36,11 +41,13 @@ class FinanceStatsViewModel @Inject constructor(
     private val _earningState = MutableStateFlow(FinanceOverviewUiState())
     val earningState: StateFlow<FinanceOverviewUiState> = _earningState.asStateFlow()
 
+    /** Tải đồng thời dữ liệu chi tiêu và thu nhập của tháng được chọn. */
     fun fetchData(month: Int, year: Int) {
         fetchSpending(month, year)
         fetchEarning(month, year)
     }
 
+    /** Tải dữ liệu chi tiêu: các job user là creator và đã hoàn thành. */
     private fun fetchSpending(month: Int, year: Int) {
         viewModelScope.launch {
             _spendingState.value = _spendingState.value.copy(isLoading = true, errorMessage = null)
@@ -57,6 +64,7 @@ class FinanceStatsViewModel @Inject constructor(
         }
     }
 
+    /** Tải dữ liệu thu nhập: các job user là helper và đã hoàn thành. */
     private fun fetchEarning(month: Int, year: Int) {
         viewModelScope.launch {
             _earningState.value = _earningState.value.copy(isLoading = true, errorMessage = null)
@@ -73,6 +81,7 @@ class FinanceStatsViewModel @Inject constructor(
         }
     }
 
+    /** Map DTO backend sang state UI để Compose render. */
     private fun mapDataToState(data: FinanceOverviewResponse): FinanceOverviewUiState {
         return FinanceOverviewUiState(
             isLoading = false,

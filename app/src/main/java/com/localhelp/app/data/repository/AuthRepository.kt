@@ -12,6 +12,12 @@ class AuthRepository @Inject constructor(
 ) {
     private val firebaseAuth = FirebaseAuth.getInstance()
 
+    /**
+     * Đăng nhập bằng Firebase Authentication và trả về Firebase ID token.
+     *
+     * Backend không nhận email/password trực tiếp; token này sẽ được gửi tiếp
+     * đến /api/auth/login để đồng bộ user nội bộ.
+     */
     fun loginFirebase(
         email: String,
         password: String,
@@ -34,6 +40,9 @@ class AuthRepository @Inject constructor(
             }
     }
 
+    /**
+     * Gọi backend để tạo/cập nhật bản ghi User sau khi Firebase login thành công.
+     */
     suspend fun syncWithBackend(token: String): Result<UserResponse> {
         return try {
             val response = authService.loginSync("Bearer $token")
@@ -59,6 +68,11 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    /**
+     * Đăng ký tài khoản mới trên Firebase Authentication.
+     *
+     * Bản ghi User trong backend sẽ được tạo ở lần đăng nhập/sync tiếp theo.
+     */
     fun registerFirebase(
         email: String,
         password: String,
@@ -73,6 +87,11 @@ class AuthRepository @Inject constructor(
             }
     }
 
+    /**
+     * Gửi email reset mật khẩu bằng Firebase SDK.
+     *
+     * Đây là luồng reset qua deep link Firebase, độc lập với luồng OTP backend bên dưới.
+     */
     fun sendResetEmail(email: String, onComplete: (Boolean, String?) -> Unit){
         val auth = FirebaseAuth.getInstance()
 
@@ -96,6 +115,7 @@ class AuthRepository @Inject constructor(
             }
     }
 
+    /** Gửi OTP quên mật khẩu qua backend. */
     suspend fun sendOtp(email: String): Result<Unit> {
         return try {
             val response = authService.sendOtp(email)
@@ -106,6 +126,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    /** Xác thực OTP và trả về resetToken nếu hợp lệ. */
     suspend fun verifyOtp(email: String, otp: String): Result<String> {
         return try {
             val response = authService.verifyOtp(email, otp)
@@ -119,6 +140,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    /** Đặt lại mật khẩu bằng resetToken đã được backend xác thực. */
     suspend fun resetPassword(email: String, resetToken: String, newPassword: String): Result<Unit> {
         return try {
             val response = authService.resetPassword(email, resetToken, newPassword)

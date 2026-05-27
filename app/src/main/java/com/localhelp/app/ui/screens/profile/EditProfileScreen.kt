@@ -32,6 +32,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.localhelp.app.model.constant.GenderEnum
 
+/**
+ * Màn hình chỉnh sửa hồ sơ cá nhân.
+ *
+ * UI cho phép đổi avatar, họ tên, số điện thoại, giới tính và bio.
+ * Khi lưu thành công, màn hình tự điều hướng về trang trước.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
@@ -254,6 +260,7 @@ fun EditProfileScreen(
 }
 
 // ─── Reusable form field ──────────────────────────────────────────────────────
+/** Text field dùng lại cho các trường trong form hồ sơ. */
 @Composable
 private fun ProfileTextField(
     label: String,
@@ -291,6 +298,7 @@ private fun ProfileTextField(
 }
 
 // ─── Gender Dropdown ──────────────────────────────────────────────────────────
+/** Dropdown chọn giới tính, map enum GenderEnum sang nhãn tiếng Việt. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GenderDropdown(

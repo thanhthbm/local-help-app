@@ -18,6 +18,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel cấp ứng dụng quản lý phiên đăng nhập và route khởi động.
+ *
+ * Khi app mở lại, ViewModel kiểm tra Firebase currentUser để auto-login,
+ * lấy hồ sơ từ backend và quyết định vào Auth, Home hoặc SetupProfile.
+ */
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val userManager: UserManager,
@@ -39,6 +45,9 @@ class MainViewModel @Inject constructor(
         checkAutoLogin()
     }
 
+    /**
+     * Kiểm tra phiên Firebase còn tồn tại hay không để tự đăng nhập.
+     */
     private fun checkAutoLogin() {
         val firebaseUser = FirebaseAuth.getInstance().currentUser
 
@@ -66,14 +75,17 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /** Cập nhật user hiện tại trong UserManager. */
     fun updateUser(user: UserResponse) {
         userManager.updateProfile(user)
     }
 
+    /** Lưu user và token sau khi LoginViewModel đăng nhập thành công. */
     fun saveSession(user: UserResponse, token: String) {
         userManager.saveSession(user, token)
     }
 
+    /** Đăng xuất khỏi app bằng cách xóa session trong UserManager. */
     fun logout() {
         userManager.logout()
     }

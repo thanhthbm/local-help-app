@@ -16,6 +16,12 @@ class TokenAuthenticator @Inject constructor(
     private val userManager: UserManager,
     private val tokenManager: TokenManager
 ): Authenticator {
+    /**
+     * Xử lý response 401 từ backend bằng cách ép Firebase cấp token mới.
+     *
+     * Nếu refresh thất bại hoặc không còn Firebase user, app đăng xuất local
+     * để tránh giữ phiên không hợp lệ.
+     */
     override fun authenticate(route: Route?, response: Response): Request? {
         val responseCount = response.responseCount()
         Log.d("TokenAuthenticator", "authenticate called. Count: $responseCount, URL: ${response.request.url}")
@@ -68,6 +74,7 @@ class TokenAuthenticator @Inject constructor(
         }
     }
 
+    /** Đếm số lần OkHttp đã retry request này để tránh vòng lặp refresh token vô hạn. */
     private fun Response.responseCount(): Int {
         var result = 1
         var prior = priorResponse
