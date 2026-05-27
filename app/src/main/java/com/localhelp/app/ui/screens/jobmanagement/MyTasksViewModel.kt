@@ -19,7 +19,15 @@ data class MyTasksUiState(
     val error: String? = null,
     val isLastPage: Boolean = false
 )
-
+/**
+ * ViewModel quản lý UI state cho tab 'Việc đã nhận' trong JobManagementScreen.
+ *
+ * Tương tự MyPostsViewModel nhưng gọi repository.getMyTasks() thay vì getMyPosts().
+ * getMyTasks() lọc jobs theo helper_id (các job mà user đã được chấp nhận làm helper).
+ *
+ * State: MyTasksUiState { isLoading, isPaginating, jobs, error, isLastPage }
+ *
+ */
 @HiltViewModel
 class MyTasksViewModel @Inject constructor(private val repository: JobRepository) : ViewModel() {
 
@@ -31,7 +39,14 @@ class MyTasksViewModel @Inject constructor(private val repository: JobRepository
     init {
         loadMyTasks(isLoadMore = false)
     }
-
+    /**
+     * Tải danh sách công việc đã nhận, hỗ trợ phân trang vô tận.
+     *
+     * @param isLoadMore  false = load trang đầu, true = append thêm.
+     *
+     * Gọi repository.getMyTasks(page, size, lat=null, lng=null).
+     * lat/lng hiện để null – có thể bổ sung sau để tính khoảng cách đến job.
+     */
     fun loadMyTasks(isLoadMore: Boolean) {
         val currentState = _uiState.value
         if (currentState.isLoading || currentState.isPaginating) return

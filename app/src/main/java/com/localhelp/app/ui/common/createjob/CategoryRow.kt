@@ -29,6 +29,13 @@ import coil.compose.AsyncImage
 import com.localhelp.app.model.response.CategoryResponse
 import com.localhelp.app.ui.screens.createjob.PrimaryOrange
 
+/**
+ * Hiển thị danh sách danh mục công việc theo dạng hàng ngang.
+ *
+ * @param categories Danh sách danh mục lấy từ backend.
+ * @param selectedId ID danh mục đang được chọn.
+ * @param onSelect Callback khi người dùng chọn một danh mục.
+ */
 @Composable
 fun CategoryRow(categories: List<CategoryResponse>, selectedId: Long?, onSelect: (Long) -> Unit) {
     if (categories.isEmpty()) {

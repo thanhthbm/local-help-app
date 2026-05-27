@@ -15,6 +15,14 @@ import com.localhelp.app.ui.screens.resetpassword.NewPasswordScreen
 import com.localhelp.app.ui.screens.resetpassword.OtpVerificationScreen
 import com.localhelp.app.ui.screens.resetpassword.ResetPasswordScreen
 
+/**
+ * Khai báo navigation graph cho luồng khôi phục mật khẩu.
+ *
+ * Graph dùng chung một ForgotPasswordViewModel cho cả ba màn hình để giữ email,
+ * OTP và resetToken xuyên suốt quá trình đặt lại mật khẩu.
+ *
+ * @param navController NavController điều hướng giữa các bước reset password.
+ */
 fun NavGraphBuilder.forgotPasswordGraph(navController: NavController) {
     navigation(
         startDestination = Screen.RESET_PASSWORD,

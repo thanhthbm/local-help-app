@@ -8,9 +8,21 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+/**
+ * Helper upload media lên Cloudinary bằng Android SDK.
+ *
+ * Được dùng khi cần upload ảnh/video và chuyển callback của SDK thành suspend
+ * function để ViewModel gọi trong coroutine.
+ */
 object CloudinaryHelper {
     private const val UPLOAD_PRESET = "localhelp_preset"
 
+    /**
+     * Upload một file media lên Cloudinary.
+     *
+     * @param uri URI media được chọn trên thiết bị.
+     * @return URL bảo mật của media sau khi upload thành công.
+     */
     suspend fun uploadMedia(uri: Uri): String = suspendCancellableCoroutine { continuation ->
         val requestId = MediaManager.get().upload(uri)
             .unsigned(UPLOAD_PRESET)
@@ -38,6 +50,12 @@ object CloudinaryHelper {
         }
     }
 
+    /**
+     * Upload nhiều file media theo thứ tự danh sách đầu vào.
+     *
+     * @param uris Danh sách URI media cần upload.
+     * @return Danh sách URL bảo mật tương ứng.
+     */
     suspend fun uploadMultipleMedia(uris: List<Uri>): List<String> {
         return uris.map { uploadMedia(it) }
     }

@@ -36,6 +36,12 @@ import com.localhelp.app.model.constant.ApiConstants
 import com.localhelp.app.model.response.JobResponse
 import com.localhelp.app.utils.FormatterUtils
 
+/**
+ * Card hiển thị công việc trong danh sách việc liên quan đến người dùng.
+ *
+ * @param job Công việc cần hiển thị.
+ * @param onClick Callback khi người dùng nhấn vào card.
+ */
 @Composable
 fun MyJobCard(
     job: JobResponse,

@@ -24,6 +24,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.localhelp.app.ui.common.login.CustomLoginTextField
 
+/**
+ * Màn hình bước 2 của luồng khôi phục mật khẩu.
+ *
+ * Người dùng nhập OTP để backend xác thực và trả về resetToken.
+ *
+ * @param viewModel ViewModel quản lý email, OTP và trạng thái xác thực.
+ * @param onOtpVerified Callback điều hướng sang màn nhập mật khẩu mới.
+ * @param onBack Callback quay lại màn trước.
+ */
 @Composable
 fun OtpVerificationScreen(
     viewModel: ForgotPasswordViewModel,
@@ -53,6 +62,7 @@ fun OtpVerificationScreen(
                 )
             }
 
+            // Xác thực OTP; thành công thì cho phép người dùng nhập mật khẩu mới.
             Button(
                 onClick = {
                     viewModel.verifyOtp { success ->

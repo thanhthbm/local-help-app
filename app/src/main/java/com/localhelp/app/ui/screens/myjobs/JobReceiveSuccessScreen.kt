@@ -12,7 +12,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+/**
+ * Màn hình xác nhận nhận việc thành công, hiển thị sau khi helper ứng tuyển.
+ *
+ * @param onNavigateHome  Lambda điều hướng về trang chủ.
+ *
+ * Layout: Scaffold → Column (center) → Icon check xanh → Text thông báo → Button.
+ * Icon CheckCircle màu #059669 (xanh lá) để tạo cảm giác tích cực.
+ * Text hướng dẫn user vào tab 'Việc đã nhận' để theo dõi tiến độ.
+ */
 @Composable
 fun JobAcceptSuccessScreen(
     onNavigateHome: () -> Unit

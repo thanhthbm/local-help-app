@@ -9,13 +9,10 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
 
+/**
+ * Retrofit service dùng để upload ảnh công việc trực tiếp lên Cloudinary.
+ */
 interface CloudinaryService {
-    /**
-     * Gọi API ngoài của Cloudinary để upload ảnh.
-     *
-     * API này không đi qua backend; app gửi file và upload_preset trực tiếp
-     * đến Cloudinary, sau đó dùng secure_url để cập nhật hồ sơ.
-     */
     @Multipart
     @POST("https://api.cloudinary.com/v1_1/{cloudName}/image/upload")
     suspend fun uploadImage(

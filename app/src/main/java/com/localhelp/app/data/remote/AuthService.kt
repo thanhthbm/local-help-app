@@ -9,6 +9,9 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Query
 
+/**
+ * Retrofit service khai báo API xác thực và khôi phục mật khẩu.
+ */
 interface AuthService {
     /**
      * Đồng bộ đăng nhập với backend sau khi Firebase xác thực thành công.
@@ -18,18 +21,15 @@ interface AuthService {
     @POST("/api/auth/login")
     suspend fun loginSync(@Header("Authorization") token: String): Response<ApiResponse<UserResponse>>
 
-    /** Gửi OTP quên mật khẩu qua backend. */
     @POST("/api/auth/forgot-password/send-otp")
     suspend fun sendOtp(@Query("email") email: String): Response<ApiResponse<Unit>>
 
-    /** Xác thực OTP và nhận resetToken để đổi mật khẩu. */
     @POST("/api/auth/forgot-password/verify-otp")
     suspend fun verifyOtp(
         @Query("email") email: String,
         @Query("otp") otp: String
     ): Response<ApiResponse<VerifyOtpResponse>>
 
-    /** Đổi mật khẩu bằng resetToken đã xác thực. */
     @POST("/api/auth/forgot-password/reset-password")
     suspend fun resetPassword(
         @Query("email") email: String,

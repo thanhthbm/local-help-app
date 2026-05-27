@@ -20,6 +20,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * UI state cho màn quản lý chi tiết công việc của chủ việc.
+ */
 sealed class JobDetailOwnerUiState {
     object Loading : JobDetailOwnerUiState()
     data class Error(val message: String) : JobDetailOwnerUiState()
@@ -34,7 +37,12 @@ sealed class JobDetailOwnerUiState {
     ) : JobDetailOwnerUiState()
 }
 
-
+/**
+ * ViewModel cho màn chủ việc theo dõi chi tiết tiến trình công việc.
+ *
+ * ViewModel tải thông tin công việc, ứng viên, bằng chứng hoàn thành và hỗ trợ
+ * các thao tác như chọn ứng viên, xác nhận thanh toán và gửi đánh giá.
+ */
 @HiltViewModel
 class JobDetailOwnerViewModel @Inject constructor(
     private val repository: JobDetailRepository,
@@ -54,6 +62,9 @@ class JobDetailOwnerViewModel @Inject constructor(
         startPolling()
     }
 
+    /**
+     * Tải lại dữ liệu chi tiết mà không đưa màn hình về trạng thái loading toàn phần.
+     */
     fun refresh() = fetchDetail(showLoading = false)
 
     private fun startPolling() {
@@ -134,10 +145,24 @@ class JobDetailOwnerViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Chọn một ứng viên làm người thực hiện công việc.
+     *
+     * @param appId ID đơn ứng tuyển cần chấp nhận.
+     */
     fun acceptApplication(appId: Long) = executeAction { repository.acceptApplication(appId) }
 
+    /**
+     * Xác nhận thanh toán sau khi công việc ở trạng thái chờ thanh toán.
+     */
     fun confirmPayment() = executeAction { repository.confirmPayment(jobId) }
 
+    /**
+     * Gửi đánh giá cho người thực hiện sau khi công việc hoàn thành.
+     *
+     * @param rating Số sao đánh giá.
+     * @param comment Nội dung nhận xét.
+     */
     fun submitReview(rating: Int, comment: String) = executeAction {
         repository.submitReview(jobId, rating, comment)
     }

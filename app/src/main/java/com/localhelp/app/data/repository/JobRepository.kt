@@ -7,10 +7,22 @@ import com.localhelp.app.model.response.JobResponse
 import com.localhelp.app.model.response.ResultPaginationDTO
 import javax.inject.Inject
 
+/**
+ * Repository trung gian giữa ViewModel và JobService.
+ *
+ * Repository chuẩn hóa response từ Retrofit thành Result để các ViewModel của
+ * chức năng đăng việc, cập nhật việc và hủy việc xử lý onSuccess/onFailure.
+ */
 class JobRepository @Inject constructor(
     private val jobService: JobService
 
 ) {
+    /**
+     * Đăng công việc mới lên backend.
+     *
+     * @param request Dữ liệu công việc đã validate ở ViewModel.
+     * @return Result chứa JobResponse nếu tạo thành công, hoặc exception nếu lỗi mạng/backend.
+     */
     suspend fun createJob(request: CreateJobRequest): Result<JobResponse> {
         return try {
             val response = jobService.createJob(request)
@@ -31,6 +43,13 @@ class JobRepository @Inject constructor(
         }
     }
 
+    /**
+     * Cập nhật công việc đã đăng theo ID.
+     *
+     * @param id ID công việc cần cập nhật.
+     * @param request Dữ liệu mới của form cập nhật công việc.
+     * @return Result chứa JobResponse đã cập nhật hoặc lỗi tương ứng.
+     */
     suspend fun updateJob(id: Long, request: CreateJobRequest): Result<JobResponse> {
         return try {
             val response = jobService.updateJob(id, request)
@@ -50,6 +69,12 @@ class JobRepository @Inject constructor(
         }
     }
 
+    /**
+     * Hủy hoặc xóa một công việc đã đăng.
+     *
+     * @param id ID công việc cần hủy.
+     * @return Result<Unit> cho biết thao tác thành công hay thất bại.
+     */
     suspend fun deleteJob(id: Long): Result<Unit> {
         return try {
             val response = jobService.deleteJob(id)
@@ -151,6 +176,12 @@ class JobRepository @Inject constructor(
         }
     }
 
+    /**
+     * Lấy chi tiết công việc để hiển thị và đổ dữ liệu vào form cập nhật.
+     *
+     * @param id ID công việc cần lấy chi tiết.
+     * @return Result chứa JobResponse chi tiết hoặc lỗi tương ứng.
+     */
     suspend fun getJobById(id: Long): Result<JobResponse> {
         return try {
             val response = jobService.getJobById(id)
@@ -172,6 +203,12 @@ class JobRepository @Inject constructor(
         }
     }
 
+    /**
+     * Gửi yêu cầu nhận việc từ phía người giúp.
+     *
+     * @param id ID công việc muốn nhận.
+     * @return Result chứa dữ liệu backend trả về hoặc lỗi tương ứng.
+     */
     suspend fun acceptJob(id: Long): Result<Any> {
         return try {
             val response = jobService.acceptJob(id)
@@ -199,6 +236,13 @@ class JobRepository @Inject constructor(
         }
     }
 
+    /**
+     * Lấy danh sách công việc người dùng hiện tại đã đăng.
+     *
+     * @param page Trang hiện tại.
+     * @param size Số phần tử mỗi trang.
+     * @return Result chứa dữ liệu phân trang danh sách job đã đăng.
+     */
     suspend fun getMyPosts(
         page :Int,
         size : Int
@@ -220,6 +264,15 @@ class JobRepository @Inject constructor(
         }
     }
 
+    /**
+     * Lấy danh sách công việc người dùng hiện tại đã nhận với vai trò helper.
+     *
+     * @param page Trang hiện tại.
+     * @param size Số phần tử mỗi trang.
+     * @param lat Vĩ độ hiện tại nếu muốn tính khoảng cách.
+     * @param lng Kinh độ hiện tại nếu muốn tính khoảng cách.
+     * @return Result chứa dữ liệu phân trang danh sách job đã nhận.
+     */
     suspend fun getMyTasks(
         page: Int,
         size: Int,

@@ -7,6 +7,12 @@ import com.localhelp.app.data.remote.AuthService
 import com.localhelp.app.model.response.UserResponse
 import javax.inject.Inject
 
+/**
+ * Repository xử lý xác thực và khôi phục mật khẩu.
+ *
+ * Các API khôi phục mật khẩu được wrap bằng Result để ViewModel điều khiển
+ * trạng thái loading, lỗi và điều hướng từng bước.
+ */
 class AuthRepository @Inject constructor(
     private val authService: AuthService
 ) {
@@ -87,11 +93,6 @@ class AuthRepository @Inject constructor(
             }
     }
 
-    /**
-     * Gửi email reset mật khẩu bằng Firebase SDK.
-     *
-     * Đây là luồng reset qua deep link Firebase, độc lập với luồng OTP backend bên dưới.
-     */
     fun sendResetEmail(email: String, onComplete: (Boolean, String?) -> Unit){
         val auth = FirebaseAuth.getInstance()
 
@@ -115,7 +116,6 @@ class AuthRepository @Inject constructor(
             }
     }
 
-    /** Gửi OTP quên mật khẩu qua backend. */
     suspend fun sendOtp(email: String): Result<Unit> {
         return try {
             val response = authService.sendOtp(email)
@@ -126,7 +126,6 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    /** Xác thực OTP và trả về resetToken nếu hợp lệ. */
     suspend fun verifyOtp(email: String, otp: String): Result<String> {
         return try {
             val response = authService.verifyOtp(email, otp)
@@ -140,7 +139,6 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    /** Đặt lại mật khẩu bằng resetToken đã được backend xác thực. */
     suspend fun resetPassword(email: String, resetToken: String, newPassword: String): Result<Unit> {
         return try {
             val response = authService.resetPassword(email, resetToken, newPassword)

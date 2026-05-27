@@ -6,10 +6,15 @@ import com.localhelp.app.model.response.TrackAsiaGeocodingResponse
 import com.trackasia.navigation.android.navigation.v5.models.DirectionsResponse
 import javax.inject.Inject
 
-
+/**
+ * Repository trung gian cho các API bản đồ và chỉ đường của TrackAsia.
+ */
 class MapRepository @Inject constructor(
     private val trackAsiaApiService: TrackAsiaApiService
 ){
+    /**
+     * Gọi API lấy lộ trình chỉ đường theo chuỗi tọa độ.
+     */
     suspend fun getDirections(coordinates : String) : Result<DirectionsResponse> {
         return try {
             val response = trackAsiaApiService.getDirections(coordinates = coordinates)
@@ -30,6 +35,9 @@ class MapRepository @Inject constructor(
         }
     }
 
+    /**
+     * Gọi API reverse geocoding để lấy địa chỉ từ tọa độ.
+     */
     suspend fun reverseGeocode(latitude: Double, longitude: Double): Result<TrackAsiaGeocodingResponse> {
         return try {
             val response = trackAsiaApiService.reverseGeocode(latitude, longitude)

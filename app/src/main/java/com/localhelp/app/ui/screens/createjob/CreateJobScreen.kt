@@ -35,6 +35,17 @@ import com.localhelp.app.ui.common.createjob.InputSection
 val PrimaryOrange = Color(0xFFED7D68)
 val LightBlueAI = Color(0xFFD3E3FD)
 
+/**
+ * Màn hình dùng chung cho chức năng đăng công việc mới và cập nhật công việc.
+ *
+ * Khi ViewModel có jobId, màn hình hiển thị ở chế độ chỉnh sửa; ngược lại là
+ * chế độ tạo mới.
+ *
+ * @param onBackClick Callback quay lại màn trước.
+ * @param onJobCreated Callback sau khi tạo hoặc cập nhật công việc thành công.
+ * @param onSelectLocation Callback mở màn chọn vị trí với tọa độ hiện tại.
+ * @param viewModel ViewModel quản lý state của form.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateJobScreen(
@@ -70,6 +81,7 @@ fun CreateJobScreen(
         }
     )
 
+    // Sau khi tạo/cập nhật công việc thành công, điều hướng về màn hình danh sách hoặc chi tiết.
     LaunchedEffect(createSuccess) {
         if (createSuccess) onJobCreated()
     }
@@ -255,6 +267,7 @@ fun CreateJobScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // --- NÚT ĐĂNG YÊU CẦU ---
+            // Nút submit gọi ViewModel để validate form, upload ảnh và gọi API tạo/cập nhật công việc.
             Button(
                 onClick = { viewModel.createJob() },
                 modifier = Modifier.fillMaxWidth().height(56.dp),

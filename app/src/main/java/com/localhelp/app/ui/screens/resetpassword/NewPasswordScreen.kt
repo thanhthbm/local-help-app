@@ -26,6 +26,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.localhelp.app.ui.common.login.CustomLoginTextField
 
+/**
+ * Màn hình bước 3 của luồng khôi phục mật khẩu.
+ *
+ * Người dùng nhập mật khẩu mới và xác nhận để hoàn tất đặt lại mật khẩu.
+ *
+ * @param viewModel ViewModel chứa resetToken và dữ liệu mật khẩu mới.
+ * @param onSuccess Callback sau khi đổi mật khẩu thành công.
+ */
 @Composable
 fun NewPasswordScreen(
     viewModel: ForgotPasswordViewModel,
@@ -74,6 +82,7 @@ fun NewPasswordScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // Gửi mật khẩu mới kèm resetToken đã xác thực ở bước OTP.
             Button(
                 onClick = {
                     viewModel.resetPassword {

@@ -22,6 +22,14 @@ import com.localhelp.app.model.response.JobResponse
 import com.localhelp.app.ui.common.myjobs.TaskActionButton
 import com.localhelp.app.ui.common.myjobs.TaskStatusBadge
 
+/**
+ * Màn hình danh sách các công việc người dùng đã đăng.
+ *
+ * Hỗ trợ pull-to-refresh và tự tải trang tiếp theo khi cuộn đến cuối danh sách.
+ *
+ * @param viewModel ViewModel quản lý danh sách việc đã đăng.
+ * @param onNavigateToDetail Callback mở màn quản lý chi tiết của công việc.
+ */
 @Composable
 fun MyPostsScreen(
     viewModel: MyPostsViewModel,
@@ -96,6 +104,12 @@ fun MyPostsScreen(
     }
 }
 
+/**
+ * Card rút gọn hiển thị một công việc đã đăng trong danh sách quản lý.
+ *
+ * @param job Công việc cần hiển thị.
+ * @param onClickAction Callback mở chi tiết hoặc thao tác tiếp theo.
+ */
 @Composable
 fun MyPostCompactCard(job: JobResponse, onClickAction: () -> Unit) {
     Card(
