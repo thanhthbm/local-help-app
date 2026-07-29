@@ -28,6 +28,7 @@ fun NavGraphBuilder.authNavGraph(
     navController: NavController,
     onUserAuthenticated: (UserResponse, String) -> Unit
 ) {
+    // Graph xác thực gồm đăng nhập, đăng ký, setup hồ sơ lần đầu và quên mật khẩu.
     navigation(
         route = Graph.AUTH,
         startDestination = Screen.LOGIN

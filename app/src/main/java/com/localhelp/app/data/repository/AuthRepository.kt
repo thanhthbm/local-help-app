@@ -7,11 +7,23 @@ import com.localhelp.app.data.remote.AuthService
 import com.localhelp.app.model.response.UserResponse
 import javax.inject.Inject
 
+/**
+ * Repository xử lý xác thực và khôi phục mật khẩu.
+ *
+ * Các API khôi phục mật khẩu được wrap bằng Result để ViewModel điều khiển
+ * trạng thái loading, lỗi và điều hướng từng bước.
+ */
 class AuthRepository @Inject constructor(
     private val authService: AuthService
 ) {
     private val firebaseAuth = FirebaseAuth.getInstance()
 
+    /**
+     * Đăng nhập bằng Firebase Authentication và trả về Firebase ID token.
+     *
+     * Backend không nhận email/password trực tiếp; token này sẽ được gửi tiếp
+     * đến /api/auth/login để đồng bộ user nội bộ.
+     */
     fun loginFirebase(
         email: String,
         password: String,
@@ -34,6 +46,9 @@ class AuthRepository @Inject constructor(
             }
     }
 
+    /**
+     * Gọi backend để tạo/cập nhật bản ghi User sau khi Firebase login thành công.
+     */
     suspend fun syncWithBackend(token: String): Result<UserResponse> {
         return try {
             val response = authService.loginSync("Bearer $token")
@@ -59,6 +74,11 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    /**
+     * Đăng ký tài khoản mới trên Firebase Authentication.
+     *
+     * Bản ghi User trong backend sẽ được tạo ở lần đăng nhập/sync tiếp theo.
+     */
     fun registerFirebase(
         email: String,
         password: String,
@@ -96,7 +116,6 @@ class AuthRepository @Inject constructor(
             }
     }
 
-    // Use case đổi mật khẩu - bước gửi OTP: gọi backend để gửi mã xác thực đến email.
     suspend fun sendOtp(email: String): Result<Unit> {
         return try {
             val response = authService.sendOtp(email)
@@ -107,7 +126,6 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    // Use case đổi mật khẩu - bước xác thực OTP: nhận resetToken nếu mã hợp lệ.
     suspend fun verifyOtp(email: String, otp: String): Result<String> {
         return try {
             val response = authService.verifyOtp(email, otp)
@@ -121,7 +139,6 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    // Use case đổi mật khẩu - bước đặt mật khẩu mới: gửi email, token và mật khẩu mới lên backend.
     suspend fun resetPassword(email: String, resetToken: String, newPassword: String): Result<Unit> {
         return try {
             val response = authService.resetPassword(email, resetToken, newPassword)

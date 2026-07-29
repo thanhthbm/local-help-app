@@ -17,6 +17,7 @@ import com.localhelp.app.ui.screens.profile.ProfileScreen
 import com.localhelp.app.ui.screens.profile.TransactionDetailScreen
 
 fun NavGraphBuilder.profileNavGraph(navController: NavController) {
+    // Nhóm route hồ sơ: hồ sơ cá nhân, chỉnh sửa hồ sơ, thống kê và chi tiết thống kê.
     navigation(
         route = Graph.PROFILE,
         startDestination = Screen.PROFILE
@@ -45,6 +46,7 @@ fun NavGraphBuilder.profileNavGraph(navController: NavController) {
         }
 
         // ── Financial statistics screens ────────────────────────────────────
+        // Màn tổng quan thống kê thu/chi.
         composable(Screen.FINANCIAL_STATS) {
             FinancialStatsScreen(
                 onNavigateBack = { navController.popBackStack() },
@@ -57,6 +59,7 @@ fun NavGraphBuilder.profileNavGraph(navController: NavController) {
             )
         }
 
+        // Màn chi tiết một danh mục thống kê theo tháng.
         composable(
             route = "${Screen.CATEGORY_DETAIL}/{categoryId}/{isEarning}/{month}/{year}",
             arguments = listOf(
@@ -82,6 +85,7 @@ fun NavGraphBuilder.profileNavGraph(navController: NavController) {
             )
         }
 
+        // Màn chi tiết một giao dịch; transactionId tương ứng với jobId.
         composable(
             route = "${Screen.TRANSACTION_DETAIL}/{transactionId}/{isEarning}",
             arguments = listOf(

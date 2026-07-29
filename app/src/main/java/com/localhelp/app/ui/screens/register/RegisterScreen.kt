@@ -26,6 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.localhelp.app.ui.common.login.CustomLoginTextField
 
+/**
+ * Màn đăng ký tài khoản bằng email/password.
+ */
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel,

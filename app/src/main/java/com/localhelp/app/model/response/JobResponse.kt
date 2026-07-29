@@ -2,6 +2,12 @@ package com.localhelp.app.model.response
 
 import com.localhelp.app.model.constant.JobStatus
 
+/**
+ * Model dữ liệu công việc trả về từ backend.
+ *
+ * Dùng cho danh sách việc, chi tiết việc, form cập nhật việc và các màn hình
+ * quản lý/hủy công việc.
+ */
 data class JobResponse(
     val id: Long,
     val title: String? = "",

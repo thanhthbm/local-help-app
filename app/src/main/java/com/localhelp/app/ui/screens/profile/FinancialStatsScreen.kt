@@ -77,6 +77,12 @@ private fun formatVnd(amount: Double): String {
 }
 
 // ─── Main screen ───────────────────────────────────────────────────────────────
+/**
+ * Màn thống kê thu/chi của người dùng.
+ *
+ * Màn gọi FinanceStatsViewModel để lấy cả spending và earning, sau đó cho phép
+ * người dùng bấm vào danh mục hoặc giao dịch để xem chi tiết.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FinancialStatsScreen(
@@ -245,6 +251,7 @@ fun FinancialStatsScreen(
 }
 
 // ─── Tab: Đã Chi ───────────────────────────────────────────────────────────────
+/** Nội dung tab chi tiêu, gồm biểu đồ tuần, danh mục chi tiêu và lịch sử chi tiêu. */
 @Composable
 private fun SpendingTabContent(
     state: FinanceOverviewUiState,
@@ -316,6 +323,7 @@ private fun SpendingTabContent(
 }
 
 // ─── Tab: Đã Kiếm ──────────────────────────────────────────────────────────────
+/** Nội dung tab thu nhập, gồm biểu đồ tuần, danh mục thu nhập và lịch sử thu nhập. */
 @Composable
 private fun EarningTabContent(
     state: FinanceOverviewUiState,
@@ -388,6 +396,7 @@ private fun EarningTabContent(
 
 // ─── Sub-composables ───────────────────────────────────────────────────────────
 
+/** Bar chart 4 tuần, nhận dữ liệu đã chuẩn hóa từ backend. */
 @Composable
 private fun WeeklyBarChart(
     data: List<Float>,
@@ -439,6 +448,7 @@ private fun WeeklyBarChart(
     }
 }
 
+/** Một dòng danh mục trong thống kê tổng quan. */
 @Composable
 private fun CategoryRow(cat: CategoryItemDTO, isEarning: Boolean, onClick: () -> Unit) {
     val baseColor = parseColor(cat.colorCode, if(isEarning) Blue else Orange)
@@ -476,6 +486,7 @@ private fun CategoryRow(cat: CategoryItemDTO, isEarning: Boolean, onClick: () ->
     }
 }
 
+/** Progress bar hiển thị tỷ trọng danh mục. */
 @Composable
 private fun LinearProgressBar(progress: Float, color: Color) {
     val animProgress by animateFloatAsState(targetValue = progress.takeIf { it > 0f } ?: 0.01f, animationSpec = tween(800))
@@ -493,6 +504,7 @@ private fun LinearProgressBar(progress: Float, color: Color) {
     }
 }
 
+/** Một dòng giao dịch gần đây, bấm vào sẽ mở TransactionDetailScreen. */
 @Composable
 private fun TransactionRow(tx: TransactionItemDTO, isEarning: Boolean, onClick: () -> Unit) {
     val baseColor = parseColor(tx.colorCode, if (isEarning) Blue else Orange)

@@ -16,6 +16,11 @@ import javax.inject.Inject
 class AuthInterceptor @Inject constructor(
     private val tokenManager: TokenManager
 ) : Interceptor {
+    /**
+     * Tự động gắn Firebase ID token vào mọi request backend nếu request chưa có Authorization.
+     *
+     * Đây là điểm đảm bảo các API hồ sơ, thống kê và quản trị được backend nhận diện đúng user.
+     */
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 

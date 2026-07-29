@@ -1,5 +1,8 @@
 package com.localhelp.app.model.response
 
+/**
+ * DTO tổng quan thống kê thu/chi trả về từ /api/finance/overview.
+ */
 data class FinanceOverviewResponse(
     val totalAmount: Double,
     val percentageChange: Double,
@@ -9,6 +12,9 @@ data class FinanceOverviewResponse(
     val recentTransactions: List<TransactionItemDTO>
 )
 
+/**
+ * Một dòng thống kê theo danh mục trong màn tổng quan.
+ */
 data class CategoryItemDTO(
     val id: Long,
     val name: String,
@@ -18,6 +24,11 @@ data class CategoryItemDTO(
     val percentage: Double
 )
 
+/**
+ * Một giao dịch hiển thị trong lịch sử thống kê.
+ *
+ * id chính là jobId, được dùng để điều hướng sang màn TransactionDetailScreen.
+ */
 data class TransactionItemDTO(
     val id: Long,
     val name: String,
@@ -30,6 +41,9 @@ data class TransactionItemDTO(
     val colorCode: String?
 )
 
+/**
+ * DTO chi tiết danh mục trả về từ /api/finance/categories/{categoryId}/details.
+ */
 data class CategoryDetailResponse(
     val categoryName: String,
     val totalAmount: Double,
@@ -38,6 +52,9 @@ data class CategoryDetailResponse(
     val aiInsight: String
 )
 
+/**
+ * Nhóm phụ trong màn chi tiết danh mục; backend hiện gom theo title của job.
+ */
 data class SubCategoryDTO(
     val subName: String,
     val amount: Double,

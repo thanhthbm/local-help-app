@@ -22,6 +22,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel quản lý màn chi tiết công việc.
+ *
+ * Với chủ công việc, ViewModel phát sự kiện điều hướng sang form cập nhật hoặc
+ * gọi repository để hủy công việc. Với người khác, ViewModel xử lý chat và nhận việc.
+ */
 @HiltViewModel
 class JobDetailViewModel @Inject constructor(
     private val jobRepository: JobRepository,
@@ -51,6 +57,9 @@ class JobDetailViewModel @Inject constructor(
     private val _navigationEvent = MutableSharedFlow<JobDetailNavEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
+    /**
+     * Các sự kiện điều hướng một lần phát ra từ màn chi tiết công việc.
+     */
     sealed class JobDetailNavEvent {
         data class NavigateToChat(val conversationId: String, val partnerName: String, val partnerAvatar: String?, val partnerId: Long) : JobDetailNavEvent()
         data class NavigateToEditJob(val jobId: Long) : JobDetailNavEvent()
@@ -119,7 +128,11 @@ class JobDetailViewModel @Inject constructor(
         }
     }
 
-    // Tải chi tiết công việc để hiển thị và làm nguồn dữ liệu cho thao tác sửa/hủy.
+    /**
+     * Tải chi tiết công việc để hiển thị và làm nguồn dữ liệu cho thao tác sửa/hủy.
+     *
+     * @param id ID công việc cần tải.
+     */
     private fun fetchJob(id: Long){
         _isLoading.value = true
         viewModelScope.launch {
@@ -133,6 +146,9 @@ class JobDetailViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Bắt đầu cuộc trò chuyện với người đăng công việc hiện tại.
+     */
     fun onChatClick() {
         val currentJob = _job.value ?: return
         viewModelScope.launch {
@@ -154,6 +170,9 @@ class JobDetailViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Gửi yêu cầu nhận công việc hiện tại.
+     */
     fun acceptJob() {
         val currentJob = _job.value ?: return
         val userId = userManager.currentUser.value?.id
@@ -177,7 +196,9 @@ class JobDetailViewModel @Inject constructor(
         }
     }
 
-    // Use case cập nhật công việc: điều hướng sang màn CreateJob ở chế độ chỉnh sửa.
+    /**
+     * Điều hướng sang màn CreateJob ở chế độ cập nhật công việc.
+     */
     fun onEditClick() {
         _job.value?.let {
             viewModelScope.launch {
@@ -186,7 +207,9 @@ class JobDetailViewModel @Inject constructor(
         }
     }
 
-    // Use case hủy công việc: gọi API xóa/hủy bài đăng rồi phát sự kiện quay lại màn trước.
+    /**
+     * Hủy công việc hiện tại và phát sự kiện quay lại khi backend xử lý thành công.
+     */
     fun deleteJob() {
         val jobId = _job.value?.id ?: return
         _isLoading.value = true
@@ -201,6 +224,9 @@ class JobDetailViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Điều hướng sang hồ sơ người đăng công việc.
+     */
     fun onUserClick() {
         _job.value?.let {
             viewModelScope.launch {

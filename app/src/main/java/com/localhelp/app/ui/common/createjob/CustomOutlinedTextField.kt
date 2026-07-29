@@ -11,6 +11,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+/**
+ * TextField dùng chung cho các ô nhập trong form đăng/cập nhật công việc.
+ *
+ * @param value Giá trị hiện tại của ô nhập.
+ * @param onValueChange Callback cập nhật giá trị khi người dùng nhập.
+ * @param placeholder Gợi ý hiển thị khi ô nhập rỗng.
+ * @param keyboardOptions Cấu hình bàn phím.
+ * @param leadingIcon Icon đầu ô nhập nếu có.
+ * @param trailingIcon Icon cuối ô nhập nếu có.
+ */
 @Composable
 fun CustomOutlinedTextField(
     value: String, onValueChange: (String) -> Unit, placeholder: String,

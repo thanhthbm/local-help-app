@@ -47,6 +47,18 @@ import com.localhelp.app.ui.common.myjobs.RemoteEvidenceSection
 import com.localhelp.app.ui.common.myjobs.ReviewDisplayCard
 import com.localhelp.app.ui.common.myjobs.TimelineSection
 
+/**
+ * Màn hình quản lý chi tiết công việc dành cho chủ việc.
+ *
+ * Hiển thị tiến trình, ứng viên, bằng chứng hoàn thành, đánh giá và các hành
+ * động tương ứng với trạng thái công việc.
+ *
+ * @param viewModel ViewModel quản lý dữ liệu chi tiết của chủ việc.
+ * @param onNavigateBack Callback quay lại màn trước.
+ * @param onNavigateToUserProfile Callback mở hồ sơ người dùng.
+ * @param onNavigateToChat Callback mở cuộc trò chuyện với người thực hiện.
+ * @param onNavigateToJobDetail Callback mở chi tiết công việc công khai.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobDetailOwnerScreen(
@@ -131,6 +143,13 @@ fun JobDetailOwnerScreen(
     }
 }
 
+/**
+ * Card hiển thị một ứng viên ứng tuyển vào công việc đang mở.
+ *
+ * @param app Dữ liệu ứng tuyển.
+ * @param onAccept Callback chọn ứng viên.
+ * @param onNavigateHelperProfile Callback mở hồ sơ ứng viên.
+ */
 @Composable
 fun ApplicationCard(app: ApplicationResponse, onAccept: () -> Unit, onNavigateHelperProfile: (Long) -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(8.dp)
@@ -178,6 +197,12 @@ fun ApplicationCard(app: ApplicationResponse, onAccept: () -> Unit, onNavigateHe
     }
 }
 
+/**
+ * Khu vực hiển thị hoặc tạo đánh giá của chủ việc sau khi công việc hoàn thành.
+ *
+ * @param review Đánh giá đã tồn tại, nếu có.
+ * @param viewModel ViewModel nhận thao tác gửi đánh giá.
+ */
 @Composable
 fun HostReviewSection(review: ReviewResponse?, viewModel: JobDetailOwnerViewModel) {
     if (review != null) {

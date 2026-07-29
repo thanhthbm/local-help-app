@@ -31,6 +31,12 @@ data class EditProfileUiState(
     val localAvatarUri: Uri? = null
 )
 
+/**
+ * ViewModel quản lý form chỉnh sửa hồ sơ.
+ *
+ * Ảnh đại diện được upload trực tiếp lên Cloudinary từ app, sau đó URL được
+ * gửi về backend trong multipart part "data".
+ */
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
@@ -54,26 +60,37 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
+    /** Cập nhật họ tên trong state form. */
     fun onFullNameChange(value: String) {
         _uiState.value = _uiState.value.copy(fullName = value)
     }
 
+    /** Cập nhật số điện thoại trong state form. */
     fun onPhoneChange(value: String) {
         _uiState.value = _uiState.value.copy(phone = value)
     }
 
+    /** Cập nhật phần giới thiệu bản thân. */
     fun onBioChange(value: String) {
         _uiState.value = _uiState.value.copy(bio = value)
     }
 
+    /** Cập nhật giới tính được chọn từ dropdown. */
     fun onGenderChange(value: GenderEnum) {
         _uiState.value = _uiState.value.copy(gender = value)
     }
 
+    /** Lưu URI ảnh local do người dùng chọn trước khi upload. */
     fun onAvatarSelected(uri: Uri) {
         _uiState.value = _uiState.value.copy(localAvatarUri = uri)
     }
 
+    /**
+     * Lưu hồ sơ.
+     *
+     * Nếu có ảnh local thì upload lên Cloudinary trước, sau đó gửi JSON data
+     * chứa fullName/phone/bio/gender/avatarUrl lên backend.
+     */
     fun saveProfile(context: Context) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
@@ -144,6 +161,7 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
+    /** Xóa lỗi sau khi UI đã hiển thị snackbar. */
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }

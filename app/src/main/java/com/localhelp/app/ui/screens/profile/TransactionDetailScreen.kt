@@ -33,6 +33,12 @@ private val TxOrange = Color(0xFFF06A50)
 private val TxGray = Color(0xFF888888)
 private val TxGrayBg = Color(0xFFF7F7F7)
 
+/**
+ * Màn chi tiết giao dịch thu/chi.
+ *
+ * transactionId chính là jobId; isEarning quyết định cách hiển thị vai trò
+ * đối tác và dấu +/- của số tiền.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionDetailScreen(
@@ -313,6 +319,7 @@ fun TransactionDetailScreen(
 
 // ─── Sub-composables ───────────────────────────────────────────────────────────
 
+/** Card dùng lại cho từng khối thông tin trong chi tiết giao dịch. */
 @Composable
 private fun SectionCard(content: @Composable ColumnScope.() -> Unit) {
     Card(
@@ -327,6 +334,7 @@ private fun SectionCard(content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
+/** Chip nhỏ hiển thị ngày/giờ hoặc thông tin ngắn. */
 @Composable
 private fun InfoChip(icon: ImageVector, label: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -336,6 +344,7 @@ private fun InfoChip(icon: ImageVector, label: String) {
     }
 }
 
+/** Tag danh mục công việc trong màn chi tiết giao dịch. */
 @Composable
 private fun TagChip(label: String) {
     Surface(

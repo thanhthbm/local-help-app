@@ -10,6 +10,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel quản lý toàn bộ luồng khôi phục mật khẩu.
+ *
+ * Luồng gồm 3 bước: gửi OTP qua email, xác thực OTP để lấy resetToken và đặt
+ * mật khẩu mới bằng resetToken đã xác thực.
+ */
 @HiltViewModel
 class ForgotPasswordViewModel @Inject constructor(
     private val authRepository: AuthRepository
@@ -23,12 +29,20 @@ class ForgotPasswordViewModel @Inject constructor(
 
     private var resetToken: String? = null
 
-    // Lưu token reset nếu luồng đổi mật khẩu được mở từ deep link/email.
+    /**
+     * Lưu token reset khi màn đặt mật khẩu mới được mở từ deep link/email.
+     *
+     * @param code Token reset nhận được từ đường dẫn xác thực.
+     */
     fun setOobCode(code: String) {
         resetToken = code
     }
 
-    // Bước 1 đổi mật khẩu: validate email và gọi repository gửi OTP.
+    /**
+     * Gửi OTP khôi phục mật khẩu đến email đã nhập.
+     *
+     * @param onResult Callback trả true nếu gửi OTP thành công.
+     */
     fun sendOtp(onResult: (Boolean) -> Unit) {
         if (email.isBlank()) {
             errorMsg = "Vui lòng nhập email"
@@ -49,7 +63,11 @@ class ForgotPasswordViewModel @Inject constructor(
         }
     }
 
-    // Bước 2 đổi mật khẩu: xác thực OTP và lưu resetToken để dùng ở bước đặt mật khẩu mới.
+    /**
+     * Xác thực OTP và lưu resetToken cho bước đặt mật khẩu mới.
+     *
+     * @param onResult Callback trả true nếu OTP hợp lệ.
+     */
     fun verifyOtp(onResult: (Boolean) -> Unit) {
         if (otp.length < 6) {
             errorMsg = "Vui lòng nhập mã OTP"
@@ -71,7 +89,11 @@ class ForgotPasswordViewModel @Inject constructor(
         }
     }
 
-    // Bước 3 đổi mật khẩu: kiểm tra token, kiểm tra nhập lại mật khẩu và gọi API reset.
+    /**
+     * Đặt lại mật khẩu sau khi OTP đã được xác thực.
+     *
+     * @param onSuccess Callback chạy khi backend đổi mật khẩu thành công.
+     */
     fun resetPassword(onSuccess: () -> Unit) {
         val token = resetToken
         if (token == null) {

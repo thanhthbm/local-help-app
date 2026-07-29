@@ -38,6 +38,12 @@ import com.localhelp.app.ui.screens.profile.SetupProfileViewModel
 import com.localhelp.app.ui.screens.splash.SplashScreen
 import kotlinx.coroutines.flow.collectLatest
 
+/**
+ * Root composable của app.
+ *
+ * Kết nối MainViewModel với NavHost: khi đăng nhập thành công thì lưu session,
+ * khi currentUser bị xóa bởi logout thì điều hướng về graph xác thực.
+ */
 @Composable
 fun LocalHelpApp(
     mainViewModel: MainViewModel
@@ -60,6 +66,7 @@ fun LocalHelpApp(
         return
     }
 
+    // Khi logout xóa currentUser, reset navigation về màn đăng nhập.
     LaunchedEffect(currentUser) {
         if (currentUser == null) {
             navController.navigate(Graph.AUTH) {

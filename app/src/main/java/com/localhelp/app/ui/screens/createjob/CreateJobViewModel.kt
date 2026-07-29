@@ -24,6 +24,13 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
+
+/**
+ * ViewModel quản lý form đăng công việc và cập nhật công việc.
+ *
+ * Khi NavGraph truyền jobId, ViewModel chạy ở chế độ chỉnh sửa và tự tải dữ
+ * liệu công việc cũ. Nếu không có jobId, form được dùng để đăng công việc mới.
+ */
 @HiltViewModel
 class CreateJobViewModel @Inject constructor(
     private val jobRepository: JobRepository,
@@ -60,29 +67,54 @@ class CreateJobViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    // Lưu danh sách ảnh mới người dùng chọn khi đăng hoặc cập nhật công việc.
+    /**
+     * Cập nhật danh sách ảnh mới người dùng chọn từ thiết bị.
+     *
+     * @param uris Danh sách URI ảnh được chọn.
+     */
     fun updateImages(uris: List<Uri>) {
         selectedImageUris.value = uris
     }
 
-    // Xóa ảnh đã có trên server khỏi danh sách gửi lại khi cập nhật công việc.
+    /**
+     * Xóa một ảnh đã có trên server khỏi danh sách ảnh giữ lại khi cập nhật.
+     *
+     * @param url URL ảnh cũ cần xóa khỏi request cập nhật.
+     */
     fun removeExistingImage(url: String) {
         existingImageUrls.value = existingImageUrls.value.filter { it != url }
     }
 
-    // Xóa ảnh mới chọn trên thiết bị trước khi submit form.
+    /**
+     * Xóa một ảnh mới chọn khỏi danh sách upload trước khi submit form.
+     *
+     * @param uri URI ảnh cần bỏ chọn.
+     */
     fun removeSelectedImage(uri: Uri) {
         selectedImageUris.value = selectedImageUris.value.filter { it != uri }
     }
 
-    // Nhận tọa độ/địa chỉ từ màn chọn vị trí để đưa vào request đăng/cập nhật việc.
+    /**
+     * Nhận tọa độ và địa chỉ từ màn chọn vị trí.
+     *
+     * @param lat Vĩ độ vị trí công việc.
+     * @param lng Kinh độ vị trí công việc.
+     * @param addr Địa chỉ hiển thị của vị trí đã chọn.
+     */
     fun setLocation(lat: Double, lng: Double, addr: String) {
         latitude.value = lat
         longitude.value = lng
         address.value = addr
     }
 
-    // Chuẩn hóa tiền công khi nhập để hiển thị có định dạng nhưng vẫn gửi số sạch lên API.
+    /**
+     * Chuẩn hóa tiền công khi người dùng nhập.
+     *
+     * Giá trị hiển thị được format theo nhóm hàng nghìn, còn khi submit sẽ được
+     * làm sạch bằng FormatterUtils.cleanPrice().
+     *
+     * @param newPrice Chuỗi tiền công mới từ ô nhập.
+     */
     fun updatePrice(newPrice: String) {
         val clean = FormatterUtils.cleanPrice(newPrice)
         if (clean.isEmpty()) {
@@ -99,7 +131,9 @@ class CreateJobViewModel @Inject constructor(
         }
     }
 
-    // Use case cập nhật công việc: tải dữ liệu cũ để đổ vào form chỉnh sửa.
+    /**
+     * Tải chi tiết công việc cũ để đổ vào form cập nhật.
+     */
     private fun fetchJobDetails() {
         jobId?.let { id ->
             viewModelScope.launch {
@@ -130,7 +164,9 @@ class CreateJobViewModel @Inject constructor(
         }
     }
 
-    // Tải danh mục công việc để người dùng chọn khi tạo hoặc cập nhật bài đăng.
+    /**
+     * Tải danh mục công việc để người dùng chọn khi đăng hoặc cập nhật bài.
+     */
     private fun fetchCategories(){
         viewModelScope.launch {
             val result = categoryRepository.getCategories()
@@ -149,8 +185,12 @@ class CreateJobViewModel @Inject constructor(
         }
     }
 
-    // Xử lý submit form cho cả đăng công việc và cập nhật công việc.
-    // Hàm validate dữ liệu, upload ảnh mới, ghép ảnh cũ và gọi API tương ứng theo isEditMode.
+    /**
+     * Submit form đăng/cập nhật công việc.
+     *
+     * Hàm thực hiện validate dữ liệu, upload ảnh mới lên Cloudinary, ghép với
+     * ảnh cũ đang giữ lại và gọi API create/update theo trạng thái isEditMode.
+     */
     fun createJob() {
         if (title.value.isBlank() || description.value.isBlank() || price.value.isBlank() || address.value.isBlank()) {
             _errorMessage.value = "Vui lòng nhập đầy đủ thông tin"

@@ -8,6 +8,9 @@ import javax.inject.Inject
 class FinanceRepository @Inject constructor(
     private val financeService: FinanceService
 ) {
+    /**
+     * Bọc API overview thành Result để ViewModel xử lý loading/error đơn giản hơn.
+     */
     suspend fun getFinanceOverview(type: String, month: Int, year: Int): Result<FinanceOverviewResponse> {
         return try {
             val response = financeService.getFinanceOverview(type, month, year)
@@ -21,6 +24,9 @@ class FinanceRepository @Inject constructor(
         }
     }
 
+    /**
+     * Bọc API chi tiết danh mục thành Result.
+     */
     suspend fun getCategoryDetails(categoryId: Long, type: String, month: Int, year: Int): Result<CategoryDetailResponse> {
         return try {
             val response = financeService.getCategoryDetails(categoryId, type, month, year)

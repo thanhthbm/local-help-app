@@ -12,6 +12,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * UI state của danh sách công việc người dùng đã đăng.
+ *
+ * @property isLoading Đang tải trang đầu tiên.
+ * @property isPaginating Đang tải thêm trang tiếp theo.
+ * @property jobs Danh sách công việc đã đăng.
+ * @property error Thông báo lỗi nếu tải danh sách thất bại.
+ * @property isLastPage True khi không còn trang dữ liệu tiếp theo.
+ */
 data class MyPostsUiState(
     val isLoading: Boolean = false,
     val isPaginating: Boolean = false,
